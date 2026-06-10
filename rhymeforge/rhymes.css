@@ -1,0 +1,324 @@
+/* ══════════════════════════════════════════════════════════════════════
+   RHYME PAGES — shared stylesheet
+   Used by /rhymes/<word>/index.html across all programmatic rhyme pages.
+   Chrome echoes RhymeForge so users feel "this is RhymeForge territory."
+   ══════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-primary: #08080c;
+  --bg-secondary: #0e0e14;
+  --bg-card: #14141e;
+  --bg-card-hover: #1a1a28;
+  --border: #252530;
+  --border-light: #2e2e3a;
+  --text-primary: #ebe8e2;
+  --text-secondary: #a0a0a8;
+  --text-muted: #606068;
+  --accent: #d4a853;
+  --accent-hover: #e4bc6c;
+  --accent-glow: rgba(212, 168, 83, 0.15);
+  --perfect: #5ec269;
+  --family: #4db8d4;
+  --additive: #e06b5e;
+  --assonance: #e8a94e;
+  --consonance: #a86bd4;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.rh-wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 72px 24px 80px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────── */
+
+.rh-hero {
+  text-align: center;
+  margin-bottom: 64px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.rh-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.rh-hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.rh-hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.rh-tagline {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  max-width: 540px;
+  margin: 0 auto 28px;
+}
+.rh-cta-primary {
+  display: inline-block;
+  padding: 14px 28px;
+  background: var(--accent);
+  color: #0a0a10;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  border-radius: 6px;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.rh-cta-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+.rh-cta-primary em { font-style: italic; }
+
+/* ── Rhyme type sections ──────────────────────────────────────────── */
+
+.rh-type {
+  margin-bottom: 48px;
+  padding: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  border-left-width: 4px;
+}
+.rh-type-perfect    { border-left-color: var(--perfect); }
+.rh-type-family     { border-left-color: var(--family); }
+.rh-type-additive   { border-left-color: var(--additive); }
+.rh-type-assonance  { border-left-color: var(--assonance); }
+.rh-type-consonance { border-left-color: var(--consonance); }
+
+.rh-type h2 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.rh-type-count {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+.rh-type-desc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 22px;
+  max-width: 580px;
+}
+
+.rh-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  font-family: var(--font-mono);
+}
+.rh-list li {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  border-radius: 5px;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.rh-list li:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+}
+
+.rh-empty-note {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.92rem;
+  padding: 14px 0;
+}
+
+/* ── Snippets ─────────────────────────────────────────────────────── */
+
+.rh-snippets {
+  margin: 72px 0 56px;
+}
+.rh-snippets > h2 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  margin-bottom: 26px;
+  font-weight: 700;
+}
+.rh-snippet {
+  padding: 22px 26px;
+  margin-bottom: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-light);
+  border-radius: 8px;
+}
+.rh-snippet-perfect    { border-left-color: var(--perfect); }
+.rh-snippet-family     { border-left-color: var(--family); }
+.rh-snippet-additive   { border-left-color: var(--additive); }
+.rh-snippet-assonance  { border-left-color: var(--assonance); }
+.rh-snippet-consonance { border-left-color: var(--consonance); }
+
+.rh-snippet-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.rh-snippet blockquote {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+.rh-snippet em { color: var(--accent); font-style: italic; }
+
+/* ── Theory note + Related ────────────────────────────────────────── */
+
+.rh-theory, .rh-related {
+  margin: 56px 0;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.rh-theory h2, .rh-related h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.rh-theory em, .rh-related em { color: var(--accent); font-style: italic; }
+.rh-theory p, .rh-related p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+.rh-related a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.rh-related a:hover { color: var(--accent-hover); }
+
+/* ── About RhymeForge collapse ────────────────────────────────────── */
+
+.rh-about {
+  margin: 56px 0 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+.rh-about summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 22px;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  user-select: none;
+}
+.rh-about summary::-webkit-details-marker { display: none; }
+.rh-about summary::after {
+  content: ' +';
+  color: var(--text-muted);
+}
+.rh-about[open] summary::after { content: ' −'; }
+.rh-about-body {
+  padding: 0 22px 22px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.rh-about-body p { margin-bottom: 10px; }
+
+/* ── Footer note ──────────────────────────────────────────────────── */
+
+.rh-footer-note {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  body { font-size: 15px; }
+  .rh-wrap { padding: 44px 18px 60px; }
+  .rh-hero { margin-bottom: 44px; padding-bottom: 28px; }
+  .rh-type { padding: 22px 18px; margin-bottom: 32px; }
+  .rh-list { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 8px; }
+  .rh-list li { padding: 8px 10px; font-size: 0.88rem; }
+  .rh-snippet { padding: 16px 18px; }
+  .rh-snippet blockquote { font-size: 1.02rem; }
+}
+
+/* ── Bespoke intro paragraph in hero ──────────────────────────────── */
+.rh-intro {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 640px;
+  margin: 0 auto 28px;
+  text-align: left;
+}
+.rh-intro em { color: var(--accent); font-style: italic; }
+
+/* ── Cross-tool section ───────────────────────────────────────────── */
+.rh-cross {
+  margin: 56px 0;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.rh-cross h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+.rh-cross p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.rh-cross a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.rh-cross a:hover { color: var(--accent-hover); }
