@@ -5308,3 +5308,27 @@ body.show-notes .fb-note{display:inline;}
     padding: 10px 6px;
   }
 }
+
+
+/* v103 — My Songs hub */
+.my-songs-popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10001; backdrop-filter: blur(8px); }
+.my-songs-popup.hidden { display: none; }
+.my-songs-content { background: #faf8f4; border-radius: 14px; padding: 22px; width: min(560px, 92vw); max-height: 80vh; overflow-y: auto; box-shadow: 0 18px 50px rgba(0,0,0,0.35); }
+.my-songs-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+.my-songs-title { font-family: 'Playfair Display', Georgia, serif; font-size: 19px; font-weight: 700; }
+.my-songs-header-actions { display: flex; align-items: center; gap: 8px; }
+.my-songs-note { font-size: 12px; color: #999; margin: 0 0 14px; }
+.song-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fff; border: 1px solid #e2ddd2; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+.song-card.current { border-color: #c8a04a; }
+.song-card-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; cursor: pointer; flex: 1; }
+.song-card.current .song-card-main { cursor: default; }
+.song-card-name { font-weight: 600; font-size: 14px; color: #333; }
+.song-card-badge { font-size: 10px; background: #c8a04a; color: #fff; border-radius: 6px; padding: 1px 7px; vertical-align: 2px; margin-left: 4px; }
+.song-card-meta { font-size: 11.5px; color: #999; }
+.song-card-chords { font-size: 12.5px; color: #777; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.song-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+body.dark-mode .my-songs-content { background: #22262e; }
+body.dark-mode .my-songs-title { color: #d8d8d8; }
+body.dark-mode .song-card { background: #2a2e38; border-color: #3a3e48; }
+body.dark-mode .song-card.current { border-color: #c8a04a; }
+body.dark-mode .song-card-name { color: #d8d8d8; }

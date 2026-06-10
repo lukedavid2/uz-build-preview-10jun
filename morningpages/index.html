@@ -17,7 +17,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✍️</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600&display=swap');
 
@@ -503,6 +502,8 @@ body {
   ]
 }
 </script>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="apple-touch-icon" href="../icon-192.png">
 </head>
 <body>
 <details id="uz-about-collapse" style="max-width:640px;margin:16px auto 0;text-align:center;font-family:Outfit,-apple-system,sans-serif;">
@@ -540,26 +541,252 @@ body {
 </details>
 
 <div id="root"><div style="display:flex;align-items:center;justify-content:center;min-height:40vh;color:#999;font-family:Georgia,serif;font-style:italic;font-size:16px;">Opening your pages&hellip;</div></div>
-<script type="text/babel">
-const { useState, useEffect, useRef, useCallback, useMemo } = React;
+<script>
+// Precompiled from JSX at build time (was type="text/babel")
+const {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo
+} = React;
 
 // ─── Icons ───
 const Icons = {
-  write: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
-  history: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
-  seed: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c-4-3-8-6-8-10a8 8 0 0 1 16 0c0 4-4 7-8 10z"/><path d="M12 12V8"/><path d="M9.5 14.5 12 12l2.5 2.5"/></svg>,
-  stats: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
-  back: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>,
-  download: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  trash: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>,
-  folder: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
-  filePlus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>,
-  link: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
-  unlink: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M5.16 11.75l-1.72 1.71a5 5 0 0 0 7.07 7.07l1.72-1.71"/><line x1="2" y1="2" x2="22" y2="22"/></svg>,
-  chevron: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
-  filter: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
-  tag: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
-  search: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  write: /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 20h9"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+  })),
+  history: /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "12 6 12 12 16 14"
+  })),
+  seed: /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 22c-4-3-8-6-8-10a8 8 0 0 1 16 0c0 4-4 7-8 10z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 12V8"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M9.5 14.5 12 12l2.5 2.5"
+  })),
+  stats: /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "3",
+    width: "18",
+    height: "18",
+    rx: "2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M3 9h18"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M9 21V9"
+  })),
+  back: /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M19 12H5"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 19l-7-7 7-7"
+  })),
+  download: /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "7 10 12 15 17 10"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "15",
+    x2: "12",
+    y2: "3"
+  })),
+  trash: /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: "3 6 5 6 21 6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M10 11v6"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M14 11v6"
+  })),
+  folder: /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+  })),
+  filePlus: /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "14 2 14 8 20 8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "18",
+    x2: "12",
+    y2: "12"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "9",
+    y1: "15",
+    x2: "15",
+    y2: "15"
+  })),
+  link: /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+  })),
+  unlink: /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M5.16 11.75l-1.72 1.71a5 5 0 0 0 7.07 7.07l1.72-1.71"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "2",
+    y1: "2",
+    x2: "22",
+    y2: "22"
+  })),
+  chevron: /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: "6 9 12 15 18 9"
+  })),
+  filter: /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("polygon", {
+    points: "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"
+  })),
+  tag: /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "7",
+    y1: "7",
+    x2: "7.01",
+    y2: "7"
+  })),
+  search: /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "11",
+    cy: "11",
+    r: "8"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "21",
+    y1: "21",
+    x2: "16.65",
+    y2: "16.65"
+  }))
 };
 
 // ═══════════════════════════════════════════════════
@@ -570,14 +797,12 @@ const DB_NAME = 'morning_pages_handles';
 const DB_STORE = 'file_handles';
 const HANDLE_KEY = 'current_file';
 const FALLBACK_KEY = 'morning_pages_data';
-
 let hasFileSystemAccess = false;
 try {
-  hasFileSystemAccess = typeof window.showOpenFilePicker === 'function'
-    && typeof window.showSaveFilePicker === 'function'
-    && window.isSecureContext !== false;
-} catch { hasFileSystemAccess = false; }
-
+  hasFileSystemAccess = typeof window.showOpenFilePicker === 'function' && typeof window.showSaveFilePicker === 'function' && window.isSecureContext !== false;
+} catch {
+  hasFileSystemAccess = false;
+}
 function openHandleDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
@@ -586,7 +811,6 @@ function openHandleDB() {
     req.onerror = () => reject(req.error);
   });
 }
-
 async function storeHandle(handle) {
   const db = await openHandleDB();
   return new Promise((resolve, reject) => {
@@ -596,7 +820,6 @@ async function storeHandle(handle) {
     tx.onerror = () => reject(tx.error);
   });
 }
-
 async function getStoredHandle() {
   try {
     const db = await openHandleDB();
@@ -606,9 +829,10 @@ async function getStoredHandle() {
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => reject(req.error);
     });
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
-
 async function clearStoredHandle() {
   try {
     const db = await openHandleDB();
@@ -620,28 +844,34 @@ async function clearStoredHandle() {
     });
   } catch {}
 }
-
 async function readFileHandle(handle) {
   const file = await handle.getFile();
   const text = await file.text();
   return JSON.parse(text);
 }
-
 async function writeFileHandle(handle, data) {
   const writable = await handle.createWritable();
   await writable.write(JSON.stringify(data, null, 2));
   await writable.close();
 }
-
 async function verifyPermission(handle, readWrite) {
-  const options = readWrite ? { mode: 'readwrite' } : {};
+  const options = readWrite ? {
+    mode: 'readwrite'
+  } : {};
   if ((await handle.queryPermission(options)) === 'granted') return true;
   if ((await handle.requestPermission(options)) === 'granted') return true;
   return false;
 }
-
-const emptyData = () => ({ entries: [], seeds: [], settings: { showTimer: true, showNudges: true, firstLineStarters: false }, version: 1 });
-
+const emptyData = () => ({
+  entries: [],
+  seeds: [],
+  settings: {
+    showTimer: true,
+    showNudges: true,
+    firstLineStarters: false
+  },
+  version: 1
+});
 function mergeData(a, b) {
   const entriesByDate = {};
   [...(a.entries || []), ...(b.entries || [])].forEach(e => {
@@ -652,16 +882,22 @@ function mergeData(a, b) {
   const mergedSeeds = [];
   [...(a.seeds || []), ...(b.seeds || [])].forEach(s => {
     const key = s.text + '|' + s.sourceDate;
-    if (!seedIds.has(key)) { seedIds.add(key); mergedSeeds.push(s); }
+    if (!seedIds.has(key)) {
+      seedIds.add(key);
+      mergedSeeds.push(s);
+    }
   });
   return {
     entries: Object.values(entriesByDate),
     seeds: mergedSeeds,
-    settings: { ...emptyData().settings, ...(a.settings || {}), ...(b.settings || {}) },
-    version: 1,
+    settings: {
+      ...emptyData().settings,
+      ...(a.settings || {}),
+      ...(b.settings || {})
+    },
+    version: 1
   };
 }
-
 function loadLocalData() {
   try {
     const raw = localStorage.getItem(FALLBACK_KEY);
@@ -670,137 +906,131 @@ function loadLocalData() {
   return null;
 }
 function saveLocalData(data) {
-  try { localStorage.setItem(FALLBACK_KEY, JSON.stringify(data)); } catch {}
+  try {
+    localStorage.setItem(FALLBACK_KEY, JSON.stringify(data));
+  } catch {}
 }
 
 // ─── Helpers ───
 const WORD_TARGET = 750;
-function wordCount(text) { return text.trim() ? text.trim().split(/\s+/).length : 0; }
+function wordCount(text) {
+  return text.trim() ? text.trim().split(/\s+/).length : 0;
+}
 function formatDate(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
-  return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 }
-function todayStr() { return new Date().toISOString().split('T')[0]; }
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
 function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2,'0')}`;
+  return `${m}:${s.toString().padStart(2, '0')}`;
 }
-
-const NUDGES = [
-  "Just write what you're feeling right now.",
-  "What's on your mind this morning?",
-  "Start with what you notice in your body.",
-  "It's okay to write nonsense.",
-  "Write about what you can see from where you're sitting.",
-  "What sounds can you hear right now?",
-  "Write about the first thing you thought of when you woke up.",
-  "Describe the quality of light where you are.",
-  "What are you resisting today?",
-  "What would you do if no one was watching?",
-];
-
-const STARTERS = [
-  "Right now I feel...",
-  "The thing I keep thinking about is...",
-  "If I'm honest with myself today...",
-  "The thing I'm avoiding is...",
-  "What I really want to say is...",
-];
-
+const NUDGES = ["Just write what you're feeling right now.", "What's on your mind this morning?", "Start with what you notice in your body.", "It's okay to write nonsense.", "Write about what you can see from where you're sitting.", "What sounds can you hear right now?", "Write about the first thing you thought of when you woke up.", "Describe the quality of light where you are.", "What are you resisting today?", "What would you do if no one was watching?"];
+const STARTERS = ["Right now I feel...", "The thing I keep thinking about is...", "If I'm honest with myself today...", "The thing I'm avoiding is...", "What I really want to say is..."];
 
 // ═══════════════════════════════════
 // INFO MODAL
 // ═══════════════════════════════════
-function InfoModal({ onClose, onStartTutorial }) {
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal wide" onClick={e => e.stopPropagation()} style={{maxHeight:'85vh', overflowY:'auto'}}>
-        <h3>What are Morning Pages?</h3>
-        <div className="info-modal-quote">
-          "Morning Pages are three pages of longhand, stream of consciousness writing, done first thing in the morning. There is no wrong way to do Morning Pages."
-        </div>
-        <div className="info-section">
-          <h4>The Practice</h4>
-          <p>Morning Pages come from Julia Cameron's <em>The Artist's Way</em>. The idea is simple: every morning, before your inner critic wakes up, write three pages of whatever comes to mind. Not a journal, not a diary, not "good writing" — just a stream of consciousness brain dump.</p>
-        </div>
-        <div className="info-section">
-          <h4>Why 750 Words?</h4>
-          <p>Three handwritten pages come to roughly 750 words when typed. This app uses 750 words as the digital equivalent of Cameron's three-page target. The number is a goal, not a limit — keep going if you want.</p>
-        </div>
-        <div className="info-section">
-          <h4>The Rules</h4>
-          <p>There's only one: write. Don't stop, don't edit, don't re-read while you're writing. If you get stuck, write "I don't know what to write" until something else comes. The pages are private and for your eyes only.</p>
-        </div>
-        <div className="info-section">
-          <h4>The Seedbank</h4>
-          <p>Sometimes in the midst of morning pages, a phrase or idea jumps out — something that feels alive. The seedbank lets you save those fragments. They're raw material for your creative life: song lyrics, story ideas, observations, truths.</p>
-        </div>
-        <div className="modal-actions" style={{justifyContent:'space-between'}}>
-          <button className="btn" onClick={() => { onClose(); onStartTutorial(); }}>Take a tour</button>
-          <button className="btn btn-primary" onClick={onClose}>Got it</button>
-        </div>
-      </div>
-    </div>
-  );
+function InfoModal({
+  onClose,
+  onStartTutorial
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: onClose
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal wide",
+    onClick: e => e.stopPropagation(),
+    style: {
+      maxHeight: '85vh',
+      overflowY: 'auto'
+    }
+  }, /*#__PURE__*/React.createElement("h3", null, "What are Morning Pages?"), /*#__PURE__*/React.createElement("div", {
+    className: "info-modal-quote"
+  }, "\"Morning Pages are three pages of longhand, stream of consciousness writing, done first thing in the morning. There is no wrong way to do Morning Pages.\""), /*#__PURE__*/React.createElement("div", {
+    className: "info-section"
+  }, /*#__PURE__*/React.createElement("h4", null, "The Practice"), /*#__PURE__*/React.createElement("p", null, "Morning Pages come from Julia Cameron's ", /*#__PURE__*/React.createElement("em", null, "The Artist's Way"), ". The idea is simple: every morning, before your inner critic wakes up, write three pages of whatever comes to mind. Not a journal, not a diary, not \"good writing\" \u2014 just a stream of consciousness brain dump.")), /*#__PURE__*/React.createElement("div", {
+    className: "info-section"
+  }, /*#__PURE__*/React.createElement("h4", null, "Why 750 Words?"), /*#__PURE__*/React.createElement("p", null, "Three handwritten pages come to roughly 750 words when typed. This app uses 750 words as the digital equivalent of Cameron's three-page target. The number is a goal, not a limit \u2014 keep going if you want.")), /*#__PURE__*/React.createElement("div", {
+    className: "info-section"
+  }, /*#__PURE__*/React.createElement("h4", null, "The Rules"), /*#__PURE__*/React.createElement("p", null, "There's only one: write. Don't stop, don't edit, don't re-read while you're writing. If you get stuck, write \"I don't know what to write\" until something else comes. The pages are private and for your eyes only.")), /*#__PURE__*/React.createElement("div", {
+    className: "info-section"
+  }, /*#__PURE__*/React.createElement("h4", null, "The Seedbank"), /*#__PURE__*/React.createElement("p", null, "Sometimes in the midst of morning pages, a phrase or idea jumps out \u2014 something that feels alive. The seedbank lets you save those fragments. They're raw material for your creative life: song lyrics, story ideas, observations, truths.")), /*#__PURE__*/React.createElement("div", {
+    className: "modal-actions",
+    style: {
+      justifyContent: 'space-between'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => {
+      onClose();
+      onStartTutorial();
+    }
+  }, "Take a tour"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: onClose
+  }, "Got it"))));
 }
-
 
 // ═══════════════════════════════════
 // TUTORIAL OVERLAY
 // ═══════════════════════════════════
-const TUTORIAL_STEPS = [
-  {
-    title: 'Write',
-    description: 'This is your writing space. Just start typing — there are no rules except to keep going. The word counter at the top tracks your progress toward the 750-word target.',
-    selector: '[data-tour="write"]',
-    position: 'right',
-  },
-  {
-    title: 'Unsticking Nudges',
-    description: 'If you stop writing for 30 seconds, a gentle nudge will appear to help you keep going. You can turn these off in Settings if you prefer silence.',
-    selector: '[data-tour="write"]',
-    position: 'right',
-  },
-  {
-    title: 'Save & Finish',
-    description: 'When you\'re done writing (or want to stop), click "Save & finish" at the bottom of your writing. This marks today\'s entry as complete. You can always reopen it later.',
-    selector: '[data-tour="write"]',
-    position: 'right',
-  },
-  {
-    title: 'History',
-    description: 'All your past entries are stored here. Search by keyword, date, or tag. Click any entry to re-read it, highlight phrases for the seedbank, or add retrospective tags.',
-    selector: '[data-tour="history"]',
-    position: 'right',
-  },
-  {
-    title: 'Seedbank',
-    description: 'When reading a past entry, highlight any phrase that feels alive and save it here. Tag your seeds, filter by tag, and click any seed to jump back to the full original entry.',
-    selector: '[data-tour="seeds"]',
-    position: 'right',
-  },
-  {
-    title: 'Progress & Settings',
-    description: 'Track your writing streak, view your calendar, and adjust settings like the timer, nudges, and first-line starters. You can also manage file storage and backups here.',
-    selector: '[data-tour="stats"]',
-    position: 'right',
-  },
-  {
-    title: 'File Storage & Sync',
-    description: 'Connect a JSON file to save your pages locally — store it in iCloud Drive, Dropbox, or any folder to sync across your iPhone and Mac. Download a dated backup anytime.',
-    selector: '[data-tour="file-status"]',
-    position: 'right',
-  },
-  {
-    title: 'Info & Help',
-    description: 'Click this button anytime to learn about Morning Pages or retake this tour. Happy writing!',
-    selector: '[data-tour="info-btn"]',
-    position: 'right',
-  },
-];
-
-function TutorialOverlay({ step, totalSteps, onNext, onPrev, onClose }) {
+const TUTORIAL_STEPS = [{
+  title: 'Write',
+  description: 'This is your writing space. Just start typing — there are no rules except to keep going. The word counter at the top tracks your progress toward the 750-word target.',
+  selector: '[data-tour="write"]',
+  position: 'right'
+}, {
+  title: 'Unsticking Nudges',
+  description: 'If you stop writing for 30 seconds, a gentle nudge will appear to help you keep going. You can turn these off in Settings if you prefer silence.',
+  selector: '[data-tour="write"]',
+  position: 'right'
+}, {
+  title: 'Save & Finish',
+  description: 'When you\'re done writing (or want to stop), click "Save & finish" at the bottom of your writing. This marks today\'s entry as complete. You can always reopen it later.',
+  selector: '[data-tour="write"]',
+  position: 'right'
+}, {
+  title: 'History',
+  description: 'All your past entries are stored here. Search by keyword, date, or tag. Click any entry to re-read it, highlight phrases for the seedbank, or add retrospective tags.',
+  selector: '[data-tour="history"]',
+  position: 'right'
+}, {
+  title: 'Seedbank',
+  description: 'When reading a past entry, highlight any phrase that feels alive and save it here. Tag your seeds, filter by tag, and click any seed to jump back to the full original entry.',
+  selector: '[data-tour="seeds"]',
+  position: 'right'
+}, {
+  title: 'Progress & Settings',
+  description: 'Track your writing streak, view your calendar, and adjust settings like the timer, nudges, and first-line starters. You can also manage file storage and backups here.',
+  selector: '[data-tour="stats"]',
+  position: 'right'
+}, {
+  title: 'File Storage & Sync',
+  description: 'Connect a JSON file to save your pages locally — store it in iCloud Drive, Dropbox, or any folder to sync across your iPhone and Mac. Download a dated backup anytime.',
+  selector: '[data-tour="file-status"]',
+  position: 'right'
+}, {
+  title: 'Info & Help',
+  description: 'Click this button anytime to learn about Morning Pages or retake this tour. Happy writing!',
+  selector: '[data-tour="info-btn"]',
+  position: 'right'
+}];
+function TutorialOverlay({
+  step,
+  totalSteps,
+  onNext,
+  onPrev,
+  onClose
+}) {
   const currentStep = TUTORIAL_STEPS[step];
   const [rect, setRect] = useState(null);
   const cardRef = useRef(null);
@@ -811,9 +1041,17 @@ function TutorialOverlay({ step, totalSteps, onNext, onPrev, onClose }) {
     const el = document.querySelector(currentStep.selector);
     if (el) {
       const r = el.getBoundingClientRect();
-      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      setRect({
+        top: r.top,
+        left: r.left,
+        width: r.width,
+        height: r.height
+      });
       // Scroll into view if needed
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
     } else {
       setRect(null);
     }
@@ -826,80 +1064,89 @@ function TutorialOverlay({ step, totalSteps, onNext, onPrev, onClose }) {
       const el = document.querySelector(currentStep.selector);
       if (el) {
         const r = el.getBoundingClientRect();
-        setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+        setRect({
+          top: r.top,
+          left: r.left,
+          width: r.width,
+          height: r.height
+        });
       }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [step]);
-
   if (!currentStep) return null;
-
   const pad = 8; // padding around highlighted element
   const highlightStyle = rect ? {
     top: rect.top - pad,
     left: rect.left - pad,
     width: rect.width + pad * 2,
     height: rect.height + pad * 2,
-    background: 'transparent',
+    background: 'transparent'
   } : null;
 
   // Position the card near the highlighted element
-  let cardStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+  let cardStyle = {
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)'
+  };
   if (rect) {
     const pos = currentStep.position || 'right';
     if (pos === 'right') {
       cardStyle = {
         top: Math.max(16, Math.min(rect.top - pad, window.innerHeight - 280)),
-        left: rect.left + rect.width + pad + 16,
+        left: rect.left + rect.width + pad + 16
       };
       // If card would go off-screen right, position below instead
       if (rect.left + rect.width + 16 + 380 > window.innerWidth) {
         cardStyle = {
           top: rect.top + rect.height + pad + 12,
-          left: Math.max(16, Math.min(rect.left - pad, window.innerWidth - 396)),
+          left: Math.max(16, Math.min(rect.left - pad, window.innerWidth - 396))
         };
       }
     } else if (pos === 'below') {
       cardStyle = {
         top: rect.top + rect.height + pad + 12,
-        left: Math.max(16, Math.min(rect.left, window.innerWidth - 396)),
+        left: Math.max(16, Math.min(rect.left, window.innerWidth - 396))
       };
     }
   }
-
-  return (
-    <>
-      {/* Dark overlay with cutout for the highlighted element */}
-      {rect ? (
-        <div className="tutorial-highlight" style={highlightStyle} />
-      ) : (
-        <div className="tutorial-backdrop" onClick={onClose} />
-      )}
-      <div className="tutorial-card" ref={cardRef} style={cardStyle} key={step}>
-        <div className="tutorial-step-num">Step {step + 1} of {totalSteps}</div>
-        <h4>{currentStep.title}</h4>
-        <p>{currentStep.description}</p>
-        <div className="tutorial-footer">
-          <div className="tutorial-dots">
-            {Array.from({length: totalSteps}, (_, i) => (
-              <div key={i} className={`tutorial-dot ${i === step ? 'active' : ''}`} />
-            ))}
-          </div>
-          <div className="tutorial-btns">
-            {step > 0 && <button className="btn btn-sm" onClick={onPrev}>Back</button>}
-            {step < totalSteps - 1 ? (
-              <button className="btn btn-sm btn-primary" onClick={onNext}>Next</button>
-            ) : (
-              <button className="btn btn-sm btn-primary" onClick={onClose}>Done</button>
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  );
+  return /*#__PURE__*/React.createElement(React.Fragment, null, rect ? /*#__PURE__*/React.createElement("div", {
+    className: "tutorial-highlight",
+    style: highlightStyle
+  }) : /*#__PURE__*/React.createElement("div", {
+    className: "tutorial-backdrop",
+    onClick: onClose
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "tutorial-card",
+    ref: cardRef,
+    style: cardStyle,
+    key: step
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tutorial-step-num"
+  }, "Step ", step + 1, " of ", totalSteps), /*#__PURE__*/React.createElement("h4", null, currentStep.title), /*#__PURE__*/React.createElement("p", null, currentStep.description), /*#__PURE__*/React.createElement("div", {
+    className: "tutorial-footer"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tutorial-dots"
+  }, Array.from({
+    length: totalSteps
+  }, (_, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: `tutorial-dot ${i === step ? 'active' : ''}`
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "tutorial-btns"
+  }, step > 0 && /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm",
+    onClick: onPrev
+  }, "Back"), step < totalSteps - 1 ? /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-primary",
+    onClick: onNext
+  }, "Next") : /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-primary",
+    onClick: onClose
+  }, "Done")))));
 }
-
 
 // ═══════════════════════════════════
 // MAIN APP
@@ -921,11 +1168,14 @@ function App() {
   const saveTimeoutRef = useRef(null);
   const fileHandleRef = useRef(null);
   const hiddenInputRef = useRef(null);
-
-  useEffect(() => { fileHandleRef.current = fileHandle; }, [fileHandle]);
-
+  useEffect(() => {
+    fileHandleRef.current = fileHandle;
+  }, [fileHandle]);
   const showToast = useCallback((message, type = 'info') => {
-    setToast({ message, type });
+    setToast({
+      message,
+      type
+    });
     setTimeout(() => setToast(null), 3000);
   }, []);
 
@@ -975,7 +1225,7 @@ function App() {
         // Small delay so the UI renders first
         setTimeout(() => setShowInfo(true), 600);
       }
-    } catch (e) { /* localStorage unavailable */ }
+    } catch (e) {/* localStorage unavailable */}
   }, [initialized]);
 
   // ── Auto-save ──
@@ -1006,9 +1256,17 @@ function App() {
       try {
         const handle = await window.showSaveFilePicker({
           suggestedName: 'morning-pages.json',
-          types: [{ description: 'Morning Pages Data', accept: { 'application/json': ['.json'] } }],
+          types: [{
+            description: 'Morning Pages Data',
+            accept: {
+              'application/json': ['.json']
+            }
+          }]
         });
-        const dataToSave = { ...data, version: 1 };
+        const dataToSave = {
+          ...data,
+          version: 1
+        };
         await writeFileHandle(handle, dataToSave);
         const check = await readFileHandle(handle);
         if (!check || typeof check !== 'object') throw new Error('Write verification failed');
@@ -1025,23 +1283,34 @@ function App() {
         showToast('Native file access failed — falling back to download', 'error');
       }
     }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'morning-pages.json'; a.click();
+    a.href = url;
+    a.download = 'morning-pages.json';
+    a.click();
     URL.revokeObjectURL(url);
     setShowWelcome(false);
     showToast('File downloaded. Use "Open file" to load it back anytime.', 'info');
   }, [data, showToast]);
-
   const openExistingFile = useCallback(async () => {
     if (hasFileSystemAccess) {
       try {
         const [handle] = await window.showOpenFilePicker({
-          types: [{ description: 'Morning Pages Data', accept: { 'application/json': ['.json'] } }],
+          types: [{
+            description: 'Morning Pages Data',
+            accept: {
+              'application/json': ['.json']
+            }
+          }]
         });
         const ok = await verifyPermission(handle, true);
-        if (!ok) { showToast('Permission denied', 'error'); return; }
+        if (!ok) {
+          showToast('Permission denied', 'error');
+          return;
+        }
         const fileData = await readFileHandle(handle);
         if (!fileData || typeof fileData !== 'object') throw new Error('Invalid file data');
         const merged = mergeData(data, fileData);
@@ -1061,8 +1330,7 @@ function App() {
     }
     hiddenInputRef.current?.click();
   }, [data, showToast]);
-
-  const handleFallbackFileLoad = useCallback((e) => {
+  const handleFallbackFileLoad = useCallback(e => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
@@ -1082,7 +1350,6 @@ function App() {
     reader.readAsText(file);
     e.target.value = '';
   }, [data, showToast]);
-
   const disconnectFile = useCallback(async () => {
     await clearStoredHandle();
     setFileHandle(null);
@@ -1090,13 +1357,16 @@ function App() {
     setFileStatus('disconnected');
     showToast('Disconnected from file. Data still in browser.', 'info');
   }, [showToast]);
-
   const saveToFileNow = useCallback(async () => {
     if (!hasFileSystemAccess) {
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json'
+      });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = fileName || 'morning-pages.json'; a.click();
+      a.href = url;
+      a.download = fileName || 'morning-pages.json';
+      a.click();
       URL.revokeObjectURL(url);
       showToast('File downloaded', 'success');
       return;
@@ -1112,10 +1382,11 @@ function App() {
       }
     }
   }, [data, fileName, showToast]);
-
   const downloadBackup = useCallback(() => {
     const today = todayStr();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: 'application/json'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -1126,39 +1397,55 @@ function App() {
   }, [data, showToast]);
 
   // ── Data mutations ──
-  const updateSettings = (key, val) => setData(d => ({ ...d, settings: { ...d.settings, [key]: val } }));
+  const updateSettings = (key, val) => setData(d => ({
+    ...d,
+    settings: {
+      ...d.settings,
+      [key]: val
+    }
+  }));
   const todayEntry = data.entries.find(e => e.date === todayStr());
-
   const streak = useMemo(() => {
     let count = 0;
-    const sorted = [...data.entries].filter(e => e.wordCount >= WORD_TARGET).sort((a,b) => b.date.localeCompare(a.date));
+    const sorted = [...data.entries].filter(e => e.wordCount >= WORD_TARGET).sort((a, b) => b.date.localeCompare(a.date));
     if (!sorted.length) return 0;
     let checkDate = new Date(todayStr() + 'T12:00:00');
     if (!sorted.find(e => e.date === todayStr())) checkDate.setDate(checkDate.getDate() - 1);
     for (let i = 0; i < 365; i++) {
       const ds = checkDate.toISOString().split('T')[0];
-      if (sorted.find(e => e.date === ds)) { count++; checkDate.setDate(checkDate.getDate() - 1); }
-      else break;
+      if (sorted.find(e => e.date === ds)) {
+        count++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else break;
     }
     return count;
   }, [data.entries]);
-
-  const saveEntry = useCallback((entry) => {
+  const saveEntry = useCallback(entry => {
     setData(d => {
       const idx = d.entries.findIndex(e => e.date === entry.date);
       const newEntries = [...d.entries];
-      if (idx >= 0) newEntries[idx] = entry; else newEntries.unshift(entry);
-      return { ...d, entries: newEntries };
+      if (idx >= 0) newEntries[idx] = entry;else newEntries.unshift(entry);
+      return {
+        ...d,
+        entries: newEntries
+      };
     });
   }, []);
-
   const addSeed = useCallback((text, sourceDate, seedId) => {
     const id = seedId || Date.now().toString();
-    setData(d => ({ ...d, seeds: [...d.seeds, { id, text, sourceDate, createdAt: new Date().toISOString(), tags: [] }] }));
+    setData(d => ({
+      ...d,
+      seeds: [...d.seeds, {
+        id,
+        text,
+        sourceDate,
+        createdAt: new Date().toISOString(),
+        tags: []
+      }]
+    }));
     return id;
   }, []);
-
-  const removeSeed = useCallback((id) => {
+  const removeSeed = useCallback(id => {
     setData(d => {
       const seed = d.seeds.find(s => s.id === id);
       let entries = d.entries;
@@ -1169,30 +1456,55 @@ function App() {
             // Only remove this highlight if no other seed from the same entry uses the same text
             const otherSeedsWithSameText = d.seeds.filter(s => s.id !== id && s.sourceDate === seed.sourceDate && s.text === seed.text);
             if (otherSeedsWithSameText.length === 0) {
-              return { ...e, highlights: e.highlights.filter(h => h !== seed.text) };
+              return {
+                ...e,
+                highlights: e.highlights.filter(h => h !== seed.text)
+              };
             }
           }
           return e;
         });
       }
-      return { ...d, seeds: d.seeds.filter(s => s.id !== id), entries };
+      return {
+        ...d,
+        seeds: d.seeds.filter(s => s.id !== id),
+        entries
+      };
     });
   }, []);
-
   const updateSeedTags = useCallback((id, tags) => {
-    setData(d => ({ ...d, seeds: d.seeds.map(s => s.id === id ? { ...s, tags } : s) }));
+    setData(d => ({
+      ...d,
+      seeds: d.seeds.map(s => s.id === id ? {
+        ...s,
+        tags
+      } : s)
+    }));
   }, []);
-
   const updateEntryTags = useCallback((date, tags) => {
-    setData(d => ({ ...d, entries: d.entries.map(e => e.date === date ? { ...e, tags } : e) }));
+    setData(d => ({
+      ...d,
+      entries: d.entries.map(e => e.date === date ? {
+        ...e,
+        tags
+      } : e)
+    }));
   }, []);
-
   const updateEntryHighlights = useCallback((date, highlights) => {
-    setData(d => ({ ...d, entries: d.entries.map(e => e.date === date ? { ...e, highlights } : e) }));
+    setData(d => ({
+      ...d,
+      entries: d.entries.map(e => e.date === date ? {
+        ...e,
+        highlights
+      } : e)
+    }));
   }, []);
-
-  const deleteEntry = useCallback((date) => {
-    setData(d => ({ ...d, entries: d.entries.filter(e => e.date !== date), seeds: d.seeds.filter(s => s.sourceDate !== date) }));
+  const deleteEntry = useCallback(date => {
+    setData(d => ({
+      ...d,
+      entries: d.entries.filter(e => e.date !== date),
+      seeds: d.seeds.filter(s => s.sourceDate !== date)
+    }));
   }, []);
 
   // ── Navigation helpers for seed -> entry -> back ──
@@ -1201,7 +1513,6 @@ function App() {
     setView('history');
     setDetailId(entryDate);
   }, []);
-
   const handleBackFromSeedEntry = useCallback(() => {
     setView('seeds');
     setDetailId(null);
@@ -1210,194 +1521,374 @@ function App() {
 
   // Tutorial handlers
   const startTutorial = useCallback(() => setTutorialStep(0), []);
-
-  const hiddenInput = <input ref={hiddenInputRef} type="file" accept=".json" style={{display:'none'}} onChange={handleFallbackFileLoad} />;
-
-  if (!initialized) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--text-faint)'}}>Loading...</div>;
-
+  const hiddenInput = /*#__PURE__*/React.createElement("input", {
+    ref: hiddenInputRef,
+    type: "file",
+    accept: ".json",
+    style: {
+      display: 'none'
+    },
+    onChange: handleFallbackFileLoad
+  });
+  if (!initialized) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100vh',
+      color: 'var(--text-faint)'
+    }
+  }, "Loading...");
   if (showWelcome) {
-    return (
-      <>
-        {hiddenInput}
-        <WelcomeScreen
-          onCreateNew={createNewFile}
-          onOpenExisting={openExistingFile}
-          onSkip={() => setShowWelcome(false)}
-          hasFileSystemAccess={hasFileSystemAccess}
-        />
-      </>
-    );
+    return /*#__PURE__*/React.createElement(React.Fragment, null, hiddenInput, /*#__PURE__*/React.createElement(WelcomeScreen, {
+      onCreateNew: createNewFile,
+      onOpenExisting: openExistingFile,
+      onSkip: () => setShowWelcome(false),
+      hasFileSystemAccess: hasFileSystemAccess
+    }));
   }
-
-  return (
-    <div className="app">
-      {hiddenInput}
-      <Sidebar
-        view={view} setView={setView} streak={streak} setDetailId={setDetailId}
-        fileStatus={fileStatus} fileName={fileName}
-        onOpenFile={openExistingFile} onCreateFile={createNewFile}
-        onDisconnect={disconnectFile} onSaveNow={saveToFileNow}
-        onDownloadBackup={downloadBackup}
-        hasFileSystemAccess={hasFileSystemAccess}
-        onShowInfo={() => setShowInfo(true)}
-      />
-      <MobileFileBar
-        fileStatus={fileStatus} fileName={fileName}
-        onOpenFile={openExistingFile} onSaveNow={saveToFileNow}
-        onShowInfo={() => setShowInfo(true)}
-      />
-      <div className="main">
-        {view === 'write' && <WritingView entry={todayEntry} saveEntry={saveEntry} settings={data.settings} onSaveToFile={saveToFileNow} onDownloadBackup={downloadBackup} fileStatus={fileStatus} hasFileSystemAccess={hasFileSystemAccess} />}
-        {view === 'history' && !detailId && <HistoryView entries={data.entries} setDetailId={setDetailId} />}
-        {view === 'history' && detailId && <EntryDetail entry={data.entries.find(e => e.date === detailId)} onBack={seedReturnState ? handleBackFromSeedEntry : () => setDetailId(null)} addSeed={addSeed} removeSeed={removeSeed} updateSeedTags={updateSeedTags} seeds={data.seeds} updateTags={updateEntryTags} updateHighlights={updateEntryHighlights} deleteEntry={(d) => { deleteEntry(d); setDetailId(null); }} backLabel={seedReturnState ? 'Back to seedbank' : 'Back to entries'} />}
-        {view === 'seeds' && <SeedsView seeds={data.seeds} removeSeed={removeSeed} updateSeedTags={updateSeedTags} navigateToEntry={navigateToEntryFromSeed} returnState={seedReturnState} clearReturnState={() => setSeedReturnState(null)} entries={data.entries} />}
-        {view === 'stats' && <StatsView entries={data.entries} streak={streak} settings={data.settings} updateSettings={updateSettings} data={data} onOpenFile={openExistingFile} onCreateFile={createNewFile} onDisconnect={disconnectFile} onSaveNow={saveToFileNow} onDownloadBackup={downloadBackup} fileStatus={fileStatus} fileName={fileName} hasFileSystemAccess={hasFileSystemAccess} />}
-      </div>
-      <MobileNav view={view} setView={setView} setDetailId={setDetailId} />
-      {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
-      {showInfo && <InfoModal onClose={() => setShowInfo(false)} onStartTutorial={startTutorial} />}
-      {tutorialStep >= 0 && (
-        <TutorialOverlay
-          step={tutorialStep}
-          totalSteps={TUTORIAL_STEPS.length}
-          onNext={() => setTutorialStep(s => s + 1)}
-          onPrev={() => setTutorialStep(s => s - 1)}
-          onClose={() => setTutorialStep(-1)}
-        />
-      )}
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    className: "app"
+  }, hiddenInput, /*#__PURE__*/React.createElement(Sidebar, {
+    view: view,
+    setView: setView,
+    streak: streak,
+    setDetailId: setDetailId,
+    fileStatus: fileStatus,
+    fileName: fileName,
+    onOpenFile: openExistingFile,
+    onCreateFile: createNewFile,
+    onDisconnect: disconnectFile,
+    onSaveNow: saveToFileNow,
+    onDownloadBackup: downloadBackup,
+    hasFileSystemAccess: hasFileSystemAccess,
+    onShowInfo: () => setShowInfo(true)
+  }), /*#__PURE__*/React.createElement(MobileFileBar, {
+    fileStatus: fileStatus,
+    fileName: fileName,
+    onOpenFile: openExistingFile,
+    onSaveNow: saveToFileNow,
+    onShowInfo: () => setShowInfo(true)
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "main"
+  }, view === 'write' && /*#__PURE__*/React.createElement(WritingView, {
+    entry: todayEntry,
+    saveEntry: saveEntry,
+    settings: data.settings,
+    onSaveToFile: saveToFileNow,
+    onDownloadBackup: downloadBackup,
+    fileStatus: fileStatus,
+    hasFileSystemAccess: hasFileSystemAccess
+  }), view === 'history' && !detailId && /*#__PURE__*/React.createElement(HistoryView, {
+    entries: data.entries,
+    setDetailId: setDetailId
+  }), view === 'history' && detailId && /*#__PURE__*/React.createElement(EntryDetail, {
+    entry: data.entries.find(e => e.date === detailId),
+    onBack: seedReturnState ? handleBackFromSeedEntry : () => setDetailId(null),
+    addSeed: addSeed,
+    removeSeed: removeSeed,
+    updateSeedTags: updateSeedTags,
+    seeds: data.seeds,
+    updateTags: updateEntryTags,
+    updateHighlights: updateEntryHighlights,
+    deleteEntry: d => {
+      deleteEntry(d);
+      setDetailId(null);
+    },
+    backLabel: seedReturnState ? 'Back to seedbank' : 'Back to entries'
+  }), view === 'seeds' && /*#__PURE__*/React.createElement(SeedsView, {
+    seeds: data.seeds,
+    removeSeed: removeSeed,
+    updateSeedTags: updateSeedTags,
+    navigateToEntry: navigateToEntryFromSeed,
+    returnState: seedReturnState,
+    clearReturnState: () => setSeedReturnState(null),
+    entries: data.entries
+  }), view === 'stats' && /*#__PURE__*/React.createElement(StatsView, {
+    entries: data.entries,
+    streak: streak,
+    settings: data.settings,
+    updateSettings: updateSettings,
+    data: data,
+    onOpenFile: openExistingFile,
+    onCreateFile: createNewFile,
+    onDisconnect: disconnectFile,
+    onSaveNow: saveToFileNow,
+    onDownloadBackup: downloadBackup,
+    fileStatus: fileStatus,
+    fileName: fileName,
+    hasFileSystemAccess: hasFileSystemAccess
+  })), /*#__PURE__*/React.createElement(MobileNav, {
+    view: view,
+    setView: setView,
+    setDetailId: setDetailId
+  }), toast && /*#__PURE__*/React.createElement("div", {
+    className: `toast ${toast.type}`
+  }, toast.message), showInfo && /*#__PURE__*/React.createElement(InfoModal, {
+    onClose: () => setShowInfo(false),
+    onStartTutorial: startTutorial
+  }), tutorialStep >= 0 && /*#__PURE__*/React.createElement(TutorialOverlay, {
+    step: tutorialStep,
+    totalSteps: TUTORIAL_STEPS.length,
+    onNext: () => setTutorialStep(s => s + 1),
+    onPrev: () => setTutorialStep(s => s - 1),
+    onClose: () => setTutorialStep(-1)
+  }));
 }
-
 
 // ─── Welcome Screen ───
-function WelcomeScreen({ onCreateNew, onOpenExisting, onSkip, hasFileSystemAccess }) {
-  return (
-    <div className="welcome-screen">
-      <div className="welcome-card">
-        <h1>Morning Pages</h1>
-        <p className="subtitle">Write freely. Think clearly.</p>
-        <div className="welcome-options">
-          <div className="welcome-option" onClick={onCreateNew}>
-            {Icons.filePlus}
-            <div className="welcome-option-text">
-              <h3>Create new pages file</h3>
-              <p>{hasFileSystemAccess ? 'Choose where to save — iCloud Drive, Dropbox, or anywhere on your Mac.' : 'Download a pages file you can store in iCloud Drive or anywhere you like.'}</p>
-            </div>
-          </div>
-          <div className="welcome-option" onClick={onOpenExisting}>
-            {Icons.folder}
-            <div className="welcome-option-text">
-              <h3>Open existing file</h3>
-              <p>Already have a morning-pages.json? Open it to pick up where you left off.</p>
-            </div>
-          </div>
-        </div>
-        <button className="welcome-skip" onClick={onSkip}>
-          Skip for now — just write in the browser
-        </button>
-        {hasFileSystemAccess && (
-          <p className="welcome-note">
-            Your browser supports persistent file access. The app will remember your file location and reconnect automatically next time.
-          </p>
-        )}
-        {!hasFileSystemAccess && (
-          <p className="welcome-note">
-            Your browser (Safari/iOS) doesn't support persistent file access. You can still open and save files manually — perfect for keeping a file in iCloud Drive via the Files app.
-          </p>
-        )}
-      </div>
-    </div>
-  );
+function WelcomeScreen({
+  onCreateNew,
+  onOpenExisting,
+  onSkip,
+  hasFileSystemAccess
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "welcome-screen"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "welcome-card"
+  }, /*#__PURE__*/React.createElement("h1", null, "Morning Pages"), /*#__PURE__*/React.createElement("p", {
+    className: "subtitle"
+  }, "Write freely. Think clearly."), /*#__PURE__*/React.createElement("div", {
+    className: "welcome-options"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "welcome-option",
+    onClick: onCreateNew
+  }, Icons.filePlus, /*#__PURE__*/React.createElement("div", {
+    className: "welcome-option-text"
+  }, /*#__PURE__*/React.createElement("h3", null, "Create new pages file"), /*#__PURE__*/React.createElement("p", null, hasFileSystemAccess ? 'Choose where to save — iCloud Drive, Dropbox, or anywhere on your Mac.' : 'Download a pages file you can store in iCloud Drive or anywhere you like.'))), /*#__PURE__*/React.createElement("div", {
+    className: "welcome-option",
+    onClick: onOpenExisting
+  }, Icons.folder, /*#__PURE__*/React.createElement("div", {
+    className: "welcome-option-text"
+  }, /*#__PURE__*/React.createElement("h3", null, "Open existing file"), /*#__PURE__*/React.createElement("p", null, "Already have a morning-pages.json? Open it to pick up where you left off.")))), /*#__PURE__*/React.createElement("button", {
+    className: "welcome-skip",
+    onClick: onSkip
+  }, "Skip for now \u2014 just write in the browser"), hasFileSystemAccess && /*#__PURE__*/React.createElement("p", {
+    className: "welcome-note"
+  }, "Your browser supports persistent file access. The app will remember your file location and reconnect automatically next time."), !hasFileSystemAccess && /*#__PURE__*/React.createElement("p", {
+    className: "welcome-note"
+  }, "Your browser (Safari/iOS) doesn't support persistent file access. You can still open and save files manually \u2014 perfect for keeping a file in iCloud Drive via the Files app.")));
 }
-
 
 // ─── Sidebar ───
-function Sidebar({ view, setView, streak, setDetailId, fileStatus, fileName, onOpenFile, onCreateFile, onDisconnect, onSaveNow, onDownloadBackup, hasFileSystemAccess, onShowInfo }) {
-  const nav = (v) => { setView(v); setDetailId(null); };
-  return (
-    <div className="sidebar">
-      <div className="sidebar-logo">
-        <div className="sidebar-logo-text">
-          <h1>Morning Pages</h1>
-          <p>Write freely. Think clearly.</p>
-        </div>
-        <button className="info-btn" data-tour="info-btn" onClick={onShowInfo} title="What are Morning Pages?"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Info</button>
-      </div>
-      <div className="sidebar-nav">
-        <button data-tour="write" className={`nav-item ${view==='write'?'active':''}`} onClick={() => nav('write')}>{Icons.write}<span>Write</span></button>
-        <button data-tour="history" className={`nav-item ${view==='history'?'active':''}`} onClick={() => nav('history')}>{Icons.history}<span>History</span></button>
-        <button data-tour="seeds" className={`nav-item ${view==='seeds'?'active':''}`} onClick={() => nav('seeds')}>{Icons.seed}<span>Seedbank</span></button>
-        <button data-tour="stats" className={`nav-item ${view==='stats'?'active':''}`} onClick={() => nav('stats')}>{Icons.stats}<span>Progress</span></button>
-      </div>
-      <div className="file-status" data-tour="file-status">
-        <div className="file-status-row">
-          <span className={`file-dot ${fileStatus}`}></span>
-          <span className="file-status-label">
-            {fileStatus === 'saving' ? 'Saving...' : fileStatus === 'connected' ? 'Synced to file' : 'No file connected'}
-          </span>
-        </div>
-        {fileName && <div className="file-status-name">{fileName}</div>}
-        <div className="file-status-actions">
-          {fileStatus === 'disconnected' ? (
-            <>
-              <button className="file-btn primary" onClick={onOpenFile}>Open file</button>
-              <button className="file-btn" onClick={onCreateFile}>New</button>
-            </>
-          ) : (
-            <>
-              {!hasFileSystemAccess && <button className="file-btn" onClick={onSaveNow}>Save</button>}
-              <button className="file-btn" onClick={onDisconnect}>Disconnect</button>
-            </>
-          )}
-        </div>
-        <div className="file-status-actions" style={{marginTop:4}}>
-          <button className="file-btn" onClick={onDownloadBackup}>{Icons.download} Download backup</button>
-        </div>
-      </div>
-      <div className="nav-streak">
-        <div className="streak-num">{streak}</div>
-        <div className="streak-label">day streak</div>
-      </div>
-    </div>
-  );
+function Sidebar({
+  view,
+  setView,
+  streak,
+  setDetailId,
+  fileStatus,
+  fileName,
+  onOpenFile,
+  onCreateFile,
+  onDisconnect,
+  onSaveNow,
+  onDownloadBackup,
+  hasFileSystemAccess,
+  onShowInfo
+}) {
+  const nav = v => {
+    setView(v);
+    setDetailId(null);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "sidebar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-logo"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-logo-text"
+  }, /*#__PURE__*/React.createElement("h1", null, "Morning Pages"), /*#__PURE__*/React.createElement("p", null, "Write freely. Think clearly.")), /*#__PURE__*/React.createElement("button", {
+    className: "info-btn",
+    "data-tour": "info-btn",
+    onClick: onShowInfo,
+    title: "What are Morning Pages?"
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "16",
+    x2: "12",
+    y2: "12"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "8",
+    x2: "12.01",
+    y2: "8"
+  })), "Info")), /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    "data-tour": "write",
+    className: `nav-item ${view === 'write' ? 'active' : ''}`,
+    onClick: () => nav('write')
+  }, Icons.write, /*#__PURE__*/React.createElement("span", null, "Write")), /*#__PURE__*/React.createElement("button", {
+    "data-tour": "history",
+    className: `nav-item ${view === 'history' ? 'active' : ''}`,
+    onClick: () => nav('history')
+  }, Icons.history, /*#__PURE__*/React.createElement("span", null, "History")), /*#__PURE__*/React.createElement("button", {
+    "data-tour": "seeds",
+    className: `nav-item ${view === 'seeds' ? 'active' : ''}`,
+    onClick: () => nav('seeds')
+  }, Icons.seed, /*#__PURE__*/React.createElement("span", null, "Seedbank")), /*#__PURE__*/React.createElement("button", {
+    "data-tour": "stats",
+    className: `nav-item ${view === 'stats' ? 'active' : ''}`,
+    onClick: () => nav('stats')
+  }, Icons.stats, /*#__PURE__*/React.createElement("span", null, "Progress"))), /*#__PURE__*/React.createElement("div", {
+    className: "file-status",
+    "data-tour": "file-status"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "file-status-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `file-dot ${fileStatus}`
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "file-status-label"
+  }, fileStatus === 'saving' ? 'Saving...' : fileStatus === 'connected' ? 'Synced to file' : 'No file connected')), fileName && /*#__PURE__*/React.createElement("div", {
+    className: "file-status-name"
+  }, fileName), /*#__PURE__*/React.createElement("div", {
+    className: "file-status-actions"
+  }, fileStatus === 'disconnected' ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "file-btn primary",
+    onClick: onOpenFile
+  }, "Open file"), /*#__PURE__*/React.createElement("button", {
+    className: "file-btn",
+    onClick: onCreateFile
+  }, "New")) : /*#__PURE__*/React.createElement(React.Fragment, null, !hasFileSystemAccess && /*#__PURE__*/React.createElement("button", {
+    className: "file-btn",
+    onClick: onSaveNow
+  }, "Save"), /*#__PURE__*/React.createElement("button", {
+    className: "file-btn",
+    onClick: onDisconnect
+  }, "Disconnect"))), /*#__PURE__*/React.createElement("div", {
+    className: "file-status-actions",
+    style: {
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "file-btn",
+    onClick: onDownloadBackup
+  }, Icons.download, " Download backup"))), /*#__PURE__*/React.createElement("div", {
+    className: "nav-streak"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "streak-num"
+  }, streak), /*#__PURE__*/React.createElement("div", {
+    className: "streak-label"
+  }, "day streak")));
 }
-
-function MobileFileBar({ fileStatus, fileName, onOpenFile, onSaveNow, onShowInfo }) {
-  return (
-    <div className="mobile-file-bar">
-      <div style={{display:'flex',alignItems:'center',gap:8}}>
-        <div className="file-status-row">
-          <span className={`file-dot ${fileStatus}`}></span>
-          <span className="file-status-label" style={{fontSize:'0.72rem'}}>
-            {fileStatus === 'connected' ? (fileName || 'Synced') : fileStatus === 'saving' ? 'Saving...' : 'Browser only'}
-          </span>
-        </div>
-      </div>
-      <div style={{display:'flex',gap:6,alignItems:'center'}}>
-        <button className="info-btn" onClick={onShowInfo} title="What are Morning Pages?" style={{padding:'3px 8px',fontSize:'0.68rem'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:12,height:12}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Info</button>
-        {fileStatus === 'disconnected' && <button className="file-btn" onClick={onOpenFile}>Open file</button>}
-        {fileStatus !== 'disconnected' && !hasFileSystemAccess && <button className="file-btn" onClick={onSaveNow}>Save</button>}
-      </div>
-    </div>
-  );
+function MobileFileBar({
+  fileStatus,
+  fileName,
+  onOpenFile,
+  onSaveNow,
+  onShowInfo
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "mobile-file-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "file-status-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `file-dot ${fileStatus}`
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "file-status-label",
+    style: {
+      fontSize: '0.72rem'
+    }
+  }, fileStatus === 'connected' ? fileName || 'Synced' : fileStatus === 'saving' ? 'Saving...' : 'Browser only'))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      alignItems: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "info-btn",
+    onClick: onShowInfo,
+    title: "What are Morning Pages?",
+    style: {
+      padding: '3px 8px',
+      fontSize: '0.68rem'
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      width: 12,
+      height: 12
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "16",
+    x2: "12",
+    y2: "12"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "8",
+    x2: "12.01",
+    y2: "8"
+  })), "Info"), fileStatus === 'disconnected' && /*#__PURE__*/React.createElement("button", {
+    className: "file-btn",
+    onClick: onOpenFile
+  }, "Open file"), fileStatus !== 'disconnected' && !hasFileSystemAccess && /*#__PURE__*/React.createElement("button", {
+    className: "file-btn",
+    onClick: onSaveNow
+  }, "Save")));
 }
-
-function MobileNav({ view, setView, setDetailId }) {
-  const nav = (v) => { setView(v); setDetailId(null); };
-  return (
-    <div className="mobile-nav">
-      <button className={view==='write'?'active':''} onClick={() => nav('write')}>{Icons.write}<span>Write</span></button>
-      <button className={view==='history'?'active':''} onClick={() => nav('history')}>{Icons.history}<span>History</span></button>
-      <button className={view==='seeds'?'active':''} onClick={() => nav('seeds')}>{Icons.seed}<span>Seeds</span></button>
-      <button className={view==='stats'?'active':''} onClick={() => nav('stats')}>{Icons.stats}<span>Progress</span></button>
-    </div>
-  );
+function MobileNav({
+  view,
+  setView,
+  setDetailId
+}) {
+  const nav = v => {
+    setView(v);
+    setDetailId(null);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "mobile-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: view === 'write' ? 'active' : '',
+    onClick: () => nav('write')
+  }, Icons.write, /*#__PURE__*/React.createElement("span", null, "Write")), /*#__PURE__*/React.createElement("button", {
+    className: view === 'history' ? 'active' : '',
+    onClick: () => nav('history')
+  }, Icons.history, /*#__PURE__*/React.createElement("span", null, "History")), /*#__PURE__*/React.createElement("button", {
+    className: view === 'seeds' ? 'active' : '',
+    onClick: () => nav('seeds')
+  }, Icons.seed, /*#__PURE__*/React.createElement("span", null, "Seeds")), /*#__PURE__*/React.createElement("button", {
+    className: view === 'stats' ? 'active' : '',
+    onClick: () => nav('stats')
+  }, Icons.stats, /*#__PURE__*/React.createElement("span", null, "Progress")));
 }
-
 
 // ─── Writing View ───
-function WritingView({ entry, saveEntry, settings, onSaveToFile, onDownloadBackup, fileStatus, hasFileSystemAccess }) {
+function WritingView({
+  entry,
+  saveEntry,
+  settings,
+  onSaveToFile,
+  onDownloadBackup,
+  fileStatus,
+  hasFileSystemAccess
+}) {
   const today = todayStr();
   const [text, setText] = useState(entry?.content || '');
   const [elapsed, setElapsed] = useState(entry?.timeSpent || 0);
@@ -1410,25 +1901,29 @@ function WritingView({ entry, saveEntry, settings, onSaveToFile, onDownloadBacku
   const textareaRef = useRef(null);
   const idleTimer = useRef(null);
   const timerRef = useRef(null);
-
   const wc = wordCount(text);
   const progress = Math.min(wc / WORD_TARGET, 1);
-
   useEffect(() => {
     if (isFinished && !justFinished) return;
     const t = setTimeout(() => {
-      saveEntry({ date: today, content: text, wordCount: wc, timeSpent: elapsed, highlights: entry?.highlights || [], tags: entry?.tags || [], finished: isFinished });
+      saveEntry({
+        date: today,
+        content: text,
+        wordCount: wc,
+        timeSpent: elapsed,
+        highlights: entry?.highlights || [],
+        tags: entry?.tags || [],
+        finished: isFinished
+      });
     }, 500);
     return () => clearTimeout(t);
   }, [text, elapsed, isFinished]);
-
   useEffect(() => {
     if (text.length > 0 && !isFinished) {
       timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
     }
     return () => clearInterval(timerRef.current);
   }, [text.length > 0, isFinished]);
-
   useEffect(() => {
     if (!settings.showNudges || isFinished) return;
     clearTimeout(idleTimer.current);
@@ -1442,171 +1937,238 @@ function WritingView({ entry, saveEntry, settings, onSaveToFile, onDownloadBacku
     }
     return () => clearTimeout(idleTimer.current);
   }, [text, settings.showNudges, isFinished]);
-
   useEffect(() => {
     if (wc >= WORD_TARGET && !hasShownComplete) {
-      setShowComplete(true); setHasShownComplete(true);
+      setShowComplete(true);
+      setHasShownComplete(true);
       setTimeout(() => setShowComplete(false), 3000);
     }
   }, [wc, hasShownComplete]);
-
-  useEffect(() => { if (textareaRef.current && !isFinished) textareaRef.current.focus(); }, []);
-
+  useEffect(() => {
+    if (textareaRef.current && !isFinished) textareaRef.current.focus();
+  }, []);
   const placeholder = settings.firstLineStarters ? STARTERS[Math.floor(Math.random() * STARTERS.length)] : '';
-
   const handleFinish = () => {
-    saveEntry({ date: today, content: text, wordCount: wc, timeSpent: elapsed, highlights: entry?.highlights || [], tags: entry?.tags || [], finished: true });
+    saveEntry({
+      date: today,
+      content: text,
+      wordCount: wc,
+      timeSpent: elapsed,
+      highlights: entry?.highlights || [],
+      tags: entry?.tags || [],
+      finished: true
+    });
     setIsFinished(true);
     setJustFinished(true);
     if (onSaveToFile && fileStatus !== 'disconnected') {
       setTimeout(() => onSaveToFile(), 200);
     }
   };
-
   const handleResume = () => {
     setIsFinished(false);
     setJustFinished(false);
-    saveEntry({ date: today, content: text, wordCount: wc, timeSpent: elapsed, highlights: entry?.highlights || [], tags: entry?.tags || [], finished: false });
-    setTimeout(() => { if (textareaRef.current) textareaRef.current.focus(); }, 50);
+    saveEntry({
+      date: today,
+      content: text,
+      wordCount: wc,
+      timeSpent: elapsed,
+      highlights: entry?.highlights || [],
+      tags: entry?.tags || [],
+      finished: false
+    });
+    setTimeout(() => {
+      if (textareaRef.current) textareaRef.current.focus();
+    }, 50);
   };
-
   if (isFinished && !justFinished) {
-    return (
-      <div className="writing-container">
-        <div className="finished-state">
-          <h2>Today's pages are done.</h2>
-          <p>{wc} words · {formatTime(elapsed)}</p>
-          <div style={{display:'flex', gap:12, justifyContent:'center', marginTop:20, flexWrap:'wrap'}}>
-            <button className="btn" onClick={onDownloadBackup}>{Icons.download} Download backup</button>
-            <button className="resume-link" onClick={handleResume}>Keep writing</button>
-          </div>
-        </div>
-      </div>
-    );
+    return /*#__PURE__*/React.createElement("div", {
+      className: "writing-container"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "finished-state"
+    }, /*#__PURE__*/React.createElement("h2", null, "Today's pages are done."), /*#__PURE__*/React.createElement("p", null, wc, " words \xB7 ", formatTime(elapsed)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 12,
+        justifyContent: 'center',
+        marginTop: 20,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn",
+      onClick: onDownloadBackup
+    }, Icons.download, " Download backup"), /*#__PURE__*/React.createElement("button", {
+      className: "resume-link",
+      onClick: handleResume
+    }, "Keep writing"))));
   }
-
   if (justFinished) {
     setTimeout(() => setJustFinished(false), 3000);
-    return (
-      <div className="writing-container">
-        <div className="finished-state" style={{animation:'fadeIn 0.3s ease-out'}}>
-          <h2>Saved.</h2>
-          <p>{wc} words · {formatTime(elapsed)}</p>
-          <div style={{display:'flex', gap:12, justifyContent:'center', marginTop:20, flexWrap:'wrap'}}>
-            <button className="btn btn-primary" onClick={onDownloadBackup}>{Icons.download} Download backup</button>
-          </div>
-          <p style={{fontSize:'0.75rem', marginTop:12, color:'var(--text-faint)', fontStyle:'italic'}}>
-            Save this file to iCloud Drive to keep it synced across your devices.
-          </p>
-        </div>
-      </div>
-    );
+    return /*#__PURE__*/React.createElement("div", {
+      className: "writing-container"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "finished-state",
+      style: {
+        animation: 'fadeIn 0.3s ease-out'
+      }
+    }, /*#__PURE__*/React.createElement("h2", null, "Saved."), /*#__PURE__*/React.createElement("p", null, wc, " words \xB7 ", formatTime(elapsed)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 12,
+        justifyContent: 'center',
+        marginTop: 20,
+        flexWrap: 'wrap'
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "btn btn-primary",
+      onClick: onDownloadBackup
+    }, Icons.download, " Download backup")), /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: '0.75rem',
+        marginTop: 12,
+        color: 'var(--text-faint)',
+        fontStyle: 'italic'
+      }
+    }, "Save this file to iCloud Drive to keep it synced across your devices.")));
   }
-
-  return (
-    <>
-      <div className="writing-container">
-        <div className="writing-header">
-          <div className="writing-date">{formatDate(today)}</div>
-          <div className="writing-meta">
-            {settings.showTimer && <span>{formatTime(elapsed)}</span>}
-            <span style={{ color: wc >= WORD_TARGET ? 'var(--success)' : 'var(--text-faint)', fontWeight: wc >= WORD_TARGET ? 500 : 400 }}>
-              {wc} / {WORD_TARGET}
-            </span>
-          </div>
-        </div>
-        <textarea ref={textareaRef} className="writing-area" value={text} onChange={e => setText(e.target.value)} placeholder={placeholder} spellCheck={false} autoCorrect="off" autoCapitalize="off" />
-        {wc > 0 && (
-          <div className="writing-footer">
-            <span style={{fontSize:'0.78rem', color:'var(--text-faint)'}}>
-              {wc < WORD_TARGET ? `${WORD_TARGET - wc} words to go` : 'Target reached'}
-            </span>
-            <button className="finish-btn" onClick={handleFinish}>
-              Save &amp; finish
-            </button>
-          </div>
-        )}
-      </div>
-      <div className="progress-wrap">
-        <div className={`progress-bar ${wc >= WORD_TARGET ? 'complete' : ''}`} style={{ width: `${progress * 100}%` }} />
-      </div>
-      {showNudge && <div className="nudge" key={nudgeText}>{nudgeText}</div>}
-      {showComplete && <div className="complete-banner">750 words — well done. Keep going if you'd like.</div>}
-    </>
-  );
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "writing-container"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "writing-header"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "writing-date"
+  }, formatDate(today)), /*#__PURE__*/React.createElement("div", {
+    className: "writing-meta"
+  }, settings.showTimer && /*#__PURE__*/React.createElement("span", null, formatTime(elapsed)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: wc >= WORD_TARGET ? 'var(--success)' : 'var(--text-faint)',
+      fontWeight: wc >= WORD_TARGET ? 500 : 400
+    }
+  }, wc, " / ", WORD_TARGET))), /*#__PURE__*/React.createElement("textarea", {
+    ref: textareaRef,
+    className: "writing-area",
+    value: text,
+    onChange: e => setText(e.target.value),
+    placeholder: placeholder,
+    spellCheck: false,
+    autoCorrect: "off",
+    autoCapitalize: "off"
+  }), wc > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "writing-footer"
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '0.78rem',
+      color: 'var(--text-faint)'
+    }
+  }, wc < WORD_TARGET ? `${WORD_TARGET - wc} words to go` : 'Target reached'), /*#__PURE__*/React.createElement("button", {
+    className: "finish-btn",
+    onClick: handleFinish
+  }, "Save & finish"))), /*#__PURE__*/React.createElement("div", {
+    className: "progress-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: `progress-bar ${wc >= WORD_TARGET ? 'complete' : ''}`,
+    style: {
+      width: `${progress * 100}%`
+    }
+  })), showNudge && /*#__PURE__*/React.createElement("div", {
+    className: "nudge",
+    key: nudgeText
+  }, nudgeText), showComplete && /*#__PURE__*/React.createElement("div", {
+    className: "complete-banner"
+  }, "750 words \u2014 well done. Keep going if you'd like."));
 }
 
-
 // ─── History View ───
-function HistoryView({ entries, setDetailId }) {
+function HistoryView({
+  entries,
+  setDetailId
+}) {
   const [search, setSearch] = useState('');
   const filtered = entries.filter(e => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return e.content.toLowerCase().includes(q) || e.date.includes(q) || (e.tags || []).some(t => t.toLowerCase().includes(q));
-  }).sort((a,b) => b.date.localeCompare(a.date));
-
-  return (
-    <div className="view-container">
-      <h2 className="view-title">Your Pages</h2>
-      <p className="view-subtitle">{entries.length} entries written</p>
-      <div className="search-bar">
-        <input className="search-input" placeholder="Search by keyword, date, or tag..." value={search} onChange={e => setSearch(e.target.value)} />
-      </div>
-      {filtered.length === 0 && (
-        <div className="empty-state">
-          <p>{entries.length === 0 ? 'No entries yet.' : 'No entries match your search.'}</p>
-          <p className="hint">{entries.length === 0 ? 'Start writing today — your pages will appear here.' : 'Try a different search term.'}</p>
-        </div>
-      )}
-      {filtered.map(entry => (
-        <div key={entry.date} className="entry-card slide-in" onClick={() => setDetailId(entry.date)}>
-          <div className="entry-card-header">
-            <div className="entry-card-date">
-              <span className={`completion-dot ${entry.wordCount >= WORD_TARGET ? 'done' : 'partial'}`}></span>
-              {formatDate(entry.date)}
-            </div>
-            <div className="entry-card-meta">
-              <span>{entry.wordCount} words</span>
-              <span>{formatTime(entry.timeSpent || 0)}</span>
-            </div>
-          </div>
-          <div className="entry-card-preview">{entry.content}</div>
-          {entry.tags?.length > 0 && <div className="entry-card-tags">{entry.tags.map(t => <span key={t} className="tag">{t}</span>)}</div>}
-        </div>
-      ))}
-    </div>
-  );
+  }).sort((a, b) => b.date.localeCompare(a.date));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "view-container"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "view-title"
+  }, "Your Pages"), /*#__PURE__*/React.createElement("p", {
+    className: "view-subtitle"
+  }, entries.length, " entries written"), /*#__PURE__*/React.createElement("div", {
+    className: "search-bar"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "search-input",
+    placeholder: "Search by keyword, date, or tag...",
+    value: search,
+    onChange: e => setSearch(e.target.value)
+  })), filtered.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty-state"
+  }, /*#__PURE__*/React.createElement("p", null, entries.length === 0 ? 'No entries yet.' : 'No entries match your search.'), /*#__PURE__*/React.createElement("p", {
+    className: "hint"
+  }, entries.length === 0 ? 'Start writing today — your pages will appear here.' : 'Try a different search term.')), filtered.map(entry => /*#__PURE__*/React.createElement("div", {
+    key: entry.date,
+    className: "entry-card slide-in",
+    onClick: () => setDetailId(entry.date)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "entry-card-header"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "entry-card-date"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `completion-dot ${entry.wordCount >= WORD_TARGET ? 'done' : 'partial'}`
+  }), formatDate(entry.date)), /*#__PURE__*/React.createElement("div", {
+    className: "entry-card-meta"
+  }, /*#__PURE__*/React.createElement("span", null, entry.wordCount, " words"), /*#__PURE__*/React.createElement("span", null, formatTime(entry.timeSpent || 0)))), /*#__PURE__*/React.createElement("div", {
+    className: "entry-card-preview"
+  }, entry.content), entry.tags?.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "entry-card-tags"
+  }, entry.tags.map(t => /*#__PURE__*/React.createElement("span", {
+    key: t,
+    className: "tag"
+  }, t))))));
 }
 
-
 // ─── Entry Detail ───
-function EntryDetail({ entry, onBack, addSeed, removeSeed, updateSeedTags, seeds, updateTags, updateHighlights, deleteEntry, backLabel }) {
+function EntryDetail({
+  entry,
+  onBack,
+  addSeed,
+  removeSeed,
+  updateSeedTags,
+  seeds,
+  updateTags,
+  updateHighlights,
+  deleteEntry,
+  backLabel
+}) {
   const [tagInput, setTagInput] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedText, setSelectedText] = useState('');
   const [justSavedSeedId, setJustSavedSeedId] = useState(null); // ID of seed just created
   const [seedTagInput, setSeedTagInput] = useState('');
-
-  if (!entry) return <div className="view-container"><button className="back-btn" onClick={onBack}>{Icons.back} Back</button><p>Entry not found.</p></div>;
-
+  if (!entry) return /*#__PURE__*/React.createElement("div", {
+    className: "view-container"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "back-btn",
+    onClick: onBack
+  }, Icons.back, " Back"), /*#__PURE__*/React.createElement("p", null, "Entry not found."));
   const [activeSeedId, setActiveSeedId] = useState(null); // seed being managed (just saved or clicked highlight)
 
   // The seed currently being managed (just saved or clicked from highlight)
   const activeSeed = activeSeedId ? seeds.find(s => s.id === activeSeedId) : null;
-
   const handleTextSelect = () => {
     if (activeSeedId) return; // don't override if managing a seed
     const sel = window.getSelection();
     if (sel && sel.toString().trim().length > 0) setSelectedText(sel.toString().trim());
   };
-
   const handleAddSeed = () => {
     if (selectedText) {
       const seedId = Date.now().toString();
       addSeed(selectedText, entry.date, seedId);
       const hl = [...(entry.highlights || [])];
-      if (!hl.includes(selectedText)) { hl.push(selectedText); updateHighlights(entry.date, hl); }
+      if (!hl.includes(selectedText)) {
+        hl.push(selectedText);
+        updateHighlights(entry.date, hl);
+      }
       setSelectedText('');
       setActiveSeedId(seedId);
       setJustSavedSeedId(seedId);
@@ -1614,8 +2176,7 @@ function EntryDetail({ entry, onBack, addSeed, removeSeed, updateSeedTags, seeds
       window.getSelection().removeAllRanges();
     }
   };
-
-  const handleHighlightClick = (highlightText) => {
+  const handleHighlightClick = highlightText => {
     // Find the seed that matches this highlight for this entry
     const matchingSeed = seeds.find(s => s.text === highlightText && s.sourceDate === entry.date);
     if (matchingSeed) {
@@ -1625,7 +2186,6 @@ function EntryDetail({ entry, onBack, addSeed, removeSeed, updateSeedTags, seeds
       setSelectedText('');
     }
   };
-
   const handleRemoveActiveSeed = () => {
     if (activeSeedId) {
       removeSeed(activeSeedId);
@@ -1634,13 +2194,11 @@ function EntryDetail({ entry, onBack, addSeed, removeSeed, updateSeedTags, seeds
       setSeedTagInput('');
     }
   };
-
   const handleDismissSeedPanel = () => {
     setActiveSeedId(null);
     setJustSavedSeedId(null);
     setSeedTagInput('');
   };
-
   const handleAddSeedTag = () => {
     const t = seedTagInput.trim().toLowerCase();
     if (t && activeSeed && !(activeSeed.tags || []).includes(t)) {
@@ -1648,21 +2206,17 @@ function EntryDetail({ entry, onBack, addSeed, removeSeed, updateSeedTags, seeds
     }
     setSeedTagInput('');
   };
-
-  const handleRemoveSeedTag = (tag) => {
+  const handleRemoveSeedTag = tag => {
     if (activeSeed) {
       updateSeedTags(activeSeedId, (activeSeed.tags || []).filter(t => t !== tag));
     }
   };
-
   const handleAddTag = () => {
     const t = tagInput.trim().toLowerCase();
     if (t && !(entry.tags || []).includes(t)) updateTags(entry.date, [...(entry.tags || []), t]);
     setTagInput('');
   };
-
-  const removeTag = (t) => updateTags(entry.date, (entry.tags || []).filter(x => x !== t));
-
+  const removeTag = t => updateTags(entry.date, (entry.tags || []).filter(x => x !== t));
   const renderContent = () => {
     let content = entry.content;
     const highlights = entry.highlights || [];
@@ -1671,104 +2225,211 @@ function EntryDetail({ entry, onBack, addSeed, removeSeed, updateSeedTags, seeds
     highlights.forEach(hl => {
       const newParts = [];
       parts.forEach(part => {
-        if (typeof part !== 'string') { newParts.push(part); return; }
+        if (typeof part !== 'string') {
+          newParts.push(part);
+          return;
+        }
         const idx = part.indexOf(hl);
-        if (idx === -1) { newParts.push(part); return; }
+        if (idx === -1) {
+          newParts.push(part);
+          return;
+        }
         if (idx > 0) newParts.push(part.slice(0, idx));
-        newParts.push(<span key={hl+idx} className="highlight" title="Click to manage this seed" onClick={(e) => { e.stopPropagation(); handleHighlightClick(hl); }}>{hl}</span>);
+        newParts.push(/*#__PURE__*/React.createElement("span", {
+          key: hl + idx,
+          className: "highlight",
+          title: "Click to manage this seed",
+          onClick: e => {
+            e.stopPropagation();
+            handleHighlightClick(hl);
+          }
+        }, hl));
         if (idx + hl.length < part.length) newParts.push(part.slice(idx + hl.length));
       });
       parts = newParts;
     });
     return parts;
   };
-
-  return (
-    <div className="view-container fade-in">
-      <button className="back-btn" onClick={onBack}>{Icons.back} {backLabel || 'Back to entries'}</button>
-      <div className="entry-detail-header">
-        <div>
-          <h2 className="view-title">{formatDate(entry.date)}</h2>
-          <p className="view-subtitle" style={{marginBottom:0}}>
-            {entry.wordCount} words · {formatTime(entry.timeSpent || 0)}
-            {entry.wordCount >= WORD_TARGET && <span style={{color:'var(--success)', marginLeft:8}}>&#10003; Complete</span>}
-          </p>
-        </div>
-        <button className="btn btn-sm btn-danger" onClick={() => setShowDeleteModal(true)} title="Delete entry">{Icons.trash}</button>
-      </div>
-
-      {/* Text selection → Save to seedbank prompt */}
-      {selectedText && !activeSeedId && (
-        <div style={{ marginBottom: 16, padding: '10px 14px', background: '#fff', border: '1px solid var(--accent-light)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', flex: 1 }}>"{selectedText.slice(0, 80)}{selectedText.length > 80 ? '...' : ''}"</span>
-          <button className="btn btn-sm btn-primary" onClick={handleAddSeed}>Save to seedbank</button>
-        </div>
-      )}
-
-      {/* Seed management panel: for just-saved seeds OR clicked highlights */}
-      {activeSeed && (
-        <div className="fade-in" style={{ marginBottom: 16, padding: '14px 16px', background: '#fff', border: '1px solid ' + (justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent-light)'), borderRadius: 'var(--radius)', borderLeft: '3px solid ' + (justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent)') }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: '0.75rem', color: justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent)', fontWeight: 500, marginBottom: 4 }}>
-                {justSavedSeedId === activeSeedId ? 'Saved to seedbank' : 'Seed'}
-              </div>
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-light)', fontStyle: 'italic', fontFamily: 'var(--serif)', lineHeight: 1.5 }}>
-                "{activeSeed.text.slice(0, 120)}{activeSeed.text.length > 120 ? '...' : ''}"
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-              <button className="btn btn-sm btn-danger" onClick={handleRemoveActiveSeed} title="Remove this seed">Remove seed</button>
-              <button className="btn btn-sm" onClick={handleDismissSeedPanel} title="Dismiss">Done</button>
-            </div>
-          </div>
-          {/* Seed tags inline */}
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 6 }}>
-            {(activeSeed.tags || []).map(t => (
-              <span key={t} className="seed-tag">
-                {t} <span className="seed-tag-remove" onClick={() => handleRemoveSeedTag(t)}>×</span>
-              </span>
-            ))}
-            <input
-              className="seed-tag-input"
-              placeholder="Add tag..."
-              value={seedTagInput}
-              onChange={e => setSeedTagInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleAddSeedTag(); }}
-              style={{ width: 100 }}
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="entry-content" onMouseUp={handleTextSelect}>{renderContent()}</div>
-      <div className="tags-section">
-        <div className="tags-section-title">Page themes</div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-faint)', marginBottom: 8, fontStyle: 'italic' }}>Retrospective tags for this whole entry — what was on your mind today?</div>
-        <div className="tags-input-row">
-          {(entry.tags || []).map(t => <span key={t} className="tag-removable">{t} <span className="tag-remove" onClick={() => removeTag(t)}>×</span></span>)}
-          <input className="tag-input" placeholder="e.g. work, anxiety, ideas..." value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); }} />
-        </div>
-      </div>
-      {showDeleteModal && (
-        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <h3>Delete this entry?</h3>
-            <p>This will permanently remove your pages from {formatDate(entry.date)}, along with any seeds harvested from it. This cannot be undone.</p>
-            <div className="modal-actions">
-              <button className="btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
-              <button className="btn btn-danger" onClick={() => { deleteEntry(entry.date); setShowDeleteModal(false); }}>Delete</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    className: "view-container fade-in"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "back-btn",
+    onClick: onBack
+  }, Icons.back, " ", backLabel || 'Back to entries'), /*#__PURE__*/React.createElement("div", {
+    className: "entry-detail-header"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h2", {
+    className: "view-title"
+  }, formatDate(entry.date)), /*#__PURE__*/React.createElement("p", {
+    className: "view-subtitle",
+    style: {
+      marginBottom: 0
+    }
+  }, entry.wordCount, " words \xB7 ", formatTime(entry.timeSpent || 0), entry.wordCount >= WORD_TARGET && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--success)',
+      marginLeft: 8
+    }
+  }, "\u2713 Complete"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-danger",
+    onClick: () => setShowDeleteModal(true),
+    title: "Delete entry"
+  }, Icons.trash)), selectedText && !activeSeedId && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16,
+      padding: '10px 14px',
+      background: '#fff',
+      border: '1px solid var(--accent-light)',
+      borderRadius: 'var(--radius)',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '0.8rem',
+      color: 'var(--text-light)',
+      flex: 1
+    }
+  }, "\"", selectedText.slice(0, 80), selectedText.length > 80 ? '...' : '', "\""), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-primary",
+    onClick: handleAddSeed
+  }, "Save to seedbank")), activeSeed && /*#__PURE__*/React.createElement("div", {
+    className: "fade-in",
+    style: {
+      marginBottom: 16,
+      padding: '14px 16px',
+      background: '#fff',
+      border: '1px solid ' + (justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent-light)'),
+      borderRadius: 'var(--radius)',
+      borderLeft: '3px solid ' + (justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent)')
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      gap: 12,
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '0.75rem',
+      color: justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent)',
+      fontWeight: 500,
+      marginBottom: 4
+    }
+  }, justSavedSeedId === activeSeedId ? 'Saved to seedbank' : 'Seed'), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '0.82rem',
+      color: 'var(--text-light)',
+      fontStyle: 'italic',
+      fontFamily: 'var(--serif)',
+      lineHeight: 1.5
+    }
+  }, "\"", activeSeed.text.slice(0, 120), activeSeed.text.length > 120 ? '...' : '', "\"")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm btn-danger",
+    onClick: handleRemoveActiveSeed,
+    title: "Remove this seed"
+  }, "Remove seed"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-sm",
+    onClick: handleDismissSeedPanel,
+    title: "Dismiss"
+  }, "Done"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 5,
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      marginTop: 6
+    }
+  }, (activeSeed.tags || []).map(t => /*#__PURE__*/React.createElement("span", {
+    key: t,
+    className: "seed-tag"
+  }, t, " ", /*#__PURE__*/React.createElement("span", {
+    className: "seed-tag-remove",
+    onClick: () => handleRemoveSeedTag(t)
+  }, "\xD7"))), /*#__PURE__*/React.createElement("input", {
+    className: "seed-tag-input",
+    placeholder: "Add tag...",
+    value: seedTagInput,
+    onChange: e => setSeedTagInput(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') handleAddSeedTag();
+    },
+    style: {
+      width: 100
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "entry-content",
+    onMouseUp: handleTextSelect
+  }, renderContent()), /*#__PURE__*/React.createElement("div", {
+    className: "tags-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tags-section-title"
+  }, "Page themes"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '0.75rem',
+      color: 'var(--text-faint)',
+      marginBottom: 8,
+      fontStyle: 'italic'
+    }
+  }, "Retrospective tags for this whole entry \u2014 what was on your mind today?"), /*#__PURE__*/React.createElement("div", {
+    className: "tags-input-row"
+  }, (entry.tags || []).map(t => /*#__PURE__*/React.createElement("span", {
+    key: t,
+    className: "tag-removable"
+  }, t, " ", /*#__PURE__*/React.createElement("span", {
+    className: "tag-remove",
+    onClick: () => removeTag(t)
+  }, "\xD7"))), /*#__PURE__*/React.createElement("input", {
+    className: "tag-input",
+    placeholder: "e.g. work, anxiety, ideas...",
+    value: tagInput,
+    onChange: e => setTagInput(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') handleAddTag();
+    }
+  }))), showDeleteModal && /*#__PURE__*/React.createElement("div", {
+    className: "modal-overlay",
+    onClick: () => setShowDeleteModal(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "modal",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("h3", null, "Delete this entry?"), /*#__PURE__*/React.createElement("p", null, "This will permanently remove your pages from ", formatDate(entry.date), ", along with any seeds harvested from it. This cannot be undone."), /*#__PURE__*/React.createElement("div", {
+    className: "modal-actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => setShowDeleteModal(false)
+  }, "Cancel"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-danger",
+    onClick: () => {
+      deleteEntry(entry.date);
+      setShowDeleteModal(false);
+    }
+  }, "Delete")))));
 }
 
-
 // ─── Seeds View (expanded with tags, filters, click-through) ───
-function SeedsView({ seeds, removeSeed, updateSeedTags, navigateToEntry, returnState, clearReturnState, entries }) {
+function SeedsView({
+  seeds,
+  removeSeed,
+  updateSeedTags,
+  navigateToEntry,
+  returnState,
+  clearReturnState,
+  entries
+}) {
   const [search, setSearch] = useState(returnState?.search || '');
   const [activeTags, setActiveTags] = useState(returnState?.activeTags || []);
   const [filterOpen, setFilterOpen] = useState(returnState?.filterOpen || false);
@@ -1789,28 +2450,25 @@ function SeedsView({ seeds, removeSeed, updateSeedTags, navigateToEntry, returnS
   const allTags = useMemo(() => {
     const tagMap = {};
     seeds.forEach(s => {
-      (s.tags || []).forEach(t => { tagMap[t] = (tagMap[t] || 0) + 1; });
+      (s.tags || []).forEach(t => {
+        tagMap[t] = (tagMap[t] || 0) + 1;
+      });
     });
-    return Object.entries(tagMap).sort((a,b) => b[1] - a[1]);
+    return Object.entries(tagMap).sort((a, b) => b[1] - a[1]);
   }, [seeds]);
 
   // Filter seeds
   const filtered = useMemo(() => {
     return seeds.filter(s => {
-      const matchesSearch = !search.trim() ||
-        s.text.toLowerCase().includes(search.toLowerCase()) ||
-        (s.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase()));
-      const matchesTags = activeTags.length === 0 ||
-        activeTags.every(t => (s.tags || []).includes(t));
+      const matchesSearch = !search.trim() || s.text.toLowerCase().includes(search.toLowerCase()) || (s.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase()));
+      const matchesTags = activeTags.length === 0 || activeTags.every(t => (s.tags || []).includes(t));
       return matchesSearch && matchesTags;
     });
   }, [seeds, search, activeTags]);
-
-  const toggleTag = (tag) => {
+  const toggleTag = tag => {
     setActiveTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
   };
-
-  const handleAddSeedTag = (seedId) => {
+  const handleAddSeedTag = seedId => {
     const t = tagInputValue.trim().toLowerCase();
     if (!t) return;
     const seed = seeds.find(s => s.id === seedId);
@@ -1820,225 +2478,411 @@ function SeedsView({ seeds, removeSeed, updateSeedTags, navigateToEntry, returnS
     setTagInputValue('');
     setTagInputId(null);
   };
-
   const removeSeedTag = (seedId, tag) => {
     const seed = seeds.find(s => s.id === seedId);
     if (seed) updateSeedTags(seedId, (seed.tags || []).filter(t => t !== tag));
   };
-
-  const handleSeedClick = (seed) => {
+  const handleSeedClick = seed => {
     // Check if the source entry exists
     const entry = entries.find(e => e.date === seed.sourceDate);
     if (entry) {
-      navigateToEntry(seed.sourceDate, { search, activeTags, filterOpen });
+      navigateToEntry(seed.sourceDate, {
+        search,
+        activeTags,
+        filterOpen
+      });
     }
   };
-
-  return (
-    <div className="view-container">
-      <h2 className="view-title">Seedbank</h2>
-      <p className="view-subtitle">Phrases and lines that feel alive — raw material for creative work.</p>
-
-      {/* Search bar - always show */}
-      <div className="search-bar">
-        <input className="search-input" placeholder="Search seeds by text or tag..." value={search} onChange={e => setSearch(e.target.value)} />
-      </div>
-
-      {/* Filter panel */}
-      {allTags.length > 0 && (
-        <div className="filter-panel">
-          <div className="filter-header" onClick={() => setFilterOpen(!filterOpen)}>
-            <span style={{display:'flex',alignItems:'center',gap:6}}>{Icons.filter} Filter by tag {activeTags.length > 0 && <span style={{fontSize:'0.7rem',background:'var(--accent)',color:'#fff',borderRadius:10,padding:'1px 7px'}}>{activeTags.length}</span>}</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={filterOpen ? 'open' : ''}><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          {filterOpen && (
-            <div className="filter-body fade-in">
-              <div className="filter-tags">
-                {allTags.map(([tag, count]) => (
-                  <button key={tag} className={`filter-tag ${activeTags.includes(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
-                    {tag} <span className="count">({count})</span>
-                  </button>
-                ))}
-                {activeTags.length > 0 && (
-                  <button className="filter-tag" onClick={() => setActiveTags([])} style={{fontStyle:'italic',color:'var(--text-faint)'}}>Clear all</button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {filtered.length === 0 && (
-        <div className="empty-state">
-          <p>{seeds.length === 0 ? 'No seeds yet.' : 'No seeds match your search or filters.'}</p>
-          <p className="hint">{seeds.length === 0 ? 'Highlight text in your entries to save seeds here.' : 'Try a different search term or clear your filters.'}</p>
-        </div>
-      )}
-
-      {filtered.map(seed => (
-        <div key={seed.id} className="seed-card slide-in clickable" onClick={() => handleSeedClick(seed)}>
-          <div className="seed-text">"{seed.text}"</div>
-          <div className="seed-source">
-            From {formatDate(seed.sourceDate)}
-            {entries.find(e => e.date === seed.sourceDate) && <span style={{marginLeft:6,fontSize:'0.7rem',color:'var(--accent)'}}>— click to view entry</span>}
-          </div>
-
-          {/* Seed tags */}
-          <div className="seed-tags" onClick={e => e.stopPropagation()}>
-            {(seed.tags || []).map(t => (
-              <span key={t} className="seed-tag">
-                {t} <span className="seed-tag-remove" onClick={() => removeSeedTag(seed.id, t)}>×</span>
-              </span>
-            ))}
-            {tagInputId === seed.id ? (
-              <input
-                className="seed-tag-input"
-                autoFocus
-                placeholder="tag..."
-                value={tagInputValue}
-                onChange={e => setTagInputValue(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleAddSeedTag(seed.id); if (e.key === 'Escape') { setTagInputId(null); setTagInputValue(''); } }}
-                onBlur={() => { if (tagInputValue.trim()) handleAddSeedTag(seed.id); else { setTagInputId(null); setTagInputValue(''); } }}
-              />
-            ) : (
-              <button className="seed-tag" style={{cursor:'pointer',borderStyle:'dashed',color:'var(--text-faint)'}} onClick={() => { setTagInputId(seed.id); setTagInputValue(''); }}>
-                + tag
-              </button>
-            )}
-          </div>
-
-          <div className="seed-actions" onClick={e => e.stopPropagation()}>
-            <button className="btn btn-ghost btn-sm btn-danger" onClick={() => removeSeed(seed.id)}>{Icons.trash}</button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    className: "view-container"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "view-title"
+  }, "Seedbank"), /*#__PURE__*/React.createElement("p", {
+    className: "view-subtitle"
+  }, "Phrases and lines that feel alive \u2014 raw material for creative work."), /*#__PURE__*/React.createElement("div", {
+    className: "search-bar"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "search-input",
+    placeholder: "Search seeds by text or tag...",
+    value: search,
+    onChange: e => setSearch(e.target.value)
+  })), allTags.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "filter-panel"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "filter-header",
+    onClick: () => setFilterOpen(!filterOpen)
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, Icons.filter, " Filter by tag ", activeTags.length > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '0.7rem',
+      background: 'var(--accent)',
+      color: '#fff',
+      borderRadius: 10,
+      padding: '1px 7px'
+    }
+  }, activeTags.length)), /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: filterOpen ? 'open' : ''
+  }, /*#__PURE__*/React.createElement("polyline", {
+    points: "6 9 12 15 18 9"
+  }))), filterOpen && /*#__PURE__*/React.createElement("div", {
+    className: "filter-body fade-in"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "filter-tags"
+  }, allTags.map(([tag, count]) => /*#__PURE__*/React.createElement("button", {
+    key: tag,
+    className: `filter-tag ${activeTags.includes(tag) ? 'active' : ''}`,
+    onClick: () => toggleTag(tag)
+  }, tag, " ", /*#__PURE__*/React.createElement("span", {
+    className: "count"
+  }, "(", count, ")"))), activeTags.length > 0 && /*#__PURE__*/React.createElement("button", {
+    className: "filter-tag",
+    onClick: () => setActiveTags([]),
+    style: {
+      fontStyle: 'italic',
+      color: 'var(--text-faint)'
+    }
+  }, "Clear all")))), filtered.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty-state"
+  }, /*#__PURE__*/React.createElement("p", null, seeds.length === 0 ? 'No seeds yet.' : 'No seeds match your search or filters.'), /*#__PURE__*/React.createElement("p", {
+    className: "hint"
+  }, seeds.length === 0 ? 'Highlight text in your entries to save seeds here.' : 'Try a different search term or clear your filters.')), filtered.map(seed => /*#__PURE__*/React.createElement("div", {
+    key: seed.id,
+    className: "seed-card slide-in clickable",
+    onClick: () => handleSeedClick(seed)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "seed-text"
+  }, "\"", seed.text, "\""), /*#__PURE__*/React.createElement("div", {
+    className: "seed-source"
+  }, "From ", formatDate(seed.sourceDate), entries.find(e => e.date === seed.sourceDate) && /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 6,
+      fontSize: '0.7rem',
+      color: 'var(--accent)'
+    }
+  }, "\u2014 click to view entry")), /*#__PURE__*/React.createElement("div", {
+    className: "seed-tags",
+    onClick: e => e.stopPropagation()
+  }, (seed.tags || []).map(t => /*#__PURE__*/React.createElement("span", {
+    key: t,
+    className: "seed-tag"
+  }, t, " ", /*#__PURE__*/React.createElement("span", {
+    className: "seed-tag-remove",
+    onClick: () => removeSeedTag(seed.id, t)
+  }, "\xD7"))), tagInputId === seed.id ? /*#__PURE__*/React.createElement("input", {
+    className: "seed-tag-input",
+    autoFocus: true,
+    placeholder: "tag...",
+    value: tagInputValue,
+    onChange: e => setTagInputValue(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') handleAddSeedTag(seed.id);
+      if (e.key === 'Escape') {
+        setTagInputId(null);
+        setTagInputValue('');
+      }
+    },
+    onBlur: () => {
+      if (tagInputValue.trim()) handleAddSeedTag(seed.id);else {
+        setTagInputId(null);
+        setTagInputValue('');
+      }
+    }
+  }) : /*#__PURE__*/React.createElement("button", {
+    className: "seed-tag",
+    style: {
+      cursor: 'pointer',
+      borderStyle: 'dashed',
+      color: 'var(--text-faint)'
+    },
+    onClick: () => {
+      setTagInputId(seed.id);
+      setTagInputValue('');
+    }
+  }, "+ tag")), /*#__PURE__*/React.createElement("div", {
+    className: "seed-actions",
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-ghost btn-sm btn-danger",
+    onClick: () => removeSeed(seed.id)
+  }, Icons.trash)))));
 }
 
-
 // ─── Stats & Settings View ───
-function StatsView({ entries, streak, settings, updateSettings, data, onOpenFile, onCreateFile, onDisconnect, onSaveNow, onDownloadBackup, fileStatus, fileName, hasFileSystemAccess }) {
-  const [calMonth, setCalMonth] = useState(() => { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; });
-
+function StatsView({
+  entries,
+  streak,
+  settings,
+  updateSettings,
+  data,
+  onOpenFile,
+  onCreateFile,
+  onDisconnect,
+  onSaveNow,
+  onDownloadBackup,
+  fileStatus,
+  fileName,
+  hasFileSystemAccess
+}) {
+  const [calMonth, setCalMonth] = useState(() => {
+    const d = new Date();
+    return {
+      year: d.getFullYear(),
+      month: d.getMonth()
+    };
+  });
   const totalWords = entries.reduce((s, e) => s + e.wordCount, 0);
   const completedDays = entries.filter(e => e.wordCount >= WORD_TARGET).length;
   const avgWords = entries.length > 0 ? Math.round(totalWords / entries.length) : 0;
   const avgTime = entries.length > 0 ? Math.round(entries.reduce((s, e) => s + (e.timeSpent || 0), 0) / entries.length) : 0;
-
   const calendarDays = useMemo(() => {
-    const { year, month } = calMonth;
+    const {
+      year,
+      month
+    } = calMonth;
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const today = todayStr();
     const days = [];
-    for (let i = 0; i < firstDay; i++) days.push({ empty: true });
+    for (let i = 0; i < firstDay; i++) days.push({
+      empty: true
+    });
     for (let d = 1; d <= daysInMonth; d++) {
-      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const entry = entries.find(e => e.date === dateStr);
-      days.push({ day: d, dateStr, isToday: dateStr === today, completed: entry?.wordCount >= WORD_TARGET, partial: entry && entry.wordCount < WORD_TARGET });
+      days.push({
+        day: d,
+        dateStr,
+        isToday: dateStr === today,
+        completed: entry?.wordCount >= WORD_TARGET,
+        partial: entry && entry.wordCount < WORD_TARGET
+      });
     }
     return days;
   }, [calMonth, entries]);
-
-  const monthLabel = new Date(calMonth.year, calMonth.month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const prevMonth = () => setCalMonth(m => m.month === 0 ? { year: m.year - 1, month: 11 } : { ...m, month: m.month - 1 });
-  const nextMonth = () => setCalMonth(m => m.month === 11 ? { year: m.year + 1, month: 0 } : { ...m, month: m.month + 1 });
-
+  const monthLabel = new Date(calMonth.year, calMonth.month).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
+  const prevMonth = () => setCalMonth(m => m.month === 0 ? {
+    year: m.year - 1,
+    month: 11
+  } : {
+    ...m,
+    month: m.month - 1
+  });
+  const nextMonth = () => setCalMonth(m => m.month === 11 ? {
+    year: m.year + 1,
+    month: 0
+  } : {
+    ...m,
+    month: m.month + 1
+  });
   const exportText = () => {
-    const text = [...entries].sort((a,b) => a.date.localeCompare(b.date)).map(e => `═══ ${formatDate(e.date)} ═══\n${e.wordCount} words\n\n${e.content}\n`).join('\n\n');
-    const blob = new Blob([text], { type: 'text/plain' });
+    const text = [...entries].sort((a, b) => a.date.localeCompare(b.date)).map(e => `═══ ${formatDate(e.date)} ═══\n${e.wordCount} words\n\n${e.content}\n`).join('\n\n');
+    const blob = new Blob([text], {
+      type: 'text/plain'
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `morning-pages-${todayStr()}.txt`; a.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `morning-pages-${todayStr()}.txt`;
+    a.click();
     URL.revokeObjectURL(url);
   };
-
-  return (
-    <div className="view-container">
-      <h2 className="view-title">Progress</h2>
-      <p className="view-subtitle">Your writing habit at a glance.</p>
-
-      <div className="stats-grid">
-        <div className="stat-card"><div className="stat-value">{streak}</div><div className="stat-label">day streak</div></div>
-        <div className="stat-card"><div className="stat-value">{completedDays}</div><div className="stat-label">pages completed</div></div>
-        <div className="stat-card"><div className="stat-value">{totalWords.toLocaleString()}</div><div className="stat-label">total words</div></div>
-      </div>
-      <div className="stats-grid" style={{gridTemplateColumns:'repeat(2, 1fr)'}}>
-        <div className="stat-card"><div className="stat-value" style={{fontSize:'1.4rem'}}>{avgWords}</div><div className="stat-label">avg words per session</div></div>
-        <div className="stat-card"><div className="stat-value" style={{fontSize:'1.4rem'}}>{formatTime(avgTime)}</div><div className="stat-label">avg time per session</div></div>
-      </div>
-
-      <div className="calendar">
-        <div className="calendar-header">
-          <div className="calendar-title">{monthLabel}</div>
-          <div className="calendar-nav"><button onClick={prevMonth}>‹</button><button onClick={nextMonth}>›</button></div>
-        </div>
-        <div className="calendar-grid">
-          {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => <div key={d} className="calendar-day-label">{d}</div>)}
-          {calendarDays.map((d, i) => <div key={i} className={`calendar-day ${d.empty?'empty':''} ${d.completed?'completed':''} ${d.partial?'partial':''} ${d.isToday?'today':''}`}>{d.empty ? '·' : d.day}</div>)}
-        </div>
-      </div>
-
-      {/* File Storage Section */}
-      <div className="settings-section">
-        <div className="settings-title">File Storage</div>
-        <div style={{fontSize:'0.85rem', color:'var(--text-light)', marginBottom:16, lineHeight:1.5}}>
-          {fileStatus === 'connected'
-            ? <>Connected to <strong>{fileName}</strong>. {hasFileSystemAccess ? 'Changes save automatically.' : 'Use Save to update the file.'}</>
-            : <>Not connected to a file. Your data is stored in this browser only. Connect a file to sync across devices via iCloud Drive, Dropbox, or any shared folder.</>
-          }
-        </div>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-          {fileStatus === 'disconnected' ? (
-            <>
-              <button className="btn btn-primary" onClick={onOpenFile}>Open existing file</button>
-              <button className="btn" onClick={onCreateFile}>Create new file</button>
-            </>
-          ) : (
-            <>
-              {!hasFileSystemAccess && <button className="btn btn-primary" onClick={onSaveNow}>Save to file</button>}
-              <button className="btn" onClick={onOpenFile}>Open different file</button>
-              <button className="btn" onClick={onDisconnect}>Disconnect</button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <div className="settings-section">
-        <div className="settings-title">Settings</div>
-        <div className="setting-row">
-          <div className="setting-info"><div className="setting-label">Show timer</div><div className="setting-desc">Display elapsed time while writing</div></div>
-          <button className={`toggle ${settings.showTimer?'on':''}`} onClick={() => updateSettings('showTimer', !settings.showTimer)} />
-        </div>
-        <div className="setting-row">
-          <div className="setting-info"><div className="setting-label">Unsticking nudges</div><div className="setting-desc">Show gentle prompts after 30 seconds of inactivity</div></div>
-          <button className={`toggle ${settings.showNudges?'on':''}`} onClick={() => updateSettings('showNudges', !settings.showNudges)} />
-        </div>
-        <div className="setting-row">
-          <div className="setting-info"><div className="setting-label">First line starters</div><div className="setting-desc">Show starter phrases as placeholder text (departs from traditional practice)</div></div>
-          <button className={`toggle ${settings.firstLineStarters?'on':''}`} onClick={() => updateSettings('firstLineStarters', !settings.firstLineStarters)} />
-        </div>
-      </div>
-
-      <div className="settings-section">
-        <div className="settings-title">Backup &amp; Export</div>
-        <p style={{fontSize:'0.85rem', color:'var(--text-light)', marginBottom:14, lineHeight:1.5}}>
-          Download a dated backup of all your data. Save it to iCloud Drive to access from any device — the newest file is always the one with today's date.
-        </p>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:12}}>
-          <button className="btn btn-primary" onClick={onDownloadBackup}>{Icons.download} Download backup (morning-pages-{todayStr()}.json)</button>
-        </div>
-        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-          <button className="btn" onClick={exportText}>{Icons.download} Export as plain text</button>
-        </div>
-      </div>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    className: "view-container"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "view-title"
+  }, "Progress"), /*#__PURE__*/React.createElement("p", {
+    className: "view-subtitle"
+  }, "Your writing habit at a glance."), /*#__PURE__*/React.createElement("div", {
+    className: "stats-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-value"
+  }, streak), /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "day streak")), /*#__PURE__*/React.createElement("div", {
+    className: "stat-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-value"
+  }, completedDays), /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "pages completed")), /*#__PURE__*/React.createElement("div", {
+    className: "stat-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-value"
+  }, totalWords.toLocaleString()), /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "total words"))), /*#__PURE__*/React.createElement("div", {
+    className: "stats-grid",
+    style: {
+      gridTemplateColumns: 'repeat(2, 1fr)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-value",
+    style: {
+      fontSize: '1.4rem'
+    }
+  }, avgWords), /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "avg words per session")), /*#__PURE__*/React.createElement("div", {
+    className: "stat-card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat-value",
+    style: {
+      fontSize: '1.4rem'
+    }
+  }, formatTime(avgTime)), /*#__PURE__*/React.createElement("div", {
+    className: "stat-label"
+  }, "avg time per session"))), /*#__PURE__*/React.createElement("div", {
+    className: "calendar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calendar-header"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calendar-title"
+  }, monthLabel), /*#__PURE__*/React.createElement("div", {
+    className: "calendar-nav"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: prevMonth
+  }, "\u2039"), /*#__PURE__*/React.createElement("button", {
+    onClick: nextMonth
+  }, "\u203A"))), /*#__PURE__*/React.createElement("div", {
+    className: "calendar-grid"
+  }, ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => /*#__PURE__*/React.createElement("div", {
+    key: d,
+    className: "calendar-day-label"
+  }, d)), calendarDays.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: `calendar-day ${d.empty ? 'empty' : ''} ${d.completed ? 'completed' : ''} ${d.partial ? 'partial' : ''} ${d.isToday ? 'today' : ''}`
+  }, d.empty ? '·' : d.day)))), /*#__PURE__*/React.createElement("div", {
+    className: "settings-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "settings-title"
+  }, "File Storage"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '0.85rem',
+      color: 'var(--text-light)',
+      marginBottom: 16,
+      lineHeight: 1.5
+    }
+  }, fileStatus === 'connected' ? /*#__PURE__*/React.createElement(React.Fragment, null, "Connected to ", /*#__PURE__*/React.createElement("strong", null, fileName), ". ", hasFileSystemAccess ? 'Changes save automatically.' : 'Use Save to update the file.') : /*#__PURE__*/React.createElement(React.Fragment, null, "Not connected to a file. Your data is stored in this browser only. Connect a file to sync across devices via iCloud Drive, Dropbox, or any shared folder.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap'
+    }
+  }, fileStatus === 'disconnected' ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: onOpenFile
+  }, "Open existing file"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: onCreateFile
+  }, "Create new file")) : /*#__PURE__*/React.createElement(React.Fragment, null, !hasFileSystemAccess && /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: onSaveNow
+  }, "Save to file"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: onOpenFile
+  }, "Open different file"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: onDisconnect
+  }, "Disconnect")))), /*#__PURE__*/React.createElement("div", {
+    className: "settings-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "settings-title"
+  }, "Settings"), /*#__PURE__*/React.createElement("div", {
+    className: "setting-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "setting-info"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "setting-label"
+  }, "Show timer"), /*#__PURE__*/React.createElement("div", {
+    className: "setting-desc"
+  }, "Display elapsed time while writing")), /*#__PURE__*/React.createElement("button", {
+    className: `toggle ${settings.showTimer ? 'on' : ''}`,
+    onClick: () => updateSettings('showTimer', !settings.showTimer)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "setting-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "setting-info"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "setting-label"
+  }, "Unsticking nudges"), /*#__PURE__*/React.createElement("div", {
+    className: "setting-desc"
+  }, "Show gentle prompts after 30 seconds of inactivity")), /*#__PURE__*/React.createElement("button", {
+    className: `toggle ${settings.showNudges ? 'on' : ''}`,
+    onClick: () => updateSettings('showNudges', !settings.showNudges)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "setting-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "setting-info"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "setting-label"
+  }, "First line starters"), /*#__PURE__*/React.createElement("div", {
+    className: "setting-desc"
+  }, "Show starter phrases as placeholder text (departs from traditional practice)")), /*#__PURE__*/React.createElement("button", {
+    className: `toggle ${settings.firstLineStarters ? 'on' : ''}`,
+    onClick: () => updateSettings('firstLineStarters', !settings.firstLineStarters)
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "settings-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "settings-title"
+  }, "Backup & Export"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: '0.85rem',
+      color: 'var(--text-light)',
+      marginBottom: 14,
+      lineHeight: 1.5
+    }
+  }, "Download a dated backup of all your data. Save it to iCloud Drive to access from any device \u2014 the newest file is always the one with today's date."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap',
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-primary",
+    onClick: onDownloadBackup
+  }, Icons.download, " Download backup (morning-pages-", todayStr(), ".json)")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: exportText
+  }, Icons.download, " Export as plain text"))));
 }
+ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 <script src="uz-nav.js"></script>
 <script src="uz-footer.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function () {});
+  });
+}
+</script>
 </body>
 </html>

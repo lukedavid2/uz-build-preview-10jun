@@ -2775,6 +2775,13 @@ function saveStateToLocalStorage() {
         lyrics: state.lyrics || null
     };
     localStorage.setItem('undercoverZestState', JSON.stringify(savedState));
+    if (typeof getSongsRegistry === 'function') {
+        const reg = getSongsRegistry();
+        if (reg && reg.songs[reg.currentId]) {
+            reg.songs[reg.currentId] = { data: buildSaveData(), updatedAt: Date.now() };
+            saveSongsRegistry(reg);
+        }
+    }
 }
 
 function loadStateFromLocalStorage() {
@@ -5580,6 +5587,24 @@ function setupEventListeners() {
             if (action === 'openTutorial') {
                 if (typeof window.uzShowTutorial === 'function') window.uzShowTutorial();
             }
+            if (action === 'toggleMySongs') {
+                const popup = document.getElementById('mySongsPopup');
+                if (popup) {
+                    popup.classList.toggle('hidden');
+                    if (!popup.classList.contains('hidden')) { persistCurrentSong(); renderMySongs(); }
+                }
+                const toolBtns2 = document.getElementById('toolButtons');
+                if (toolBtns2) toolBtns2.classList.remove('open');
+            }
+            if (action === 'closeMySongs') {
+                const popup = document.getElementById('mySongsPopup');
+                if (popup) popup.classList.add('hidden');
+            }
+            if (action === 'switchSong') { switchToSong(actionBtn.dataset.song); }
+            if (action === 'newSongHub') { createNewSong(); }
+            if (action === 'deleteSong') { deleteSongById(actionBtn.dataset.song); }
+            if (action === 'exportSong') { exportSongById(actionBtn.dataset.song); }
+            if (action === 'importSongHub') { importSongFile(); }
             if (action === 'copyShareLink') {
                 const url = buildShareUrl();
                 if (!url) {
@@ -7987,6 +8012,169 @@ loadStateFromLocalStorage();
 if (state.selectedTab === 'dark') {
     document.body.classList.add('dark-mode');
 }
+
+// ========== MY SONGS (multi-song registry) ==========
+// Registry of songs in localStorage. Each entry stores the same version-3
+// object that File > Save writes, so export/import shares one format.
+const SONGS_KEY = 'uzSongsRegistry';
+
+function getSongsRegistry() {
+    try {
+        const reg = JSON.parse(localStorage.getItem(SONGS_KEY));
+        if (reg && reg.songs) return reg;
+    } catch (e) {}
+    return null;
+}
+
+function saveSongsRegistry(reg) {
+    try { localStorage.setItem(SONGS_KEY, JSON.stringify(reg)); } catch (e) {}
+}
+
+function persistCurrentSong() {
+    let reg = getSongsRegistry();
+    if (!reg) reg = { currentId: 's' + Date.now(), songs: {} };
+    reg.songs[reg.currentId] = { data: buildSaveData(), updatedAt: Date.now() };
+    saveSongsRegistry(reg);
+}
+
+function blankSongData() {
+    return { version: 3, songName: '', key: state.selectedKey,
+             mode: 'major', progressionKey: state.selectedKey,
+             bpm: 100, style: 'pop', styleVariant: 1,
+             drums: false, bass: true, keys: true,
+             lines: [{ chords: [], repeats: 1, name: '', tab: [], tabArtic: [], showTab: false }],
+             lyrics: null };
+}
+
+function switchToSong(id) {
+    const reg = getSongsRegistry();
+    if (!reg || !reg.songs[id]) return;
+    persistCurrentSong();
+    reg.currentId = id;
+    saveSongsRegistry(reg);
+    loadProgressionData(reg.songs[id].data);
+    saveStateToLocalStorage();
+    renderMySongs();
+}
+
+function createNewSong() {
+    persistCurrentSong();
+    const reg = getSongsRegistry();
+    const id = 's' + Date.now();
+    reg.songs[id] = { data: blankSongData(), updatedAt: Date.now() };
+    reg.currentId = id;
+    saveSongsRegistry(reg);
+    loadProgressionData(reg.songs[id].data);
+    saveStateToLocalStorage();
+    renderMySongs();
+}
+
+function deleteSongById(id) {
+    const reg = getSongsRegistry();
+    if (!reg || !reg.songs[id]) return;
+    const name = (reg.songs[id].data.songName || 'Untitled song');
+    if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+    delete reg.songs[id];
+    if (reg.currentId === id) {
+        const rest = Object.keys(reg.songs).sort((a, b) => reg.songs[b].updatedAt - reg.songs[a].updatedAt);
+        if (rest.length === 0) {
+            const nid = 's' + Date.now();
+            reg.songs[nid] = { data: blankSongData(), updatedAt: Date.now() };
+            reg.currentId = nid;
+        } else {
+            reg.currentId = rest[0];
+        }
+        saveSongsRegistry(reg);
+        loadProgressionData(reg.songs[reg.currentId].data);
+        saveStateToLocalStorage();
+    } else {
+        saveSongsRegistry(reg);
+    }
+    renderMySongs();
+}
+
+function exportSongById(id) {
+    const reg = getSongsRegistry();
+    if (!reg || !reg.songs[id]) return;
+    const data = reg.songs[id].data;
+    const name = (data.songName || 'untitled-song').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'untitled-song';
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const aEl = document.createElement('a');
+    aEl.href = url; aEl.download = name + '.json';
+    document.body.appendChild(aEl); aEl.click(); aEl.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function importSongFile() {
+    const input = document.getElementById('fileInput');
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const data = JSON.parse(event.target.result);
+                if (!data || !data.lines) throw new Error('not a song file');
+                persistCurrentSong();
+                const reg = getSongsRegistry();
+                const id = 's' + Date.now();
+                reg.songs[id] = { data, updatedAt: Date.now() };
+                reg.currentId = id;
+                saveSongsRegistry(reg);
+                loadProgressionData(data);
+                saveStateToLocalStorage();
+                renderMySongs();
+            } catch (err) {
+                alert('Could not import file. Please ensure it is a valid song file.');
+            }
+        };
+        reader.readAsText(file);
+        input.value = '';
+    };
+    input.click();
+}
+
+function renderMySongs() {
+    const popup = document.getElementById('mySongsPopup');
+    if (!popup || popup.classList.contains('hidden')) return;
+    const reg = getSongsRegistry();
+    const body = document.getElementById('mySongsBody');
+    if (!reg || !body) return;
+    const ids = Object.keys(reg.songs).sort((a, b) => reg.songs[b].updatedAt - reg.songs[a].updatedAt);
+    body.innerHTML = ids.map(id => {
+        const entry = reg.songs[id];
+        const d = entry.data;
+        const isCurrent = id === reg.currentId;
+        const chords = (d.lines && d.lines[0] && d.lines[0].chords || []).map(c => c.chord).slice(0, 6).join(' – ') || 'No chords yet';
+        const nLines = (d.lines || []).filter(l => l.chords && l.chords.length).length;
+        const hasLyrics = !!(d.lyrics && ((d.lyrics.freeText || '').trim() || (d.lyrics.structured || '').trim()));
+        const when = new Date(entry.updatedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+        const safeName = (d.songName || 'Untitled song').replace(/[<>&"]/g, '');
+        return `
+        <div class="song-card ${isCurrent ? 'current' : ''}">
+            <div class="song-card-main" ${isCurrent ? '' : `data-action="switchSong" data-song="${id}"`}>
+                <span class="song-card-name">${safeName}${isCurrent ? ' <span class="song-card-badge">open</span>' : ''}</span>
+                <span class="song-card-meta">Key of ${d.key || '?'} · ${nLines} line${nLines === 1 ? '' : 's'}${hasLyrics ? ' · lyrics' : ''} · ${when}</span>
+                <span class="song-card-chords">${chords}</span>
+            </div>
+            <div class="song-card-actions">
+                ${isCurrent ? '' : `<button class="file-btn" data-action="switchSong" data-song="${id}">Open</button>`}
+                <button class="file-btn" data-action="exportSong" data-song="${id}" title="Download .json">⬇</button>
+                <button class="file-btn" data-action="deleteSong" data-song="${id}" title="Delete">×</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+(function migrateSongsRegistry() {
+    if (getSongsRegistry()) return;
+    // First run on this browser: wrap whatever the legacy single-song
+    // localStorage held (already loaded into state by now) as song #1.
+    const reg = { currentId: 's' + Date.now(), songs: {} };
+    reg.songs[reg.currentId] = { data: buildSaveData(), updatedAt: Date.now() };
+    saveSongsRegistry(reg);
+})();
 
 // ========== SHAREABLE PROGRESSION URLS ==========
 // ?key=C&p=C-G-Am-F|F-G-C  (lines split by |, chords by -; URL-encoded)
