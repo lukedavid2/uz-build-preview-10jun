@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SenseSpark — Sensory Writing Prompt Generator for Songwriters</title>
+<meta name="description" content="Generate vivid sensory writing prompts across sight, sound, touch, taste, and smell. Break through creative blocks with unexpected sensory details. Free tool for songwriters and poets.">
+<meta name="keywords" content="sensory writing prompts, songwriting prompts, creative writing tool, five senses writing, lyric inspiration, writing prompt generator, poetry prompts">
+<meta property="og:title" content="SenseSpark — Sensory Writing Prompt Generator">
+<meta property="og:description" content="Tap into all five senses to write lyrics that make listeners feel something real. Free sensory prompt tool for songwriters.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#c8a04a">
+<meta property="og:image" content="https://undercoverzest.app/lemon-logo.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SenseSpark — Sensory Writing Prompts">
+<meta name="twitter:description" content="Tap into all five senses to write lyrics that make listeners feel something real. Free prompt tool for songwriters.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d1a;
+    --lab-bg: #0d0d1a;
+    --surface: #12121e;
+    --border: #1e1e2e;
+    --border-light: #2a2a3a;
+    --text: #ccc;
+    --text-dim: #666;
+    --text-faint: #444;
+    --red: #E8453C;
+    --mono: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
+    --serif: 'Georgia', 'Times New Roman', serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+  #app { height: calc(100vh - var(--uz-rail-h, 52px)); display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Title bar */
+  .titlebar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px 0; flex-shrink: 0; }
+  .titlebar-brand { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.15em; }
+  .titlebar-sub { margin-left: 10px; font-size: 10px; color: var(--text-faint); font-family: var(--mono); }
+  .titlebar-stats { font-size: 12px; color: #666; font-family: var(--mono); }
+
+  /* Hub */
+  .hub { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 16px 24px 24px; gap: 16px; max-width: 800px; margin: 0 auto; width: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+  /* Seed row */
+  .seed-row { display: flex; gap: 10px; width: 100%; max-width: 520px; align-items: flex-end; }
+  .seed-field { flex: 1; }
+  .seed-label { display: block; font-size: 10px; color: var(--text-dim); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+  .seed-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border-light); border-radius: 8px; padding: 11px 14px; color: #ddd; font-size: 15px; font-family: var(--serif); outline: none; -webkit-appearance: none; transition: border-color 0.2s; }
+  .seed-input:focus { border-color: #555; }
+  .seed-input::placeholder { color: var(--text-faint); }
+  .seed-random { padding: 11px 18px; background: rgba(255,255,255,0.06); border: 1px solid var(--border-light); border-radius: 8px; color: #bbb; font-size: 14px; font-family: var(--mono); cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; transition: all 0.15s; flex-shrink: 0; }
+  .seed-random:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: #444; }
+  .seed-random:active { transform: scale(0.97); }
+
+  /* Hex area with pills */
+  .hex-area { position: relative; width: 100%; max-width: 520px; aspect-ratio: 1 / 1; }
+  .hex-svg { width: 100%; height: 100%; }
+  .hex-petal { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .hex-petal:hover path { stroke-opacity: 0.9 !important; }
+
+  /* Sense pills - positioned via JS as absolute overlays */
+  .sense-pill {
+    position: absolute;
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px;
+    border-radius: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s ease;
+    -webkit-user-select: none; user-select: none;
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    font-size: 0;
+  }
+  .sense-pill:hover { transform: translate(-50%, -50%) scale(1.08); }
+  .sense-pill:active { transform: translate(-50%, -50%) scale(0.95); }
+  .sense-pill-icon { font-size: 14px; line-height: 1; }
+  .sense-pill-label { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .sense-pill-wc { font-family: var(--mono); font-size: 9px; opacity: 0.6; }
+
+  /* Bottom controls */
+  .controls { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Sprint panel */
+  .sprint { width: 100%; border-radius: 10px; padding: 14px 18px; transition: all 0.3s; }
+  .sprint--idle { background: rgba(255,255,255,0.03); border: 1px solid #222; }
+  .sprint--active { background: rgba(232,69,60,0.06); border: 1px solid rgba(232,69,60,0.2); }
+  .sprint-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .sprint-title { font-size: 12px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+  .sprint-interval-wrap { display: flex; align-items: center; gap: 8px; }
+  .sprint-interval-label { color: #888; font-size: 12px; font-family: var(--mono); }
+  .sprint-time-input { background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 6px; color: var(--text); padding: 6px 10px; font-size: 14px; font-family: var(--mono); outline: none; -webkit-appearance: none; width: 60px; text-align: center; font-variant-numeric: tabular-nums; }
+  .sprint-time-input:focus { border-color: var(--red); }
+  .sprint-time-unit { color: #666; font-size: 12px; font-family: var(--mono); }
+  .sprint-now { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .sprint-now-icon { font-size: 20px; }
+  .sprint-now-label { font-family: var(--mono); font-weight: 600; font-size: 15px; }
+  .sprint-timer { margin-left: auto; font-family: var(--mono); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .sprint-timer--urgent { color: var(--red); animation: pulse 1s infinite; }
+  .sprint-bar { height: 5px; background: #1a1a2e; border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+  .sprint-bar-fill { height: 100%; border-radius: 3px; transition: width 1s linear; }
+  .sprint-dots { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; }
+  .sprint-dot { width: 10px; height: 10px; border-radius: 50%; transition: all 0.3s; }
+  .sprint-buttons { display: flex; gap: 10px; }
+
+  /* Buttons - larger, more readable */
+  .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--mono); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; border: none; -webkit-tap-highlight-color: transparent; transition: all 0.15s; }
+  .btn:hover { filter: brightness(1.15); }
+  .btn:active { transform: scale(0.97); }
+  .btn--primary { background: var(--red); color: #fff; flex: 1; }
+  .btn--ghost { background: rgba(255,255,255,0.06); border: 1px solid #444; color: #bbb; }
+  .btn--ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .btn--ghost-red { background: rgba(232,69,60,0.1); border: 1px solid rgba(232,69,60,0.35); color: #E8453C; flex: 1; }
+
+  /* Action row */
+  .actions { width: 100%; display: flex; gap: 10px; }
+  .actions .btn { flex: 1; padding: 12px 20px; font-size: 13px; }
+  .btn--export { background: rgba(255,255,255,0.06); border: 1px solid #444; color: #bbb; }
+  .btn--export:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .btn--export:disabled { color: #333; cursor: default; background: rgba(255,255,255,0.02); border-color: #222; filter: none; }
+  .btn--new { background: rgba(255,255,255,0.03); border: 1px solid #333; color: #888; }
+  .btn--new:hover { background: rgba(255,255,255,0.07); color: #bbb; }
+
+  /* Drafts */
+  .drafts-row { width: 100%; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .drafts-label { font-size: 11px; color: #555; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.1em; }
+  .draft-chip { padding: 5px 12px; background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 6px; color: #888; font-size: 12px; font-family: var(--mono); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: all 0.2s; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .draft-chip:hover { border-color: #555; color: #ccc; }
+
+  /* Writing View */
+  .writing { flex: 1; display: flex; flex-direction: column; animation: fadeIn 0.25s ease; min-height: 0; }
+  .writing-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; flex-shrink: 0; }
+  .writing-head-left { display: flex; align-items: center; gap: 12px; }
+  .writing-sense-icon { font-size: 24px; }
+  .writing-sense-label { font-family: var(--mono); font-weight: 600; font-size: 18px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .writing-wc { color: #666; font-size: 13px; font-family: var(--mono); }
+  .writing-prompt { padding: 0 24px 10px; color: var(--text-dim); font-size: 14px; font-style: italic; line-height: 1.5; flex-shrink: 0; }
+  .writing-body { flex: 1; padding: 8px 24px 24px; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .writing-textarea { flex: 1; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; color: #ddd; font-size: 16px; line-height: 1.8; padding: 18px; resize: none; outline: none; font-family: var(--serif); min-height: 180px; -webkit-appearance: none; transition: border-color 0.2s; }
+  .writing-textarea:focus { border-color: rgba(255,255,255,0.15); }
+  .writing-textarea::placeholder { color: var(--text-faint); }
+
+  /* Word bank */
+  .wordbank { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 14px 16px; margin-top: 14px; flex-shrink: 0; }
+  .wordbank-title { font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; opacity: 0.8; }
+  .wordbank-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .wordbank-chip { padding: 4px 10px; border-radius: 5px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: #999; font-size: 13px; font-family: var(--mono); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: all 0.2s; -webkit-user-select: none; user-select: none; }
+  .wordbank-chip:active { transform: scale(0.95); }
+
+  /* Mini hex */
+  .mini-hex { position: fixed; bottom: 16px; right: 16px; width: 72px; z-index: 50; opacity: 0.6; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: opacity 0.2s; }
+  .mini-hex:hover { opacity: 0.9; }
+
+  /* Export modal */
+  .export-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease; padding: 20px; }
+  .export-modal { background: var(--surface); border: 1px solid var(--border-light); border-radius: 12px; max-width: 640px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+  .export-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #222; flex-shrink: 0; }
+  .export-title { color: var(--text); font-family: var(--mono); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .export-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; }
+  .export-pre { color: #bbb; font-size: 13px; line-height: 1.6; font-family: var(--mono); white-space: pre-wrap; word-break: break-word; }
+  .export-foot { padding: 12px 20px; border-top: 1px solid #222; display: flex; gap: 10px; flex-shrink: 0; }
+
+  /* Archive panel */
+  .archive-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease; padding: 20px; }
+  .archive-modal { background: var(--surface); border: 1px solid var(--border-light); border-radius: 12px; max-width: 700px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
+  .archive-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #222; flex-shrink: 0; }
+  .archive-title { color: var(--text); font-family: var(--mono); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .archive-count { color: var(--text-dim); font-family: var(--mono); font-size: 12px; margin-left: 10px; }
+  .archive-search-row { display: flex; gap: 10px; padding: 14px 20px; border-bottom: 1px solid #1a1a2a; flex-shrink: 0; }
+  .archive-search { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 14px; color: #ddd; font-size: 14px; font-family: var(--mono); outline: none; -webkit-appearance: none; }
+  .archive-search:focus { border-color: #555; }
+  .archive-search::placeholder { color: var(--text-faint); }
+  .archive-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 4px 0; }
+  .archive-empty { text-align: center; padding: 60px 20px; color: var(--text-dim); font-family: var(--mono); font-size: 14px; }
+  .archive-date-group { padding: 0 20px; }
+  .archive-date-label { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim); padding: 14px 0 8px; border-bottom: 1px solid #1a1a2a; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  .archive-entry { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: all 0.15s; }
+  .archive-entry:hover { background: rgba(255,255,255,0.02); margin: 0 -20px; padding-left: 20px; padding-right: 20px; }
+  .archive-entry:last-child { border-bottom: none; }
+  .archive-entry-seed { font-family: var(--serif); font-size: 15px; color: #ccc; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .archive-entry-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .archive-entry-wc { font-family: var(--mono); font-size: 12px; color: #666; }
+  .archive-entry-senses { display: flex; gap: 3px; }
+  .archive-entry-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .archive-entry-time { font-family: var(--mono); font-size: 11px; color: var(--text-faint); min-width: 48px; text-align: right; }
+  .archive-entry-del { background: none; border: none; color: #444; font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 4px; transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+  .archive-entry-del:hover { color: var(--red); background: rgba(232,69,60,0.1); }
+  .archive-foot { padding: 12px 20px; border-top: 1px solid #222; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .archive-storage { font-family: var(--mono); font-size: 11px; color: var(--text-faint); }
+  .btn--archive { background: rgba(255,255,255,0.04); border: 1px solid #333; color: #999; }
+  .btn--archive:hover { background: rgba(255,255,255,0.08); color: #ccc; }
+
+  /* File status bar */
+  .file-bar { width: 100%; max-width: 520px; display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid #1a1a2a; font-family: var(--mono); font-size: 11px; }
+  .file-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .file-dot--connected { background: #4EA85B; }
+  .file-dot--saving { background: #D4B83E; animation: pulse 1s infinite; }
+  .file-dot--disconnected { background: #444; }
+  .file-status-label { color: #888; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-status-name { color: #666; font-size: 10px; }
+  .file-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .file-btn { font-size: 10px; padding: 4px 10px; border-radius: 5px; border: 1px solid #333; background: none; color: #888; cursor: pointer; font-family: var(--mono); transition: all 0.15s; -webkit-tap-highlight-color: transparent; }
+  .file-btn:hover { background: rgba(255,255,255,0.06); color: #ccc; border-color: #555; }
+  .file-btn--primary { background: rgba(78,168,91,0.15); border-color: rgba(78,168,91,0.3); color: #4EA85B; }
+  .file-btn--primary:hover { background: rgba(78,168,91,0.25); }
+
+  /* File welcome/connect modal */
+  .file-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease; padding: 20px; }
+  .file-modal { background: var(--surface); border: 1px solid var(--border-light); border-radius: 14px; max-width: 460px; width: 100%; padding: 32px 28px; text-align: center; }
+  .file-modal-title { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+  .file-modal-sub { color: var(--text-dim); font-size: 13px; margin-bottom: 28px; line-height: 1.5; }
+  .file-option { display: flex; align-items: flex-start; gap: 14px; padding: 16px; border: 1px solid #222; border-radius: 10px; cursor: pointer; text-align: left; margin-bottom: 10px; transition: all 0.15s; }
+  .file-option:hover { border-color: #444; background: rgba(255,255,255,0.02); }
+  .file-option-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .file-option-text h3 { font-family: var(--mono); font-size: 13px; font-weight: 600; color: #ccc; margin-bottom: 4px; }
+  .file-option-text p { font-size: 12px; color: #666; line-height: 1.4; }
+  .file-skip { background: none; border: none; color: var(--text-faint); font-size: 12px; font-family: var(--mono); cursor: pointer; margin-top: 16px; padding: 8px; transition: color 0.15s; }
+  .file-skip:hover { color: #888; }
+  .file-api-note { font-size: 11px; color: #444; margin-top: 16px; line-height: 1.4; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  /* Info Modal */
+  .info-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.2s ease; padding: 20px; }
+  .info-modal { background: var(--surface); border: 1px solid var(--border-light); border-radius: 12px; max-width: 520px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 28px; }
+  .info-modal h3 { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--red); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+  .info-quote { font-family: var(--serif); font-style: italic; font-size: 14px; color: #888; padding: 14px 18px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 16px; line-height: 1.6; border-left: 3px solid var(--red); }
+  .info-section { margin-bottom: 14px; }
+  .info-section h4 { font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; color: #bbb; }
+  .info-section p { font-size: 13px; color: #999; line-height: 1.6; }
+  .info-actions { display: flex; justify-content: flex-end; margin-top: 20px; gap: 10px; }
+  .info-btn-header { background: rgba(232,69,60,0.1); border: 1px solid rgba(232,69,60,0.3); border-radius: 6px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: var(--red); font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; transition: all 0.15s; margin-left: 10px; }
+  .info-btn-header:hover { border-color: var(--red); background: rgba(232,69,60,0.18); }
+
+  @media (max-width: 580px) {
+    .hub { padding: 14px 14px 20px; }
+    .hex-area { max-width: 340px; }
+    .sense-pill { padding: 6px 12px; }
+    .sense-pill-icon { font-size: 15px; }
+    .sense-pill-label { font-size: 11px; }
+    .writing-head { padding: 12px 14px; }
+    .writing-body { padding: 8px 14px 16px; }
+  }
+</style>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "SenseSpark",
+  "url": "https://undercoverzest.app/sensespark/",
+  "description": "Generate vivid sensory writing prompts across sight, sound, touch, taste and smell. Break through creative blocks with unexpected sensory details. Free tool for songwriters and poets.",
+  "applicationCategory": "MusicApplication",
+  "operatingSystem": "Web Browser",
+  "browserRequirements": "Requires JavaScript",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Undercover Zest",
+    "url": "https://undercoverzest.app/"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "Undercover Zest",
+    "url": "https://undercoverzest.app/"
+  }
+}
+  </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is SenseSpark?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A free sensory writing prompts tool that generates lyric-ready images anchored in one of the five senses, sight, sound, touch, taste, or smell."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. No account, no signup."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is SenseSpark for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Songwriters and lyricists chasing concrete sensory imagery instead of abstract emotional language. Useful for breaking through creative blocks when the line you want feels too generic."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<details id="uz-about-collapse" style="max-width:640px;margin:16px auto 0;text-align:center;font-family:Outfit,-apple-system,sans-serif;">
+  <summary style="cursor:pointer;font-size:0.95rem;color:#c8a04a;padding:8px 14px;font-weight:500;font-family:inherit;display:list-item;list-style-position:inside;">About this tool</summary>
+<div id="uz-static-intro" style="max-width:640px;margin:16px auto 24px;padding:0 24px;font-family:Inter,-apple-system,sans-serif;color:#e0e0e0;">
+      <h1 style="font-size:1.85rem;font-weight:700;color:#c8a04a;margin-bottom:8px;text-align:center;font-family:inherit;">SenseSpark</h1>
+      <h2 style="font-size:1.1rem;font-weight:500;color:#e0e0e0;margin-bottom:16px;text-align:center;font-style:italic;opacity:0.85;">Feel it, then write it.</h2>
+      <p style="font-size:1.05rem;line-height:1.7;color:#bbb;margin-bottom:14px;">SenseSpark is a free sensory writing prompts tool that ties lyrical imagery to one of the five senses. Tap sight, sound, touch, taste, or smell, and the tool generates a concrete prompt anchored in real, felt experience: "What did your grandmother's hands feel like in winter?" "What's the loudest silence you've ever stood in?" "What does grief taste like at three in the afternoon?"</p>
+      <p style="font-size:1.05rem;line-height:1.7;color:#bbb;margin-bottom:14px;">The trap most lyrics fall into is abstraction. The senses force specificity. A lyric that lands gives the listener something to picture, touch, hear, smell. SenseSpark's prompts pull you from the abstract feeling to the concrete sense-memory underneath it.</p>
+      <ul style="text-align:left;display:inline-block;font-size:0.98rem;line-height:1.75;color:#bbb;margin:6px 0 18px;padding-left:20px;">
+        <li>Sensory writing prompts for songwriters across all five senses</li>
+        <li>A "break the block" generator when the lyric will not start</li>
+        <li>Quick-fire prompts for short writing sessions</li>
+        <li>Cross-sense pairings (sight + sound, touch + smell) for richer images</li>
+        <li>A free, no-signup creative-block tool</li>
+      </ul>
+      <p style="font-size:0.95rem;color:#bbb;margin-bottom:14px;">SenseSpark pairs naturally with <a href="../collisionlab/" style="color:#c8a04a;text-decoration:underline;">CollisionLab</a> for metaphor and <a href="../rhymeforge/" style="color:#c8a04a;text-decoration:underline;">RhymeForge</a> for the words that land the image.</p>
+      <p style="font-size:0.9rem;color:#888;">Part of the <a href="../homepage/" style="color:#c8a04a;text-decoration:underline;">Undercover Zest</a> songwriting suite. No account, no cost, no catch.</p>
+      <div style="margin-top:28px;padding-top:18px;border-top:1px solid rgba(212,168,83,0.12);">
+        <div style="font-size:0.9rem;font-weight:600;color:#c8a04a;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.08em;text-align:center;">Frequently asked</div>
+        <div style="margin-bottom:14px;text-align:left;">
+          <div style="font-size:1rem;font-weight:600;color:#c8a04a;margin-bottom:4px;">What is SenseSpark?</div>
+          <div style="font-size:0.95rem;line-height:1.65;color:#888;">A free sensory writing prompts tool that generates lyric-ready images anchored in one of the five senses, sight, sound, touch, taste, or smell.</div>
+        </div>
+        <div style="margin-bottom:14px;text-align:left;">
+          <div style="font-size:1rem;font-weight:600;color:#c8a04a;margin-bottom:4px;">Is it free?</div>
+          <div style="font-size:0.95rem;line-height:1.65;color:#888;">Yes. No account, no signup.</div>
+        </div>
+        <div style="margin-bottom:14px;text-align:left;">
+          <div style="font-size:1rem;font-weight:600;color:#c8a04a;margin-bottom:4px;">Who is SenseSpark for?</div>
+          <div style="font-size:0.95rem;line-height:1.65;color:#888;">Songwriters and lyricists chasing concrete sensory imagery instead of abstract emotional language. Useful for breaking through creative blocks when the line you want feels too generic.</div>
+        </div>
+      </div>
+    </div>
+</details>
+
+<div id="app"><div style="display:flex;align-items:center;justify-content:center;min-height:40vh;color:#888;font-family:ui-monospace,monospace;font-size:14px;letter-spacing:0.08em;">LOADING SENSESPARK&hellip;</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+<script>
+"use strict";
+var e = React.createElement;
+var useState = React.useState, useEffect = React.useEffect, useCallback = React.useCallback, useRef = React.useRef, useMemo = React.useMemo;
+
+// ─── Data ───────────────────────────────────────────────────────────────────
+
+var SENSES = [
+  { id:"sight", label:"Sight", icon:"\u{1F441}", color:"#E8453C", prompt:"What do you see? Colors, shapes, light, shadows, movement, textures visible to the eye.",
+    wordBank:["luminous","flickering","opaque","translucent","hazy","vivid","mottled","silhouetted","glinting","bleached","streaked","shadowed","iridescent","dappled","dim","warped","jagged","blurred","stark","crystalline","smeared","glowing","weathered","faded"] },
+  { id:"sound", label:"Sound", icon:"\u{1F50A}", color:"#E07B3C", prompt:"What do you hear? Volume, pitch, rhythm, echoes, silence, vibration.",
+    wordBank:["hum","clatter","drone","whisper","crackle","thud","shrill","muffled","staccato","reverberating","rasping","tinkling","rumble","hiss","chime","scraping","buzzing","sputtering","thrumming","hollow","piercing","rhythmic","echoing","grinding"] },
+  { id:"smell", label:"Smell", icon:"\u{1F443}", color:"#D4B83E", prompt:"What do you smell? Sharp, sweet, chemical, organic, layered, faint.",
+    wordBank:["acrid","musty","pungent","briny","earthy","saccharine","smoky","rancid","floral","metallic","damp","cloying","sour","woodsy","astringent","yeasty","sulfurous","minty","stale","fragrant","piney","gasoline-tinged","mossy","burnt"] },
+  { id:"taste", label:"Taste", icon:"\u{1F445}", color:"#4EA85B", prompt:"What do you taste? Tongue, teeth, saliva, aftertaste, texture in the mouth.",
+    wordBank:["bitter","tangy","gritty","chalky","savory","brackish","astringent","umami","saccharine","coppery","effervescent","buttery","briny","acidic","silky","grainy","sharp","mellow","waxy","chemical","honeyed","soapy","peppery","dusty"] },
+  { id:"touch", label:"Touch", icon:"\u270B", color:"#4A8FD4", prompt:"What do you feel on your skin? Temperature, pressure, texture, moisture, pain.",
+    wordBank:["gritty","slick","prickly","velvety","clammy","abrasive","yielding","brittle","spongy","scalding","numb","supple","coarse","tacky","frigid","feathery","rigid","waxy","thorny","silken","calloused","damp","electric","papery"] },
+  { id:"kinesthetic", label:"Kinesthetic", icon:"\u{1F3CB}", color:"#9B59B6", prompt:"What movement do you sense? Balance, muscle tension, acceleration, weight shift, coordination, spatial awareness.",
+    wordBank:["lurching","weightless","stumbling","swaying","rigid","coiled","unsteady","bracing","reaching","gripping","recoiling","staggering","tensing","springing","dragging","straining","twisting","balancing","falling","steadying","flexing","crouching","stretching","jerking"] },
+  { id:"organic", label:"Organic", icon:"\u{1FAC0}", color:"#E05DBF", prompt:"What do you feel inside your body? Heartbeat, hunger, breath, fatigue, nausea, adrenaline, gut feeling.",
+    wordBank:["pulsing","hollow","queasy","flushed","breathless","churning","bloated","parched","drowsy","wired","aching","feverish","famished","restless","numb","buzzing","constricted","throbbing","shivering","tingling","surging","deflated","cramping","raw"] }
+];
+
+// Seed words: concrete nouns, places, materials, weather, objects — never verbs
+var SEED_WORDS = [
+  // Places
+  "a hospital corridor","the basement","a rooftop at dawn","the barber shop","a motel bathroom",
+  "grandmother's porch","a petrol station","the school gymnasium","an empty church","a laundrette",
+  "the dentist's chair","a ferry deck","a phone box","the attic","a greenhouse",
+  "a multistorey car park","a fish market","the cinema at 2am","a hotel lobby","an elevator",
+  // Objects
+  "a rusty padlock","a vinyl record","a leather jacket","the kitchen tap","a cracked mirror",
+  "a matchbox","an old suitcase","a typewriter","a candle stub","a wool blanket",
+  "a pocket watch","a chipped mug","a garden hose","a piano lid","a cigarette lighter",
+  "a snow globe","a pair of scissors","a transistor radio","a brass doorknob","a glass bottle",
+  // Materials & textures
+  "copper","wet clay","sandpaper","kerosene","velvet",
+  "chalk dust","motor oil","damp newspaper","burnt toast","fresh concrete",
+  "sea salt","beeswax","tar","linen","amber",
+  // Nature & weather
+  "a tide pool","morning fog","a thunderstorm","a frozen puddle","moss on stone",
+  "a pinecone","the first frost","a muddy riverbank","summer asphalt","wildfire smoke",
+  "a beehive","a rockpool","pollen","a dead tree","lichen",
+  // Body & human
+  "a bruise","calloused hands","a scar","sunburnt shoulders","tangled hair",
+  "a held breath","a loose tooth","the small of the back","a clenched jaw","a paper cut",
+  // Moments & situations
+  "a power cut","the last day of school","a waiting room","a car boot sale","a late bus",
+  "the morning after","a first rehearsal","queueing in the rain","a wrong number","the 5am alarm",
+  "a flat tyre","packing boxes","a lost key","an unanswered door","closing time"
+];
+
+function randomSeed() {
+  return SEED_WORDS[Math.floor(Math.random() * SEED_WORDS.length)];
+}
+
+// ─── Storage (compressed with LZ-String) ─────────────────────────────────
+
+var ARCHIVE_KEY = "sensory-hex-archive";
+var CURRENT_KEY = "sensory-hex-current";
+
+// Compress JSON -> LZ-String UTF16 for efficient localStorage
+function compressStore(key, data) {
+  try {
+    var json = JSON.stringify(data);
+    var compressed = LZString.compressToUTF16(json);
+    localStorage.setItem(key, compressed);
+    return true;
+  } catch(x) { console.warn("Storage save failed:", x); return false; }
+}
+function decompressLoad(key) {
+  try {
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    // Try decompressing first (new format)
+    var json = LZString.decompressFromUTF16(raw);
+    if (json) return JSON.parse(json);
+    // Fall back to plain JSON (legacy data)
+    return JSON.parse(raw);
+  } catch(x) { return null; }
+}
+
+function loadArchive() { return decompressLoad(ARCHIVE_KEY) || []; }
+function saveArchive(entries) { compressStore(ARCHIVE_KEY, entries); }
+function loadCurrent() { try { return JSON.parse(localStorage.getItem(CURRENT_KEY)); } catch(x) { return null; } }
+function saveCurrent(d) { try { localStorage.setItem(CURRENT_KEY, JSON.stringify(d)); } catch(x) {} }
+function emptySenseData() { var d = {}; SENSES.forEach(function(s){ d[s.id] = ""; }); return d; }
+function wordCount(t) { var s = t && t.trim(); return s ? s.split(/\s+/).length : 0; }
+function totalWords(sd) { return Object.values(sd).reduce(function(a,t){ return a + wordCount(t); }, 0); }
+function sensesUsed(sd) { return Object.values(sd).filter(function(t){ return t && t.trim(); }).length; }
+
+// Migrate old drafts format to archive
+function migrateOldDrafts() {
+  try {
+    var oldRaw = localStorage.getItem("sensory-hex-drafts");
+    if (!oldRaw) return;
+    var oldDrafts = JSON.parse(oldRaw);
+    if (!oldDrafts || !oldDrafts.length) return;
+    var archive = loadArchive();
+    var existingIds = {};
+    archive.forEach(function(e){ existingIds[e.id] = true; });
+    oldDrafts.forEach(function(d) {
+      if (!existingIds[d.id]) archive.push(d);
+    });
+    archive.sort(function(a,b){ return (b.id||0) - (a.id||0); });
+    saveArchive(archive);
+    localStorage.removeItem("sensory-hex-drafts");
+  } catch(x) {}
+}
+
+function getStorageInfo() {
+  try {
+    var archiveRaw = localStorage.getItem(ARCHIVE_KEY) || "";
+    var currentRaw = localStorage.getItem(CURRENT_KEY) || "";
+    var usedBytes = archiveRaw.length * 2 + currentRaw.length * 2; // UTF-16
+    var archive = loadArchive();
+    var uncompressedSize = JSON.stringify(archive).length * 2;
+    return { usedKB: Math.round(usedBytes / 1024), ratio: uncompressedSize > 0 ? Math.round((1 - usedBytes / uncompressedSize) * 100) : 0, count: archive.length };
+  } catch(x) { return { usedKB: 0, ratio: 0, count: 0 }; }
+}
+
+// ─── File System Access API (live JSON linking) ──────────────────────────
+
+var hasFileSystemAccess = false;
+try {
+  hasFileSystemAccess = typeof window.showOpenFilePicker === "function"
+    && typeof window.showSaveFilePicker === "function"
+    && window.isSecureContext !== false;
+} catch(x) { hasFileSystemAccess = false; }
+
+var FS_DB_NAME = "sense_spark_handles";
+var FS_DB_STORE = "file_handles";
+var FS_HANDLE_KEY = "current_file";
+
+function openHandleDB() {
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open(FS_DB_NAME, 1);
+    req.onupgradeneeded = function() { req.result.createObjectStore(FS_DB_STORE); };
+    req.onsuccess = function() { resolve(req.result); };
+    req.onerror = function() { reject(req.error); };
+  });
+}
+
+function storeFileHandle(handle) {
+  return openHandleDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction(FS_DB_STORE, "readwrite");
+      tx.objectStore(FS_DB_STORE).put(handle, FS_HANDLE_KEY);
+      tx.oncomplete = function() { resolve(); };
+      tx.onerror = function() { reject(tx.error); };
+    });
+  });
+}
+
+function getStoredHandle() {
+  return openHandleDB().then(function(db) {
+    return new Promise(function(resolve, reject) {
+      var tx = db.transaction(FS_DB_STORE, "readonly");
+      var req = tx.objectStore(FS_DB_STORE).get(FS_HANDLE_KEY);
+      req.onsuccess = function() { resolve(req.result || null); };
+      req.onerror = function() { reject(req.error); };
+    });
+  }).catch(function() { return null; });
+}
+
+function clearStoredHandle() {
+  return openHandleDB().then(function(db) {
+    return new Promise(function(resolve) {
+      var tx = db.transaction(FS_DB_STORE, "readwrite");
+      tx.objectStore(FS_DB_STORE).delete(FS_HANDLE_KEY);
+      tx.oncomplete = function() { resolve(); };
+      tx.onerror = function() { resolve(); };
+    });
+  }).catch(function() {});
+}
+
+function readFileHandle(handle) {
+  return handle.getFile().then(function(file) {
+    return file.text();
+  }).then(function(text) {
+    return JSON.parse(text);
+  });
+}
+
+function writeFileHandle(handle, data) {
+  return handle.createWritable().then(function(writable) {
+    return writable.write(JSON.stringify(data, null, 2)).then(function() {
+      return writable.close();
+    });
+  });
+}
+
+function verifyPermission(handle, readWrite) {
+  var options = readWrite ? { mode: "readwrite" } : {};
+  return handle.queryPermission(options).then(function(result) {
+    if (result === "granted") return true;
+    return handle.requestPermission(options).then(function(result2) {
+      return result2 === "granted";
+    });
+  });
+}
+
+// Merge file data with current archive — deduplicate by id
+function mergeArchiveData(existing, incoming) {
+  var idMap = {};
+  existing.forEach(function(entry) { idMap[entry.id] = entry; });
+  incoming.forEach(function(entry) { if (!idMap[entry.id]) idMap[entry.id] = entry; });
+  var merged = Object.values(idMap);
+  merged.sort(function(a, b) { return (b.id || 0) - (a.id || 0); });
+  return merged;
+}
+
+// Build the full save payload
+function buildSavePayload(seedWord, senseData, archive) {
+  return {
+    version: 1,
+    app: "sense-spark",
+    lastSaved: new Date().toISOString(),
+    current: { seedWord: seedWord, senseData: senseData },
+    archive: archive
+  };
+}
+
+// Parse loaded payload back into app state
+function parseSavePayload(payload) {
+  if (!payload || typeof payload !== "object") return null;
+  return {
+    current: payload.current || null,
+    archive: Array.isArray(payload.archive) ? payload.archive : []
+  };
+}
+
+// Date grouping helpers
+function dateLabel(isoStr) {
+  var d = new Date(isoStr);
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var entry = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  var diff = Math.floor((today - entry) / 86400000);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  if (diff < 7) return d.toLocaleDateString("en-US", { weekday: "long" });
+  if (diff < 30) return Math.floor(diff / 7) + " week" + (Math.floor(diff / 7) > 1 ? "s" : "") + " ago";
+  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+function timeLabel(isoStr) {
+  var d = new Date(isoStr);
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).toLowerCase();
+}
+
+// ─── Heptagon geometry (7 senses) ────────────────────────────────────────────
+
+var SEGMENT_DEG = 360 / 7; // ~51.43 degrees per petal
+
+function heptPt(cx,cy,r,deg) { var rad = Math.PI/180*deg; return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)]; }
+function petalPath(cx,cy,R,r,i) {
+  var a1=SEGMENT_DEG*i-90, a2=a1+SEGMENT_DEG;
+  var o1=heptPt(cx,cy,R,a1), o2=heptPt(cx,cy,R,a2), i1=heptPt(cx,cy,r,a1), i2=heptPt(cx,cy,r,a2);
+  return "M "+i1[0]+" "+i1[1]+" L "+o1[0]+" "+o1[1]+" L "+o2[0]+" "+o2[1]+" L "+i2[0]+" "+i2[1]+" Z";
+}
+
+// Pill positions — computed from midpoint angles of each petal, sitting just outside the shape
+var PILL_POSITIONS = (function() {
+  var positions = [];
+  for (var i = 0; i < 7; i++) {
+    var midAngle = SEGMENT_DEG * i - 90 + SEGMENT_DEG / 2;
+    var rad = Math.PI / 180 * midAngle;
+    // 44% from center keeps pills snug to the petal edges
+    var px = 50 + 44 * Math.cos(rad);
+    var py = 50 + 44 * Math.sin(rad);
+    positions.push({ top: py.toFixed(1) + "%", left: px.toFixed(1) + "%" });
+  }
+  return positions;
+})();
+
+// ─── HexSVG (no labels — pills handle that) ────────────────────────────────
+
+function HexSVG(props) {
+  var senseData=props.senseData, activeSense=props.activeSense, onSelect=props.onSelect, seedWord=props.seedWord, mini=props.mini;
+  var cx=200, cy=200, R=175, r=55;
+
+  var petals = SENSES.map(function(sense, i) {
+    var text = senseData[sense.id] || "";
+    var fill = Math.min(text.length / 200, 1);
+    var isActive = activeSense === sense.id;
+    var fid = "g-" + sense.id + (mini?"-m":"");
+    return e("g", { key: sense.id, className: "hex-petal", onClick: function(){ onSelect && onSelect(sense.id); } },
+      e("defs", null, e("filter", { id: fid },
+        e("feGaussianBlur", { stdDeviation: "6", result: "blur" }),
+        e("feMerge", null, e("feMergeNode", { in: "blur" }), e("feMergeNode", { in: "SourceGraphic" }))
+      )),
+      e("path", {
+        d: petalPath(cx,cy,R,r,i), fill: sense.color,
+        fillOpacity: 0.1 + fill * 0.5,
+        stroke: sense.color, strokeWidth: isActive ? 3 : 1.5, strokeOpacity: isActive ? 1 : 0.35,
+        filter: fill > 0.25 ? "url(#"+fid+")" : undefined,
+        style: { transition: "all 0.3s ease" }
+      })
+    );
+  });
+
+  var center = [
+    e("circle", { key:"cc", cx:cx, cy:cy, r:r-2, fill:"#13132a", stroke:"#333", strokeWidth:1 })
+  ];
+  if (!mini) {
+    // Adaptive font size for seed word based on length
+    var sw = seedWord || "";
+    var seedFontSize = sw.length <= 10 ? 13 : sw.length <= 20 ? 11 : sw.length <= 30 ? 10 : 9;
+    var circleR = r - 2; // usable radius
+    var boxSize = circleR * 2 * 0.82; // ~82% of diameter for text area
+    center.push(
+      e("foreignObject", { key:"cfo", x: cx - boxSize/2, y: cy - circleR * 0.82, width: boxSize, height: circleR * 1.64 },
+        e("div", { xmlns:"http://www.w3.org/1999/xhtml",
+          style:{
+            width:"100%", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
+            textAlign:"center", overflow:"hidden", padding:"0 2px", gap:"3px"
+          }
+        },
+          e("span", { style:{ fontSize:"9px", fontFamily:"var(--mono)", textTransform:"uppercase", letterSpacing:"0.1em", color:"#888", flexShrink:0 } }, "seed"),
+          e("span", { style:{ fontSize: seedFontSize + "px", fontFamily:"var(--mono)", color:"#ccc", lineHeight:"1.35", wordBreak:"break-word" } }, sw || "\u2014")
+        )
+      )
+    );
+  }
+  return e("svg", { viewBox:"0 0 400 400", className: mini ? "" : "hex-svg" }, petals.concat(center));
+}
+
+// ─── Hex with pills wrapper ─────────────────────────────────────────────────
+
+function HexWithPills(props) {
+  var senseData=props.senseData, activeSense=props.activeSense, onSelect=props.onSelect, seedWord=props.seedWord;
+  return e("div", { className: "hex-area" },
+    e(HexSVG, { senseData:senseData, activeSense:activeSense, onSelect:onSelect, seedWord:seedWord }),
+    SENSES.map(function(sense, i) {
+      var pos = PILL_POSITIONS[i];
+      var wc = wordCount(senseData[sense.id] || "");
+      var isActive = activeSense === sense.id;
+      var fillAmt = Math.min((senseData[sense.id] || "").length / 200, 1);
+      return e("div", {
+        key: sense.id, className: "sense-pill",
+        style: {
+          top: pos.top, left: pos.left,
+          background: isActive ? sense.color+"33" : "rgba(13,13,26,0.85)",
+          border: "2px solid " + sense.color + (fillAmt > 0 ? "88" : "44"),
+          boxShadow: fillAmt > 0.3 ? "0 0 12px " + sense.color + "33" : "none"
+        },
+        onClick: function(){ onSelect(sense.id); }
+      },
+        e("span", { className: "sense-pill-icon" }, sense.icon),
+        e("span", { className: "sense-pill-label", style: { color: sense.color } }, sense.label),
+        wc > 0 && e("span", { className: "sense-pill-wc", style: { color: sense.color } }, wc + "w")
+      );
+    })
+  );
+}
+
+// ─── Word Bank ──────────────────────────────────────────────────────────────
+
+function WordBank(props) {
+  var sense=props.sense;
+  var _s=useState(null), copied=_s[0], setCopied=_s[1];
+  var ref = useRef(null);
+  return e("div", { className: "wordbank", style: { borderColor: sense.color+"22" } },
+    e("div", { className: "wordbank-title", style: { color: sense.color } }, "Word Bank"),
+    e("div", { className: "wordbank-grid" },
+      sense.wordBank.map(function(word) {
+        var isC = copied === word;
+        return e("span", { key: word, className: "wordbank-chip",
+          style: { background: isC ? sense.color+"33" : undefined, borderColor: isC ? sense.color+"66" : sense.color+"22", color: isC ? sense.color : "#999" },
+          onClick: function() {
+            if (navigator.clipboard) navigator.clipboard.writeText(word);
+            setCopied(word); clearTimeout(ref.current);
+            ref.current = setTimeout(function(){ setCopied(null); }, 1200);
+          }
+        }, word);
+      })
+    )
+  );
+}
+
+// ─── Writing View ───────────────────────────────────────────────────────────
+
+function WritingView(props) {
+  var sense=props.sense, text=props.text, onChange=props.onChange, onBack=props.onBack, sprintActive=props.sprintActive;
+  var textRef = useRef(null);
+  var wc = wordCount(text);
+  useEffect(function() { if (textRef.current) textRef.current.focus(); }, [sense.id]);
+
+  return e("div", { className: "writing" },
+    e("div", { className: "writing-head", style: { borderBottom: "1px solid "+sense.color+"22" } },
+      e("div", { className: "writing-head-left" },
+        !sprintActive && e("button", { className: "btn btn--ghost", onClick: onBack }, "\u2190 Back"),
+        e("span", { className: "writing-sense-icon" }, sense.icon),
+        e("span", { className: "writing-sense-label", style: { color: sense.color } }, sense.label)
+      ),
+      e("span", { className: "writing-wc" }, wc + " words")
+    ),
+    e("div", { className: "writing-prompt" }, sense.prompt),
+    e("div", { className: "writing-body" },
+      e("textarea", { ref: textRef, className: "writing-textarea", value: text,
+        onChange: function(ev){ onChange(ev.target.value); },
+        placeholder: "Write about " + sense.label.toLowerCase() + "...",
+        style: { borderColor: sense.color+"22" }
+      }),
+      e(WordBank, { sense: sense })
+    )
+  );
+}
+
+// ─── Sprint Controls ────────────────────────────────────────────────────────
+
+function SprintControls(props) {
+  var active=props.active, timeLeft=props.timeLeft, totalTime=props.totalTime, senseIdx=props.senseIdx;
+  var onStart=props.onStart, onStop=props.onStop, onReset=props.onReset;
+  var interval=props.interval, onIntervalChange=props.onIntervalChange;
+  var progress = active ? timeLeft/(totalTime||1) : 1;
+  var cur = SENSES[senseIdx];
+
+  var _iv = useState(function(){ var m=Math.floor(interval/60),s=interval%60; return m+":"+String(s).padStart(2,"0"); });
+  var inputVal=_iv[0], setInputVal=_iv[1];
+  useEffect(function(){ var m=Math.floor(interval/60),s=interval%60; setInputVal(m+":"+String(s).padStart(2,"0")); }, [interval]);
+
+  function commit() {
+    var raw=inputVal.replace(/[^0-9:]/g,""), secs;
+    if (raw.indexOf(":")!==-1) { var p=raw.split(":"); secs=(parseInt(p[0],10)||0)*60+(parseInt(p[1],10)||0); }
+    else { secs=parseInt(raw,10)||0; }
+    onIntervalChange(Math.max(10, Math.min(300, secs)));
+  }
+
+  return e("div", { className: active ? "sprint sprint--active" : "sprint sprint--idle" },
+    e("div", { className: "sprint-head" },
+      e("span", { className: "sprint-title", style: { color: active ? "var(--red)" : "#888" } }, "Sprint Mode"),
+      !active && e("div", { className: "sprint-interval-wrap" },
+        e("span", { className: "sprint-interval-label" }, "Per sense:"),
+        e("input", { className: "sprint-time-input", type: "text", value: inputVal,
+          onBlur: commit, onKeyDown: function(ev){ if(ev.key==="Enter") ev.target.blur(); },
+          onChange: function(ev){ setInputVal(ev.target.value); }
+        }),
+        e("span", { className: "sprint-time-unit" }, "m:ss")
+      )
+    ),
+    active && e(React.Fragment, null,
+      e("div", { className: "sprint-now" },
+        e("span", { className: "sprint-now-icon" }, cur.icon),
+        e("span", { className: "sprint-now-label", style:{ color: cur.color } }, cur.label),
+        e("span", { className: "sprint-timer"+(timeLeft<=10?" sprint-timer--urgent":""), style:{color:timeLeft<=10?undefined:"#ccc"} },
+          Math.floor(timeLeft/60)+":"+String(timeLeft%60).padStart(2,"0"))
+      ),
+      e("div", { className: "sprint-bar" },
+        e("div", { className: "sprint-bar-fill", style:{ width:(progress*100)+"%", background: cur.color } })
+      ),
+      e("div", { className: "sprint-dots" },
+        SENSES.map(function(s,i){ return e("div",{key:s.id,className:"sprint-dot",style:{background:i<=senseIdx?s.color:"#222",opacity:i<=senseIdx?1:0.3}}); })
+      )
+    ),
+    e("div", { className: "sprint-buttons" },
+      !active
+        ? e("button", { className: "btn btn--primary", onClick: onStart }, "Start Sprint")
+        : e(React.Fragment, null,
+            e("button", { className: "btn btn--ghost-red", onClick: onStop }, "Stop"),
+            e("button", { className: "btn btn--ghost", onClick: onReset }, "Reset")
+          )
+    )
+  );
+}
+
+// ─── Export Modal ───────────────────────────────────────────────────────────
+
+function ExportModal(props) {
+  var seedWord=props.seedWord, senseData=props.senseData, onClose=props.onClose;
+  var _c=useState(false), copied=_c[0], setCopied=_c[1];
+  var exportText = useMemo(function() {
+    var out = "SENSE SPARK \u2014 Object Writing\n" + "\u2550".repeat(50) + "\n";
+    out += "Seed: "+(seedWord||"(none)")+"\nDate: "+new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})+"\n"+"\u2550".repeat(50)+"\n\n";
+    SENSES.forEach(function(s){ var t=senseData[s.id]||"", wc=wordCount(t);
+      out += s.icon+" "+s.label.toUpperCase()+" ("+wc+" words)\n"+"\u2500".repeat(40)+"\n"+(t.trim()||"(empty)")+"\n\n";
+    });
+    out += "\u2550".repeat(50)+"\nTotal: "+totalWords(senseData)+" words across "+sensesUsed(senseData)+"/7 senses\n";
+    return out;
+  }, [seedWord, senseData]);
+
+  return e("div", { className:"export-overlay", onClick:function(ev){if(ev.target===ev.currentTarget)onClose();} },
+    e("div", { className:"export-modal" },
+      e("div", { className:"export-head" },
+        e("span", { className:"export-title" }, "Sense-Bound Export"),
+        e("button", { className:"btn btn--ghost", onClick:onClose }, "Close")
+      ),
+      e("div", { className:"export-body" }, e("pre", { className:"export-pre" }, exportText)),
+      e("div", { className:"export-foot" },
+        e("button", { className:"btn btn--primary", style:{background:copied?"#4EA85B":undefined},
+          onClick:function(){ if(navigator.clipboard) navigator.clipboard.writeText(exportText); setCopied(true); setTimeout(function(){setCopied(false);},2000); }
+        }, copied ? "Copied!" : "Copy to Clipboard"),
+        e("button", { className:"btn btn--ghost",
+          onClick:function(){ var b=new Blob([exportText],{type:"text/plain"}), u=URL.createObjectURL(b), a=document.createElement("a"); a.href=u; a.download="sense-spark-"+(seedWord||"draft").replace(/\s+/g,"-").toLowerCase()+".txt"; a.click(); URL.revokeObjectURL(u); }
+        }, "Download .txt")
+      )
+    )
+  );
+}
+
+// ─── Archive Browser ─────────────────────────────────────────────────────
+
+function ArchiveBrowser(props) {
+  var archive=props.archive, onLoad=props.onLoad, onDelete=props.onDelete, onClose=props.onClose, onExportAll=props.onExportAll;
+  var _q=useState(""), query=_q[0], setQuery=_q[1];
+  var storageInfo = useMemo(function(){ return getStorageInfo(); }, [archive]);
+
+  var filtered = useMemo(function() {
+    if (!query.trim()) return archive;
+    var q = query.toLowerCase();
+    return archive.filter(function(e) {
+      var seed = (e.seedWord || "").toLowerCase();
+      var dateStr = (e.date ? new Date(e.date).toLocaleDateString() : "").toLowerCase();
+      return seed.indexOf(q) !== -1 || dateStr.indexOf(q) !== -1;
+    });
+  }, [archive, query]);
+
+  // Group by date
+  var groups = useMemo(function() {
+    var g = [];
+    var currentLabel = null;
+    var currentItems = [];
+    filtered.forEach(function(entry) {
+      var label = entry.date ? dateLabel(entry.date) : "Unknown";
+      if (label !== currentLabel) {
+        if (currentLabel !== null) g.push({ label: currentLabel, items: currentItems });
+        currentLabel = label;
+        currentItems = [entry];
+      } else {
+        currentItems.push(entry);
+      }
+    });
+    if (currentLabel !== null) g.push({ label: currentLabel, items: currentItems });
+    return g;
+  }, [filtered]);
+
+  return e("div", { className: "archive-overlay", onClick: function(ev){ if(ev.target===ev.currentTarget)onClose(); } },
+    e("div", { className: "archive-modal" },
+      e("div", { className: "archive-head" },
+        e("div", { style: { display: "flex", alignItems: "center" } },
+          e("span", { className: "archive-title" }, "Writing Archive"),
+          e("span", { className: "archive-count" }, archive.length + " session" + (archive.length !== 1 ? "s" : ""))
+        ),
+        e("button", { className: "btn btn--ghost", onClick: onClose }, "Close")
+      ),
+      e("div", { className: "archive-search-row" },
+        e("input", { className: "archive-search", type: "text", value: query,
+          onChange: function(ev){ setQuery(ev.target.value); },
+          placeholder: "Search by seed word or date..."
+        })
+      ),
+      e("div", { className: "archive-body" },
+        filtered.length === 0
+          ? e("div", { className: "archive-empty" }, query ? "No sessions match \"" + query + "\"" : "No writing sessions saved yet")
+          : groups.map(function(group) {
+              return e("div", { key: group.label, className: "archive-date-group" },
+                e("div", { className: "archive-date-label" }, group.label),
+                group.items.map(function(entry) {
+                  return e("div", { key: entry.id, className: "archive-entry", onClick: function(){ onLoad(entry); onClose(); } },
+                    e("span", { className: "archive-entry-seed" }, entry.seedWord || "(untitled)"),
+                    e("span", { className: "archive-entry-meta" },
+                      e("span", { className: "archive-entry-senses" },
+                        SENSES.map(function(s) {
+                          var has = entry.senseData && entry.senseData[s.id] && entry.senseData[s.id].trim();
+                          return e("span", { key: s.id, className: "archive-entry-dot",
+                            style: { background: has ? s.color : "#222", opacity: has ? 1 : 0.3 }
+                          });
+                        })
+                      ),
+                      e("span", { className: "archive-entry-wc" }, (entry.wordCount || 0) + "w"),
+                      entry.date && e("span", { className: "archive-entry-time" }, timeLabel(entry.date))
+                    ),
+                    e("button", { className: "archive-entry-del", onClick: function(ev){
+                      ev.stopPropagation();
+                      onDelete(entry.id);
+                    }, title: "Delete" }, "\u2715")
+                  );
+                })
+              );
+            })
+      ),
+      e("div", { className: "archive-foot" },
+        e("span", { className: "archive-storage" },
+          storageInfo.usedKB + "KB used" + (storageInfo.ratio > 0 ? " (" + storageInfo.ratio + "% compressed)" : "")
+        ),
+        e("div", { style: { display: "flex", gap: 10 } },
+          archive.length > 0 && e("button", { className: "btn btn--ghost", style: { padding: "8px 14px", fontSize: 12 },
+            onClick: onExportAll
+          }, "Export All"),
+          archive.length > 0 && e("button", { className: "btn btn--ghost", style: { padding: "8px 14px", fontSize: 12 },
+            onClick: function() {
+              var json = JSON.stringify(archive, null, 2);
+              var b = new Blob([json], { type: "application/json" });
+              var u = URL.createObjectURL(b);
+              var a = document.createElement("a");
+              a.href = u; a.download = "sense-spark-archive-" + new Date().toISOString().slice(0,10) + ".json";
+              a.click(); URL.revokeObjectURL(u);
+            }
+          }, "Backup JSON")
+        )
+      )
+    )
+  );
+}
+
+// ─── File Status Bar ─────────────────────────────────────────────────────────
+
+function FileStatusBar(props) {
+  var fileStatus=props.fileStatus, fileName=props.fileName, onOpenModal=props.onOpenModal, onDisconnect=props.onDisconnect;
+  var dotClass = "file-dot file-dot--" + fileStatus;
+  var label = fileStatus === "saving" ? "Saving..." : fileStatus === "connected" ? (fileName || "Synced to file") : "No file linked";
+
+  return e("div", { className: "file-bar" },
+    e("span", { className: dotClass }),
+    e("span", { className: "file-status-label" }, label),
+    fileStatus === "connected" && fileName && e("span", { className: "file-status-name" }, fileName),
+    e("div", { className: "file-actions" },
+      fileStatus === "disconnected"
+        ? e("button", { className: "file-btn file-btn--primary", onClick: onOpenModal }, "Link File")
+        : e("button", { className: "file-btn", onClick: onDisconnect }, "Disconnect")
+    )
+  );
+}
+
+// ─── File Connect Modal ──────────────────────────────────────────────────────
+
+function FileConnectModal(props) {
+  var onCreateNew=props.onCreateNew, onOpenExisting=props.onOpenExisting, onClose=props.onClose;
+
+  return e("div", { className: "file-overlay", onClick: function(ev){ if(ev.target===ev.currentTarget)onClose(); } },
+    e("div", { className: "file-modal" },
+      e("div", { className: "file-modal-title" }, "Link a File"),
+      e("div", { className: "file-modal-sub" }, "Connect to a JSON file for persistent storage. Save to iCloud Drive, Dropbox, or anywhere on your machine for automatic sync."),
+      e("div", { className: "file-option", onClick: onCreateNew },
+        e("span", { className: "file-option-icon" }, "\u{1F4C4}"),
+        e("div", { className: "file-option-text" },
+          e("h3", null, "Create new file"),
+          e("p", null, hasFileSystemAccess
+            ? "Choose where to save \u2014 the app will auto-save to this file from now on."
+            : "Download a sense-spark.json file you can store wherever you like."
+          )
+        )
+      ),
+      e("div", { className: "file-option", onClick: onOpenExisting },
+        e("span", { className: "file-option-icon" }, "\u{1F4C2}"),
+        e("div", { className: "file-option-text" },
+          e("h3", null, "Open existing file"),
+          e("p", null, "Already have a sense-spark.json? Open it to pick up where you left off.")
+        )
+      ),
+      e("button", { className: "file-skip", onClick: onClose }, "Cancel \u2014 keep using browser storage"),
+      hasFileSystemAccess && e("p", { className: "file-api-note" }, "Your browser supports persistent file access. The app will remember your file and reconnect automatically next time.")
+    )
+  );
+}
+
+// ─── Info Modal ─────────────────────────────────────────────────────────────
+
+function InfoModal(props) {
+  return e("div", { className: "info-overlay", onClick: props.onClose },
+    e("div", { className: "info-modal", onClick: function(ev){ ev.stopPropagation(); } },
+      e("h3", null, "What is SenseSpark?"),
+      e("div", { className: "info-quote" }, "Object writing is about using your senses as diving equipment — they take you to places you wouldn't reach just by thinking."),
+      e("div", { className: "info-section" },
+        e("h4", null, "The Technique"),
+        e("p", null, "SenseSpark is built around 'object writing', a method developed by Pat Pattison at Berklee College of Music. Pick any object or idea as a seed word, then freewrite about it through seven sense channels: sight, sound, touch, taste, smell, movement, and emotion. The goal isn't to describe the object — it's to follow wherever your senses lead, collecting vivid, unexpected images along the way.")
+      ),
+      e("div", { className: "info-section" },
+        e("h4", null, "Sprint Mode"),
+        e("p", null, "Set a timer and SenseSpark automatically cycles through each sense at equal intervals. When the timer moves to the next sense, keep writing — the constraint forces fresh perspectives and prevents overthinking.")
+      ),
+      e("div", { className: "info-section" },
+        e("h4", null, "The Word Bank"),
+        e("p", null, "As you write, suggested words appear based on your chosen sense. Click any word to copy it — useful when you hit a wall and need a spark of inspiration.")
+      ),
+      e("div", { className: "info-section" },
+        e("h4", null, "Archive & Export"),
+        e("p", null, "Every session is auto-saved. Browse past sessions by seed word or date, and export individual sessions or your entire archive as formatted text.")
+      ),
+      e("div", { className: "info-section" },
+        e("h4", null, "File Sync"),
+        e("p", null, "Connect to a JSON file for persistent cross-device sync. Save to iCloud Drive, Dropbox, or your local machine — your work stays in sync wherever you go.")
+      ),
+      e("div", { className: "info-actions" },
+        e("button", { className: "btn btn--ghost", onClick: props.onClose }, "Got it")
+      )
+    )
+  );
+}
+
+// ─── App ────────────────────────────────────────────────────────────────────
+
+function App() {
+  // Migrate old drafts on first load
+  var _migrated = useRef(false);
+  if (!_migrated.current) { migrateOldDrafts(); _migrated.current = true; }
+
+  var saved = loadCurrent();
+  var _seed=useState(saved?saved.seedWord||"":""), seedWord=_seed[0], setSeedWord=_seed[1];
+  var _data=useState(saved?saved.senseData||emptySenseData():emptySenseData()), senseData=_data[0], setSenseData=_data[1];
+  var _active=useState(null), activeSense=_active[0], setActiveSense=_active[1];
+  var _export=useState(false), showExport=_export[0], setShowExport=_export[1];
+  var _archive=useState(loadArchive), archive=_archive[0], setArchive=_archive[1];
+  var _showArchive=useState(false), showArchive=_showArchive[0], setShowArchive=_showArchive[1];
+  var _showInfo=useState(false), showInfo=_showInfo[0], setShowInfo=_showInfo[1];
+
+  // File System Access API state
+  var _fh=useState(null), fileHandle=_fh[0], setFileHandle=_fh[1];
+  var _fn=useState(null), fileName=_fn[0], setFileName=_fn[1];
+  var _fs=useState("disconnected"), fileStatus=_fs[0], setFileStatus=_fs[1];
+  var _fm=useState(false), showFileModal=_fm[0], setShowFileModal=_fm[1];
+  var fileHandleRef = useRef(null);
+  var fileSaveTimer = useRef(null);
+  var hiddenInputRef = useRef(null);
+
+  // Keep ref in sync
+  useEffect(function() { fileHandleRef.current = fileHandle; }, [fileHandle]);
+
+  var _sprint=useState(false), sprintActive=_sprint[0], setSprintActive=_sprint[1];
+  var _interval=useState(90), sprintInterval=_interval[0], setSprintInterval=_interval[1];
+  var _si=useState(0), sprintIdx=_si[0], setSprintIdx=_si[1];
+  var _tl=useState(90), timeLeft=_tl[0], setTimeLeft=_tl[1];
+  var timerRef = useRef(null);
+
+  // Auto-reconnect to stored file handle on mount
+  useEffect(function() {
+    if (!hasFileSystemAccess) return;
+    getStoredHandle().then(function(stored) {
+      if (!stored) return;
+      verifyPermission(stored, true).then(function(ok) {
+        if (!ok) return;
+        readFileHandle(stored).then(function(payload) {
+          var parsed = parseSavePayload(payload);
+          if (!parsed) return;
+          // Merge file archive with local archive
+          if (parsed.archive && parsed.archive.length > 0) {
+            var merged = mergeArchiveData(loadArchive(), parsed.archive);
+            setArchive(merged);
+            saveArchive(merged);
+          }
+          // Restore current session if present
+          if (parsed.current) {
+            if (parsed.current.seedWord) setSeedWord(parsed.current.seedWord);
+            if (parsed.current.senseData) setSenseData(parsed.current.senseData);
+          }
+          setFileHandle(stored);
+          setFileName(stored.name);
+          setFileStatus("connected");
+        }).catch(function(err) { console.log("Could not read stored file:", err); });
+      }).catch(function() {});
+    });
+  }, []);
+
+  // Show info modal on first visit
+  useEffect(function() {
+    var hasVisited = localStorage.getItem("ss-has-visited");
+    if (!hasVisited) {
+      setShowInfo(true);
+      localStorage.setItem("ss-has-visited", "true");
+    }
+  }, []);
+
+  // Auto-save to localStorage + file (debounced)
+  useEffect(function() {
+    saveCurrent({seedWord:seedWord,senseData:senseData});
+    if (fileHandleRef.current) {
+      clearTimeout(fileSaveTimer.current);
+      fileSaveTimer.current = setTimeout(function() {
+        var payload = buildSavePayload(seedWord, senseData, archive);
+        setFileStatus("saving");
+        writeFileHandle(fileHandleRef.current, payload).then(function() {
+          setFileStatus("connected");
+        }).catch(function(err) {
+          console.error("File save error:", err);
+          setFileStatus("disconnected");
+          setFileHandle(null);
+          setFileName(null);
+        });
+      }, 1000);
+    }
+    return function(){ clearTimeout(fileSaveTimer.current); };
+  }, [seedWord, senseData, archive]);
+
+  useEffect(function() {
+    if (!sprintActive) return;
+    timerRef.current = setInterval(function() {
+      setTimeLeft(function(prev) {
+        if (prev <= 1) {
+          setSprintIdx(function(si) {
+            var next = si+1;
+            if (next >= SENSES.length) { setSprintActive(false); setActiveSense(null); return 0; }
+            setActiveSense(SENSES[next].id); setTimeLeft(sprintInterval); return next;
+          }); return sprintInterval;
+        } return prev-1;
+      });
+    }, 1000);
+    return function(){ clearInterval(timerRef.current); };
+  }, [sprintActive, sprintInterval]);
+
+  var startSprint = useCallback(function(){ setSprintIdx(0); setTimeLeft(sprintInterval); setSprintActive(true); setActiveSense(SENSES[0].id); }, [sprintInterval]);
+  var stopSprint = useCallback(function(){ setSprintActive(false); clearInterval(timerRef.current); }, []);
+  var resetSprint = useCallback(function(){ setSprintActive(false); clearInterval(timerRef.current); setSprintIdx(0); setTimeLeft(sprintInterval); setActiveSense(null); }, [sprintInterval]);
+  var updateSense = useCallback(function(id,text){ setSenseData(function(prev){ var n=Object.assign({},prev); n[id]=text; return n; }); }, []);
+
+  function doSaveToArchive() {
+    var tw = totalWords(senseData); if (tw===0) return;
+    var entry = { id: Date.now(), seedWord:seedWord, senseData:Object.assign({},senseData), date: new Date().toISOString(), wordCount: tw };
+    var updated = [entry].concat(archive);
+    setArchive(updated); saveArchive(updated);
+  }
+  function doLoadEntry(d) { setSeedWord(d.seedWord||""); setSenseData(d.senseData||emptySenseData()); setActiveSense(null); resetSprint(); }
+  function doDeleteEntry(id) {
+    var updated = archive.filter(function(e){ return e.id !== id; });
+    setArchive(updated); saveArchive(updated);
+  }
+  function doNew() { doSaveToArchive(); setSenseData(emptySenseData()); setSeedWord(""); setActiveSense(null); resetSprint(); }
+  function doExportAll() {
+    var out = "SENSE SPARK \u2014 Full Archive Export\n" + "\u2550".repeat(60) + "\n";
+    out += "Exported: " + new Date().toLocaleString() + "\nSessions: " + archive.length + "\n" + "\u2550".repeat(60) + "\n\n";
+    archive.forEach(function(entry, idx) {
+      out += "\u2500".repeat(60) + "\n";
+      out += "SESSION " + (idx+1) + ": " + (entry.seedWord || "(untitled)") + "\n";
+      out += "Date: " + (entry.date ? new Date(entry.date).toLocaleString() : "unknown") + "  |  " + (entry.wordCount || 0) + " words\n";
+      out += "\u2500".repeat(60) + "\n\n";
+      SENSES.forEach(function(s) {
+        var t = (entry.senseData && entry.senseData[s.id]) || "";
+        if (t.trim()) { out += s.icon + " " + s.label.toUpperCase() + " (" + wordCount(t) + " words)\n" + t.trim() + "\n\n"; }
+      });
+      out += "\n";
+    });
+    var b = new Blob([out], { type: "text/plain" });
+    var u = URL.createObjectURL(b);
+    var a = document.createElement("a");
+    a.href = u; a.download = "sense-spark-all-" + new Date().toISOString().slice(0,10) + ".txt";
+    a.click(); URL.revokeObjectURL(u);
+  }
+
+  // JSON import handler
+  function doImportArchive(ev) {
+    var file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var imported = JSON.parse(e.target.result);
+        if (!Array.isArray(imported)) return;
+        var existingIds = {};
+        archive.forEach(function(entry){ existingIds[entry.id] = true; });
+        var newEntries = imported.filter(function(entry){ return !existingIds[entry.id]; });
+        var merged = newEntries.concat(archive);
+        merged.sort(function(a,b){ return (b.id||0) - (a.id||0); });
+        setArchive(merged); saveArchive(merged);
+      } catch(x) { console.warn("Import failed:", x); }
+    };
+    reader.readAsText(file);
+    ev.target.value = "";
+  }
+
+  // ─── File system actions ──
+  function doCreateFile() {
+    if (hasFileSystemAccess) {
+      window.showSaveFilePicker({
+        suggestedName: "sense-spark.json",
+        types: [{ description: "Sense Spark Data", accept: { "application/json": [".json"] } }]
+      }).then(function(handle) {
+        var payload = buildSavePayload(seedWord, senseData, archive);
+        return writeFileHandle(handle, payload).then(function() {
+          return readFileHandle(handle).then(function(check) {
+            if (!check || typeof check !== "object") throw new Error("Write verification failed");
+            return storeFileHandle(handle).then(function() {
+              setFileHandle(handle);
+              setFileName(handle.name);
+              setFileStatus("connected");
+              setShowFileModal(false);
+            });
+          });
+        });
+      }).catch(function(err) {
+        if (err.name === "AbortError") return;
+        console.error("Create file failed:", err);
+        // Fallback download
+        doFallbackDownload();
+      });
+    } else {
+      doFallbackDownload();
+    }
+  }
+
+  function doFallbackDownload() {
+    var payload = buildSavePayload(seedWord, senseData, archive);
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = "sense-spark.json"; a.click();
+    URL.revokeObjectURL(url);
+    setShowFileModal(false);
+  }
+
+  function doOpenFile() {
+    if (hasFileSystemAccess) {
+      window.showOpenFilePicker({
+        types: [{ description: "Sense Spark Data", accept: { "application/json": [".json"] } }]
+      }).then(function(handles) {
+        var handle = handles[0];
+        return verifyPermission(handle, true).then(function(ok) {
+          if (!ok) return;
+          return readFileHandle(handle).then(function(payload) {
+            var parsed = parseSavePayload(payload);
+            if (!parsed) throw new Error("Invalid file data");
+            // Merge archives
+            if (parsed.archive && parsed.archive.length > 0) {
+              var merged = mergeArchiveData(archive, parsed.archive);
+              setArchive(merged); saveArchive(merged);
+            }
+            // Restore current session
+            if (parsed.current) {
+              if (parsed.current.seedWord) setSeedWord(parsed.current.seedWord);
+              if (parsed.current.senseData) setSenseData(parsed.current.senseData);
+            }
+            return storeFileHandle(handle).then(function() {
+              setFileHandle(handle);
+              setFileName(handle.name);
+              setFileStatus("connected");
+              setShowFileModal(false);
+            });
+          });
+        });
+      }).catch(function(err) {
+        if (err.name === "AbortError") return;
+        console.error("Open file failed:", err);
+        // Fallback to hidden input
+        if (hiddenInputRef.current) hiddenInputRef.current.click();
+      });
+    } else {
+      if (hiddenInputRef.current) hiddenInputRef.current.click();
+    }
+  }
+
+  function doFallbackFileLoad(ev) {
+    var file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(re) {
+      try {
+        var payload = JSON.parse(re.target.result);
+        var parsed = parseSavePayload(payload);
+        if (parsed) {
+          if (parsed.archive && parsed.archive.length > 0) {
+            var merged = mergeArchiveData(archive, parsed.archive);
+            setArchive(merged); saveArchive(merged);
+          }
+          if (parsed.current) {
+            if (parsed.current.seedWord) setSeedWord(parsed.current.seedWord);
+            if (parsed.current.senseData) setSenseData(parsed.current.senseData);
+          }
+        } else {
+          // Try as old archive format (plain array)
+          if (Array.isArray(payload)) {
+            var merged2 = mergeArchiveData(archive, payload);
+            setArchive(merged2); saveArchive(merged2);
+          }
+        }
+        setFileName(file.name);
+        setFileStatus("connected");
+        setShowFileModal(false);
+      } catch(x) { console.warn("File load failed:", x); }
+    };
+    reader.readAsText(file);
+    ev.target.value = "";
+  }
+
+  function doDisconnectFile() {
+    clearStoredHandle();
+    setFileHandle(null);
+    setFileName(null);
+    setFileStatus("disconnected");
+  }
+
+  var tw = totalWords(senseData);
+  var su = sensesUsed(senseData);
+  var activeSenseObj = activeSense ? SENSES.find(function(s){return s.id===activeSense;}) : null;
+
+  // Hidden file input for fallback
+  var hiddenInput = e("input", { ref: hiddenInputRef, type: "file", accept: ".json", style: { display: "none" }, onChange: doFallbackFileLoad });
+
+  // ── Writing view ──
+  if (activeSense && activeSenseObj) {
+    return e("div", { style:{height:"100%",display:"flex",flexDirection:"column"} },
+      e("div", { className:"titlebar" },
+        e("div", null,
+          e("span",{className:"titlebar-brand"},"Sense Spark"),
+          e("span",{className:"titlebar-sub"},"Object Writing Tool")
+        ),
+        e("button", { className: "info-btn-header", onClick: function(){ setShowInfo(true); }, title: "About SenseSpark" },
+          e("span", null, "ℹ"),
+          e("span", null, "Info")
+        ),
+        tw > 0 && e("div",{className:"titlebar-stats"}, tw+" words \u00B7 "+su+"/7")
+      ),
+      sprintActive && e("div", { style:{padding:"8px 24px 0",flexShrink:0} },
+        e("div", { style:{display:"flex",alignItems:"center",gap:10,marginBottom:6} },
+          e("span",{className:"sprint-timer"+(timeLeft<=10?" sprint-timer--urgent":""),style:{fontSize:18,color:timeLeft<=10?undefined:"#ccc"}},
+            Math.floor(timeLeft/60)+":"+String(timeLeft%60).padStart(2,"0")),
+          e("div",{style:{flex:1}}, e("div",{className:"sprint-bar"},
+            e("div",{className:"sprint-bar-fill",style:{width:(timeLeft/(sprintInterval||1)*100)+"%",background:activeSenseObj.color}})
+          )),
+          e("button",{className:"btn btn--ghost",style:{padding:"6px 14px",fontSize:12},onClick:stopSprint},"Stop")
+        ),
+        e("div",{className:"sprint-dots",style:{marginBottom:0}},
+          SENSES.map(function(s,i){return e("div",{key:s.id,className:"sprint-dot",style:{background:i<=sprintIdx?s.color:"#222",opacity:i<=sprintIdx?1:0.3}});})
+        )
+      ),
+      e(WritingView, { sense:activeSenseObj, text:senseData[activeSense],
+        onChange:function(t){updateSense(activeSense,t);}, onBack:function(){setActiveSense(null);}, sprintActive:sprintActive }),
+      e("div", { className:"mini-hex", onClick:function(){if(!sprintActive)setActiveSense(null);}, title: sprintActive?"Sprint active":"Back" },
+        e(HexSVG, { senseData:senseData, activeSense:activeSense, onSelect:function(id){if(!sprintActive)setActiveSense(id);}, seedWord:seedWord, mini:true })
+      ),
+      showExport && e(ExportModal, { seedWord:seedWord, senseData:senseData, onClose:function(){setShowExport(false);} }),
+      showArchive && e(ArchiveBrowser, { archive:archive, onLoad:doLoadEntry, onDelete:doDeleteEntry, onClose:function(){setShowArchive(false);}, onExportAll:doExportAll }),
+      showFileModal && e(FileConnectModal, { onCreateNew:doCreateFile, onOpenExisting:doOpenFile, onClose:function(){setShowFileModal(false);} }),
+      showInfo && e(InfoModal, { onClose: function(){ setShowInfo(false); } })
+    );
+  }
+
+  // ── Hub view ──
+  return e("div", { style:{height:"100%",display:"flex",flexDirection:"column"} },
+    e("div", { className:"titlebar" },
+      e("div", null,
+        e("span",{className:"titlebar-brand"},"Sense Spark"),
+        e("span",{className:"titlebar-sub"},"Object Writing Tool")
+      ),
+      e("button", { className: "info-btn-header", onClick: function(){ setShowInfo(true); }, title: "About SenseSpark" },
+        e("span", null, "ℹ"),
+        e("span", null, "Info")
+      ),
+      tw > 0 && e("div",{className:"titlebar-stats"}, tw+" words \u00B7 "+su+"/7")
+    ),
+    e("div", { className:"hub" },
+      // Seed input + random button
+      e("div", { className:"seed-row" },
+        e("div", { className:"seed-field" },
+          e("label",{className:"seed-label"}, "Seed Word / Prompt"),
+          e("input", { className:"seed-input", type:"text", value:seedWord,
+            onChange:function(ev){setSeedWord(ev.target.value);},
+            placeholder:"e.g. \u201Cthe old kitchen\u201D or \u201Ca rainy bus stop\u201D"
+          })
+        ),
+        e("button", { className:"seed-random", onClick:function(){ doSaveToArchive(); setSenseData(emptySenseData()); setSeedWord(randomSeed()); setActiveSense(null); resetSprint(); }, title:"Save & generate new seed" }, "\u{1F3B2}  Random")
+      ),
+      // Hexagon with pills
+      e(HexWithPills, { senseData:senseData, activeSense:activeSense, onSelect:setActiveSense, seedWord:seedWord }),
+      // Controls below hex
+      e("div", { className:"controls" },
+        e(SprintControls, { active:sprintActive, timeLeft:timeLeft, totalTime:sprintInterval, senseIdx:sprintIdx,
+          onStart:startSprint, onStop:stopSprint, onReset:resetSprint, interval:sprintInterval, onIntervalChange:setSprintInterval }),
+        e("div", { className:"actions" },
+          e("button", { className:"btn btn--export", disabled:tw===0, onClick:function(){setShowExport(true);} }, "Export"),
+          e("button", { className:"btn btn--archive", onClick:function(){setShowArchive(true);} },
+            "\u{1F4DA} Archive" + (archive.length > 0 ? " (" + archive.length + ")" : "")
+          ),
+          e("button", { className:"btn btn--new", onClick:doNew }, "New Session")
+        ),
+        archive.length > 0 && e("div", { className:"drafts-row" },
+          e("span",{className:"drafts-label"}, "Recent:"),
+          archive.slice(0,5).map(function(d) {
+            return e("span", { key:d.id, className:"draft-chip", onClick:function(){doLoadEntry(d);},
+              title: d.seedWord+" ("+d.wordCount+" words)"
+            }, (d.seedWord||"untitled")+" \u00B7 "+d.wordCount+"w");
+          })
+        ),
+        // File status bar
+        e(FileStatusBar, { fileStatus:fileStatus, fileName:fileName, onOpenModal:function(){setShowFileModal(true);}, onDisconnect:doDisconnectFile })
+      )
+    ),
+    hiddenInput,
+    showExport && e(ExportModal, { seedWord:seedWord, senseData:senseData, onClose:function(){setShowExport(false);} }),
+    showArchive && e(ArchiveBrowser, {
+      archive: archive,
+      onLoad: doLoadEntry,
+      onDelete: doDeleteEntry,
+      onClose: function(){ setShowArchive(false); },
+      onExportAll: doExportAll
+    }),
+    showFileModal && e(FileConnectModal, { onCreateNew:doCreateFile, onOpenExisting:doOpenFile, onClose:function(){setShowFileModal(false);} }),
+    showInfo && e(InfoModal, { onClose: function(){ setShowInfo(false); } })
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(e(App));
+</script>
+<script src="uz-nav.js"></script>
+<script src="uz-footer.js"></script>
+</body>
+</html>

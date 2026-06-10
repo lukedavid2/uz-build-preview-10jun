@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  FIELD NOTES, ARTICLE TEMPLATE
+  ══════════════════════════════════════════════════════════════════════
+
+  To publish a new article:
+
+  1. Copy this file to:  /blog/<slug>/index.html
+     where <slug> is the URL-safe title, e.g. "borrowed-chords-primer".
+
+  2. Replace every {{ PLACEHOLDER }} below with real content.
+
+  3. Pick an author class for every fn-avatar:
+       mv  → Marcus Vale     (Theory & Harmony)
+       jo  → June Okafor     (Process & Craft)
+       sr  → Sasha Reyes     (Lyrics & Inspiration)
+
+  4. Category is one of:   Theory · Lyrics · Process · Inspiration
+
+  5. Add the new URL to /sitemap.xml and to /blog/index.html (top of list).
+
+  6. Speaker-note: the avatar classes are visual-only. Update the JSON-LD
+     "author" block too so search engines see the real byline.
+
+  No build step needed. Hand-finished HTML, same pattern as every other
+  page in the suite.
+  ══════════════════════════════════════════════════════════════════════
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <!-- ── PER-ARTICLE META ─────────────────────────────────────────── -->
+  <title>{{ TITLE }}, Field Notes</title>
+  <meta name="description" content="{{ DESCRIPTION, ~155 chars, SEO-friendly, includes target keyword. }}">
+  <meta name="keywords" content="{{ COMMA, SEPARATED, KEYWORDS }}">
+  <meta name="theme-color" content="#1a1a2a">
+  <link rel="alternate" type="application/rss+xml" title="Field Notes — Undercover Zest" href="https://undercoverzest.app/blog/feed.xml">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ TITLE }}">
+  <meta property="og:description" content="{{ SHORT_OG_DESCRIPTION }}">
+  <meta property="og:type" content="article">
+  <meta property="og:image" content="https://undercoverzest.app/lemon-logo.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ TITLE }}">
+  <meta name="twitter:description" content="{{ SHORT_TWITTER_DESCRIPTION }}">
+  <meta name="twitter:image" content="https://undercoverzest.app/lemon-logo.png">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍋</text></svg>">
+
+  <!-- Shared fonts + blog stylesheet -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../blog/blog.css">
+
+  <!-- ── JSON-LD: every article needs its own ─────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "{{ TITLE }}",
+    "description": "{{ DESCRIPTION }}",
+    "image": "https://undercoverzest.app/lemon-logo.png",
+    "author": {
+      "@type": "Person",
+      "name": "{{ AUTHOR_NAME }}",
+      "jobTitle": "{{ AUTHOR_ROLE }}",
+      "affiliation": "Undercover Zest"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Undercover Zest",
+      "logo": { "@type": "ImageObject", "url": "https://undercoverzest.app/lemon-logo.png" }
+    },
+    "datePublished": "{{ YYYY-MM-DD }}",
+    "dateModified": "{{ YYYY-MM-DD }}",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://undercoverzest.app/blog/{{ SLUG }}/"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <article class="fn-wrap fn-article">
+
+    <!-- 1. Back link, always /blog/ -->
+    <a class="fn-back" href="../blog/">Back to all Field Notes</a>
+
+    <!-- 2. Eyebrow: Category · Field Notes #NNN -->
+    <div class="fn-eyebrow">{{ CATEGORY }} · Field Notes #{{ NNN }}</div>
+
+    <!-- 3. H1 -->
+    <h1>{{ TITLE }}</h1>
+
+    <!-- 4. Lede (1 short paragraph, ~25 words) -->
+    <p class="fn-lede">{{ LEDE }}</p>
+
+    <!-- 5. Byline: avatar · author · date · reading time · share -->
+    <div class="fn-byline">
+      <span class="fn-avatar {{ AUTHOR_CLASS: mv | jo | sr }}" aria-hidden="true">{{ INITIALS }}</span>
+      <div class="fn-author-info">
+        <div class="fn-author-name"><a href="#author">{{ AUTHOR_NAME }}</a></div>
+        <div class="fn-meta">{{ Month DD, YYYY }} · {{ N }} min read</div>
+      </div>
+      <div class="fn-share" role="group" aria-label="Share this article">
+        <a class="fn-share-btn" href="#" title="Copy link" aria-label="Copy link">⌘</a>
+        <a class="fn-share-btn" href="https://twitter.com/intent/tweet?url=https://undercoverzest.app/blog/{{ SLUG }}/" title="Share on X" aria-label="Share on X">𝕏</a>
+        <a class="fn-share-btn" href="#" title="Share on Reddit" aria-label="Share on Reddit">R</a>
+      </div>
+    </div>
+
+    <!-- 6. Body, Outfit body, Playfair H2/H3.  See CSS for available extras. -->
+    <div class="fn-body">
+
+      <p>{{ FIRST_BODY_PARAGRAPH }}</p>
+
+      <h2>{{ SECTION_HEADING }}</h2>
+      <p>{{ … }}</p>
+
+      <!-- Optional: a sub-heading with a Roman-numeral chip (Theory articles) -->
+      <!-- <h3>1. The Four-Chord Pop Loop <span class="fn-rn">I–V–vi–IV</span></h3> -->
+
+      <!-- Optional: a pull-quote -->
+      <!-- <p class="fn-pull">A short, italic line that earns its space.</p> -->
+
+      <!-- 7. CTA box, every article should have ONE, deep-linking to a tool -->
+      <div class="fn-cta">
+        <h2>{{ CTA_HEADING }}</h2>
+        <p>{{ ONE_SENTENCE_BENEFIT }}</p>
+        <a class="fn-cta-btn" href="{{ /  |  /rhymeforge/  |  /collisionlab/  |  /morningpages/  |  /sensespark/ }}">{{ BUTTON_LABEL }}</a>
+      </div>
+
+    </div>
+
+    <!-- 8. Author card, anchor target for the byline link -->
+    <aside class="fn-author-card" id="author">
+      <span class="fn-avatar {{ AUTHOR_CLASS }}" aria-hidden="true">{{ INITIALS }}</span>
+      <div class="fn-author-card-body">
+        <div class="fn-author-card-eyebrow">Written by</div>
+        <div class="fn-author-card-name">{{ AUTHOR_NAME }}</div>
+        <p class="fn-author-card-bio">{{ AUTHOR_BIO, the writer's first-person bio (~55 words). Reuse the same bio across every article by this writer. }}</p>
+      </div>
+    </aside>
+
+    <!-- 9. Up next + related (cross-link to keep readers in the blog) -->
+    <section class="fn-foot" aria-label="Keep reading">
+      <div>
+        <div class="fn-foot-eyebrow">Up next</div>
+        <a class="fn-next-card" href="../blog/{{ NEXT_SLUG }}/">
+          <div class="fn-next-cat">{{ NEXT_CATEGORY }} · {{ NEXT_AUTHOR }}</div>
+          <div class="fn-next-title">{{ NEXT_TITLE }}</div>
+          <span class="fn-next-arrow">Read next →</span>
+        </a>
+      </div>
+      <div>
+        <div class="fn-foot-eyebrow">Related reading</div>
+        <div class="fn-related">
+          <a class="fn-related-link" href="../blog/{{ RELATED_SLUG_1 }}/">
+            <span class="fn-related-cat">{{ CATEGORY }}</span>
+            {{ RELATED_TITLE_1 }}
+          </a>
+          <a class="fn-related-link" href="../blog/{{ RELATED_SLUG_2 }}/">
+            <span class="fn-related-cat">{{ CATEGORY }}</span>
+            {{ RELATED_TITLE_2 }}
+          </a>
+          <a class="fn-related-link" href="../blog/{{ RELATED_SLUG_3 }}/">
+            <span class="fn-related-cat">{{ CATEGORY }}</span>
+            {{ RELATED_TITLE_3 }}
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Suite footer note, same on every article -->
+    <p class="fn-footer-note">
+      Undercover Zest is a free suite of songwriting tools, a chord progression
+      builder, RhymeForge, CollisionLab, Morning Pages, and SenseSpark.
+      No account, no cost, no catch.
+    </p>
+
+    <p class="fn-disclosure-link"><a href="../blog/about/">About the writers</a></p>
+
+  </article>
+
+  <!-- 11. Suite shell, same on every page -->
+  <script src="../uz-nav.js"></script>
+  <script src="../uz-footer.js"></script>
+</body>
+</html>

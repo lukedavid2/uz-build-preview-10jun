@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Pages — Free Online Writing Journal for Songwriters</title>
+<meta name="description" content="A distraction-free morning writing journal with daily and weekly tracking. Stream-of-consciousness writing to unlock your creativity. Free, no sign-up required.">
+<meta name="keywords" content="morning pages, free writing journal, stream of consciousness, songwriting journal, creative writing, daily writing habit, writing prompts">
+<meta property="og:title" content="Morning Pages — Free Writing Journal for Songwriters">
+<meta property="og:description" content="Write before you think. A distraction-free morning journal that tracks your streak and helps you build a daily writing habit.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#8b7355">
+<meta property="og:image" content="https://undercoverzest.app/lemon-logo.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Morning Pages — Free Writing Journal">
+<meta name="twitter:description" content="Write before you think. A distraction-free morning journal for songwriters. Track your streak and build a daily writing habit.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✍️</text></svg>">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #faf9f6;
+  --bg-warm: #f5f3ee;
+  --lab-bg: #faf9f6;
+  --text: #2c2c2c;
+  --text-light: #6b6560;
+  --text-faint: #a8a29e;
+  --accent: #8b7355;
+  --accent-light: #c4b59a;
+  --accent-hover: #6d5a43;
+  --border: #e8e4de;
+  --success: #6b8f6b;
+  --danger: #b55a5a;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 6px;
+  --serif: 'Lora', Georgia, serif;
+  --sans: 'Source Sans 3', -apple-system, sans-serif;
+}
+
+html { font-size: 16px; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes nudgeFade { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes completePulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.fade-in { animation: fadeIn 0.3s ease-out; }
+.slide-in { animation: slideIn 0.25s ease-out; }
+
+/* Layout */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 220px;
+  background: var(--bg-warm);
+  border-right: 1px solid var(--border);
+  padding: 28px 0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: var(--uz-rail-h, 52px); left: 0; bottom: 0;
+  z-index: 10;
+}
+.sidebar-logo { padding: 0 24px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; display: flex; align-items: flex-start; justify-content: space-between; }
+.sidebar-logo-text h1 { font-family: var(--serif); font-size: 1.15rem; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
+.sidebar-logo-text p { font-size: 0.75rem; color: var(--text-faint); margin-top: 2px; }
+.info-btn {
+  background: rgba(139,115,85,0.08); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 5px 10px; display: flex; align-items: center; gap: 5px;
+  cursor: pointer; color: var(--text-light); font-family: var(--sans);
+  font-size: 0.72rem; font-weight: 500; transition: all 0.15s;
+  flex-shrink: 0; margin-top: 2px; letter-spacing: 0.01em;
+}
+.info-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.info-btn:hover { border-color: var(--accent-light); color: var(--accent); background: rgba(139,115,85,0.14); }
+.sidebar-nav { flex: 1; padding: 0 12px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  border-radius: var(--radius); cursor: pointer; font-size: 0.875rem;
+  font-weight: 400; color: var(--text-light); transition: all 0.15s;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: rgba(139,115,85,0.08); color: var(--text); }
+.nav-item.active { background: rgba(139,115,85,0.12); color: var(--accent-hover); font-weight: 500; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* File status in sidebar */
+.file-status {
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+.file-status-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+}
+.file-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.file-dot.connected { background: var(--success); }
+.file-dot.disconnected { background: var(--text-faint); }
+.file-dot.saving { background: var(--accent); animation: pulse 1s infinite; }
+.file-status-label { color: var(--text-light); font-weight: 500; }
+.file-status-name { color: var(--text-faint); font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-status-actions { display: flex; gap: 6px; margin-top: 6px; }
+.file-btn {
+  font-size: 0.7rem; padding: 3px 8px; border-radius: 4px;
+  border: 1px solid var(--border); background: none; color: var(--text-light);
+  cursor: pointer; font-family: var(--sans); transition: all 0.15s;
+}
+.file-btn:hover { border-color: var(--accent-light); color: var(--text); }
+.file-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.file-btn.primary:hover { background: var(--accent-hover); }
+
+.nav-streak {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+.nav-streak .streak-num { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--accent); }
+.nav-streak .streak-label { font-size: 0.75rem; color: var(--text-faint); }
+.main { margin-left: 220px; flex: 1; min-height: 100vh; }
+
+/* Writing View */
+.writing-container { max-width: 680px; margin: 0 auto; padding: 48px 32px 120px; animation: fadeIn 0.4s ease-out; }
+.writing-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+.writing-date { font-family: var(--serif); font-size: 0.95rem; color: var(--text-light); font-style: italic; }
+.writing-meta { display: flex; gap: 16px; align-items: center; }
+.writing-meta span { font-size: 0.8rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.writing-area {
+  width: 100%; min-height: 65vh; border: none; outline: none; resize: none;
+  font-family: var(--serif); font-size: 1.1rem; line-height: 1.85;
+  color: var(--text); background: transparent; caret-color: var(--accent);
+}
+.writing-area::placeholder { color: var(--text-faint); font-style: italic; }
+
+/* Save & Finish */
+.writing-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 24px; margin-top: 24px; border-top: 1px solid var(--border);
+}
+.finish-btn {
+  padding: 10px 24px; border-radius: var(--radius); font-family: var(--sans);
+  font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.15s;
+  border: 1px solid var(--accent); background: var(--accent); color: #fff;
+}
+.finish-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.finish-btn:disabled { opacity: 0.4; cursor: default; }
+.finish-btn.finished { background: var(--success); border-color: var(--success); cursor: default; }
+.finished-state {
+  text-align: center; padding: 60px 20px; animation: fadeIn 0.4s ease-out;
+}
+.finished-state h2 { font-family: var(--serif); font-size: 1.3rem; font-weight: 500; color: var(--success); margin-bottom: 8px; }
+.finished-state p { font-size: 0.9rem; color: var(--text-faint); margin-bottom: 4px; }
+.finished-state .resume-link {
+  font-size: 0.8rem; color: var(--text-faint); cursor: pointer; background: none;
+  border: none; font-family: var(--sans); margin-top: 16px; padding: 6px 12px;
+  border-bottom: 1px dashed var(--text-faint);
+}
+.finished-state .resume-link:hover { color: var(--text-light); border-color: var(--text-light); }
+
+.progress-wrap { position: fixed; bottom: 0; left: 220px; right: 0; height: 3px; background: var(--border); z-index: 5; }
+.progress-bar { height: 100%; background: var(--accent-light); transition: width 0.4s ease-out; }
+.progress-bar.complete { background: var(--success); }
+
+.complete-banner {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(calc(-50% + 110px));
+  background: var(--success); color: #fff; padding: 10px 24px; border-radius: 20px;
+  font-size: 0.85rem; font-weight: 500; animation: completePulse 0.5s ease-out;
+  z-index: 6; box-shadow: var(--shadow-lg);
+}
+.nudge {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(calc(-50% + 110px));
+  color: var(--text-faint); font-size: 0.85rem; font-style: italic;
+  animation: nudgeFade 5s ease-in-out forwards; pointer-events: none; z-index: 6;
+}
+
+/* Views */
+.view-container { max-width: 720px; margin: 0 auto; padding: 48px 32px; animation: fadeIn 0.3s ease-out; }
+.view-title { font-family: var(--serif); font-size: 1.3rem; font-weight: 500; margin-bottom: 8px; }
+.view-subtitle { font-size: 0.85rem; color: var(--text-faint); margin-bottom: 28px; }
+.search-bar { display: flex; gap: 10px; margin-bottom: 24px; }
+.search-input {
+  flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+  font-family: var(--sans); font-size: 0.875rem; background: #fff; color: var(--text);
+  outline: none; transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--accent-light); }
+.search-input::placeholder { color: var(--text-faint); }
+
+.entry-card {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 12px; cursor: pointer; transition: all 0.15s;
+}
+.entry-card:hover { border-color: var(--accent-light); box-shadow: var(--shadow); }
+.entry-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.entry-card-date { font-family: var(--serif); font-size: 0.9rem; font-weight: 500; }
+.entry-card-meta { font-size: 0.75rem; color: var(--text-faint); display: flex; gap: 12px; }
+.entry-card-preview {
+  font-size: 0.85rem; color: var(--text-light); line-height: 1.6; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+}
+.entry-card-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.tag { font-size: 0.7rem; padding: 2px 8px; background: var(--bg-warm); border: 1px solid var(--border); border-radius: 12px; color: var(--text-light); }
+.completion-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.completion-dot.done { background: var(--success); }
+.completion-dot.partial { background: var(--accent-light); }
+
+.entry-detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem;
+  color: var(--text-faint); cursor: pointer; background: none; border: none;
+  font-family: var(--sans); margin-bottom: 16px; padding: 4px 0;
+}
+.back-btn:hover { color: var(--text); }
+.entry-content { font-family: var(--serif); font-size: 1.05rem; line-height: 1.85; white-space: pre-wrap; color: var(--text); }
+.entry-content .highlight { background: rgba(139,115,85,0.15); border-radius: 2px; padding: 1px 0; cursor: pointer; }
+.entry-content .highlight:hover { background: rgba(139,115,85,0.25); }
+
+.tags-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.tags-section-title { font-size: 0.8rem; font-weight: 500; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+.tags-input-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tag-removable { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; padding: 3px 10px; background: var(--bg-warm); border: 1px solid var(--border); border-radius: 12px; color: var(--text-light); }
+.tag-remove { cursor: pointer; font-size: 0.85rem; color: var(--text-faint); line-height: 1; }
+.tag-remove:hover { color: var(--danger); }
+.tag-input { border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 10px; font-size: 0.8rem; font-family: var(--sans); outline: none; width: 120px; background: #fff; color: var(--text); }
+.tag-input:focus { border-color: var(--accent-light); }
+
+.seed-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px; transition: all 0.15s; }
+.seed-card:hover { border-color: var(--accent-light); }
+.seed-card.clickable { cursor: pointer; }
+.seed-text { font-family: var(--serif); font-size: 1rem; font-style: italic; color: var(--text); line-height: 1.6; }
+.seed-source { font-size: 0.75rem; color: var(--text-faint); margin-top: 6px; }
+.seed-actions { display: flex; justify-content: flex-end; margin-top: 8px; gap: 6px; align-items: center; }
+.seed-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+.seed-tag { font-size: 0.68rem; padding: 2px 8px; background: rgba(139,115,85,0.08); border: 1px solid var(--border); border-radius: 12px; color: var(--text-light); display: inline-flex; align-items: center; gap: 3px; }
+.seed-tag-remove { cursor: pointer; font-size: 0.75rem; color: var(--text-faint); line-height: 1; }
+.seed-tag-remove:hover { color: var(--danger); }
+.seed-tag-input {
+  border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px;
+  font-size: 0.7rem; font-family: var(--sans); outline: none; width: 80px;
+  background: #fff; color: var(--text);
+}
+.seed-tag-input:focus { border-color: var(--accent-light); }
+
+/* Filter panel */
+.filter-panel {
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 20px; overflow: hidden; transition: all 0.2s;
+}
+.filter-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; cursor: pointer; font-size: 0.8rem; color: var(--text-light);
+  font-weight: 500; user-select: none;
+}
+.filter-header:hover { background: var(--bg-warm); }
+.filter-header svg { transition: transform 0.2s; }
+.filter-header svg.open { transform: rotate(180deg); }
+.filter-body { padding: 0 16px 14px; }
+.filter-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-tag {
+  font-size: 0.72rem; padding: 4px 10px; border-radius: 14px;
+  border: 1px solid var(--border); background: #fff; color: var(--text-light);
+  cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;
+}
+.filter-tag:hover { border-color: var(--accent-light); }
+.filter-tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.filter-tag .count { font-size: 0.65rem; opacity: 0.7; }
+
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.stat-value { font-family: var(--serif); font-size: 1.8rem; font-weight: 600; color: var(--accent); }
+.stat-label { font-size: 0.8rem; color: var(--text-faint); margin-top: 2px; }
+
+.calendar { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 32px; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.calendar-title { font-family: var(--serif); font-size: 1rem; font-weight: 500; }
+.calendar-nav { display: flex; gap: 8px; }
+.calendar-nav button { background: none; border: 1px solid var(--border); border-radius: var(--radius); width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-light); font-size: 0.85rem; }
+.calendar-nav button:hover { border-color: var(--accent-light); }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.calendar-day-label { text-align: center; font-size: 0.7rem; color: var(--text-faint); padding: 4px 0; font-weight: 500; }
+.calendar-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 50%; color: var(--text-light); }
+.calendar-day.completed { background: var(--success); color: #fff; font-weight: 500; }
+.calendar-day.partial { background: var(--accent-light); color: #fff; }
+.calendar-day.today { border: 1.5px solid var(--accent); }
+.calendar-day.empty { color: transparent; }
+
+.settings-section { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+.settings-title { font-family: var(--serif); font-size: 1rem; font-weight: 500; margin-bottom: 16px; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.setting-row:last-child { border-bottom: none; }
+.setting-info { flex: 1; }
+.setting-label { font-size: 0.875rem; color: var(--text); }
+.setting-desc { font-size: 0.75rem; color: var(--text-faint); margin-top: 2px; }
+
+.toggle { width: 40px; height: 22px; background: var(--border); border-radius: 11px; position: relative; cursor: pointer; transition: background 0.2s; border: none; flex-shrink: 0; }
+.toggle.on { background: var(--accent); }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: transform 0.2s; }
+.toggle.on::after { transform: translateX(18px); }
+
+.btn { padding: 8px 16px; border-radius: var(--radius); font-family: var(--sans); font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border); background: #fff; color: var(--text); }
+.btn:hover { border-color: var(--accent-light); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-sm { padding: 4px 12px; font-size: 0.75rem; }
+.btn-danger { color: var(--danger); }
+.btn-danger:hover { background: rgba(181,90,90,0.08); border-color: var(--danger); }
+.btn-ghost { border-color: transparent; background: transparent; }
+.btn-ghost:hover { background: rgba(139,115,85,0.08); }
+
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text-faint); }
+.empty-state p { font-size: 0.9rem; margin-bottom: 4px; }
+.empty-state .hint { font-size: 0.8rem; font-style: italic; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 10000; }
+.modal { background: var(--bg); border-radius: 8px; padding: 28px; max-width: 480px; width: 90%; box-shadow: var(--shadow-lg); }
+.modal.wide { max-width: 560px; }
+.modal h3 { font-family: var(--serif); font-size: 1.1rem; font-weight: 500; margin-bottom: 12px; }
+.modal p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 14px; line-height: 1.6; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* Info modal specifics */
+.info-modal-quote { font-family: var(--serif); font-style: italic; font-size: 0.95rem; color: var(--accent); padding: 16px 20px; background: var(--bg-warm); border-radius: var(--radius); margin-bottom: 16px; line-height: 1.6; border-left: 3px solid var(--accent-light); }
+.info-section { margin-bottom: 14px; }
+.info-section h4 { font-family: var(--serif); font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; color: var(--text); }
+.info-section p { font-size: 0.82rem; margin-bottom: 6px; }
+
+/* Tutorial overlay */
+.tutorial-overlay { position: fixed; inset: 0; z-index: 10100; pointer-events: none; }
+.tutorial-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10100; pointer-events: all; }
+.tutorial-highlight {
+  position: fixed; z-index: 10101; border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  pointer-events: none;
+  transition: top 0.35s ease, left 0.35s ease, width 0.35s ease, height 0.35s ease;
+  border: 2px solid var(--accent-light);
+}
+.tutorial-card {
+  position: fixed; z-index: 10102; background: #fff; border-radius: 10px;
+  padding: 24px 28px; max-width: 380px; width: calc(100vw - 32px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18); pointer-events: all;
+  animation: fadeIn 0.25s ease-out;
+}
+.tutorial-card h4 { font-family: var(--serif); font-size: 1rem; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+.tutorial-card p { font-size: 0.82rem; color: var(--text-light); line-height: 1.55; margin-bottom: 16px; }
+.tutorial-footer { display: flex; justify-content: space-between; align-items: center; }
+.tutorial-dots { display: flex; gap: 5px; }
+.tutorial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+.tutorial-dot.active { background: var(--accent); }
+.tutorial-btns { display: flex; gap: 8px; }
+.tutorial-step-num { font-size: 0.7rem; color: var(--text-faint); margin-bottom: 4px; }
+
+/* Welcome / file connect screen */
+.welcome-screen {
+  display: flex; align-items: center; justify-content: center; min-height: 100vh;
+  padding: 32px; animation: fadeIn 0.5s ease-out;
+}
+.welcome-card {
+  max-width: 440px; width: 100%; text-align: center;
+}
+.welcome-card h1 { font-family: var(--serif); font-size: 1.6rem; font-weight: 500; margin-bottom: 8px; }
+.welcome-card .subtitle { font-size: 0.9rem; color: var(--text-faint); margin-bottom: 36px; font-style: italic; }
+.welcome-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.welcome-option {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: #fff; cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.welcome-option:hover { border-color: var(--accent-light); box-shadow: var(--shadow); }
+.welcome-option svg { width: 24px; height: 24px; color: var(--accent); flex-shrink: 0; }
+.welcome-option-text h3 { font-family: var(--serif); font-size: 0.95rem; font-weight: 500; margin-bottom: 2px; }
+.welcome-option-text p { font-size: 0.78rem; color: var(--text-faint); line-height: 1.4; }
+.welcome-skip { font-size: 0.8rem; color: var(--text-faint); cursor: pointer; background: none; border: none; font-family: var(--sans); padding: 8px; }
+.welcome-skip:hover { color: var(--text-light); }
+.welcome-note { font-size: 0.75rem; color: var(--text-faint); margin-top: 20px; line-height: 1.5; font-style: italic; }
+
+/* Toast notification */
+.toast {
+  position: fixed; top: calc(var(--uz-rail-h, 52px) + 12px); right: 20px; padding: 12px 20px;
+  background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-lg); font-size: 0.8rem; color: var(--text-light);
+  z-index: 10000; animation: fadeIn 0.2s ease-out;
+}
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--danger); }
+.toast.info { border-left: 3px solid var(--accent); }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .mobile-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg-warm); border-top: 1px solid var(--border);
+    display: flex; justify-content: space-around;
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); z-index: 10;
+  }
+  .mobile-nav button {
+    background: none; border: none; display: flex; flex-direction: column;
+    align-items: center; gap: 2px; font-size: 0.65rem; color: var(--text-faint);
+    cursor: pointer; padding: 4px 12px;
+  }
+  .mobile-nav button.active { color: var(--accent); }
+  .mobile-nav button svg { width: 20px; height: 20px; }
+  .writing-container { padding: 24px 16px 120px; }
+  .view-container { padding: 24px 16px 100px; }
+  .progress-wrap { left: 0; bottom: calc(50px + env(safe-area-inset-bottom)); }
+  .complete-banner { transform: translateX(-50%); bottom: calc(70px + env(safe-area-inset-bottom)); }
+  .nudge { transform: translateX(-50%); bottom: calc(70px + env(safe-area-inset-bottom)); }
+  .stats-grid { grid-template-columns: 1fr; }
+  /* Mobile file bar */
+  .mobile-file-bar {
+    position: fixed; top: var(--uz-rail-h, 52px); left: 0; right: 0;
+    background: var(--bg-warm); border-bottom: 1px solid var(--border);
+    padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;
+    z-index: 10; font-size: 0.75rem;
+  }
+  .mobile-file-bar .file-status-row { margin: 0; }
+  .writing-container { padding-top: calc(var(--uz-rail-h, 52px) + 44px); }
+  .view-container { padding-top: calc(var(--uz-rail-h, 52px) + 44px); }
+  .tutorial-card { max-width: 320px; padding: 20px; }
+}
+@media (min-width: 769px) {
+  .mobile-nav { display: none; }
+  .mobile-file-bar { display: none; }
+}
+</style>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Morning Pages",
+  "url": "https://undercoverzest.app/morningpages/",
+  "description": "A distraction-free morning writing journal with daily and weekly tracking. Stream-of-consciousness writing to unlock your creativity. Free, no sign-up required.",
+  "applicationCategory": "LifestyleApplication",
+  "operatingSystem": "Web Browser",
+  "browserRequirements": "Requires JavaScript",
+  "isAccessibleForFree": true,
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Undercover Zest",
+    "url": "https://undercoverzest.app/"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "Undercover Zest",
+    "url": "https://undercoverzest.app/"
+  }
+}
+  </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Morning Pages?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A free, distraction-free writing journal for songwriters and creatives, inspired by Julia Cameron's three-pages-every-morning practice. No toolbar, no spellcheck, no editing while you write."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. No account, no signup. Pages save locally in your browser."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is this different from a regular text editor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No editing affordances, no autocorrect, no formatting toolbar. The lack of features is the feature: it removes the temptation to revise as you write, which is what blocks the practice."
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<details id="uz-about-collapse" style="max-width:640px;margin:16px auto 0;text-align:center;font-family:Outfit,-apple-system,sans-serif;">
+  <summary style="cursor:pointer;font-size:0.95rem;color:#c8a04a;padding:8px 14px;font-weight:500;font-family:inherit;display:list-item;list-style-position:inside;">About this tool</summary>
+<div id="uz-static-intro" style="max-width:640px;margin:16px auto 24px;padding:0 24px;font-family:'Source Sans 3',-apple-system,sans-serif;color:#2c2c2c;">
+      <h1 style="font-size:1.85rem;font-weight:500;color:#8b7355;margin-bottom:8px;text-align:center;font-family:'Lora',Georgia,serif;">Morning Pages</h1>
+      <h2 style="font-size:1.1rem;font-weight:500;color:#2c2c2c;margin-bottom:16px;text-align:center;font-style:italic;opacity:0.85;">Three pages, every morning, before you think.</h2>
+      <p style="font-size:1.05rem;line-height:1.7;color:#6b6560;margin-bottom:14px;">Morning Pages is a free, distraction-free writing journal designed for songwriters and creatives. The interface is a single page. No toolbar. No spellcheck. No word count while you write. Just open the page and start: stream-of-consciousness freewriting, three pages long, to clear the mental clutter before the proper work begins.</p>
+      <p style="font-size:1.05rem;line-height:1.7;color:#6b6560;margin-bottom:14px;">The practice comes from Julia Cameron's "The Artist's Way", the idea that creative blocks lift faster when you empty the head onto a page first. You are not writing for an audience. You are not editing as you go. You are moving the noise out of the way so the real ideas can land later in the day.</p>
+      <ul style="text-align:left;display:inline-block;font-size:0.98rem;line-height:1.75;color:#6b6560;margin:6px 0 18px;padding-left:20px;">
+        <li>Distraction-free freewriting in the browser, no signup</li>
+        <li>Daily streak counter that builds the writing habit</li>
+        <li>Past entries saved locally so you can revisit your own pattern</li>
+        <li>One-tap export when a morning page turns into a real song</li>
+        <li>Three pages target, the length the practice traditionally calls for</li>
+      </ul>
+      <p style="font-size:0.95rem;color:#6b6560;margin-bottom:14px;">Stream-of-consciousness writing pairs naturally with the structured craft of the <a href="../" style="color:#8b7355;text-decoration:underline;">chord progression builder</a> and <a href="../rhymeforge/" style="color:#8b7355;text-decoration:underline;">RhymeForge</a>. Use Morning Pages to find what you want to say. Use the other tools to finish saying it.</p>
+      <p style="font-size:0.9rem;color:#a8a29e;">Part of the <a href="../homepage/" style="color:#8b7355;text-decoration:underline;">Undercover Zest</a> songwriting suite. No account, no cost, no catch.</p>
+      <div style="margin-top:28px;padding-top:18px;border-top:1px solid rgba(212,168,83,0.12);">
+        <div style="font-size:0.9rem;font-weight:600;color:#8b7355;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.08em;text-align:center;">Frequently asked</div>
+        <div style="margin-bottom:14px;text-align:left;">
+          <div style="font-size:1rem;font-weight:600;color:#8b7355;margin-bottom:4px;">What is Morning Pages?</div>
+          <div style="font-size:0.95rem;line-height:1.65;color:#a8a29e;">A free, distraction-free writing journal for songwriters and creatives, inspired by Julia Cameron's three-pages-every-morning practice. No toolbar, no spellcheck, no editing while you write.</div>
+        </div>
+        <div style="margin-bottom:14px;text-align:left;">
+          <div style="font-size:1rem;font-weight:600;color:#8b7355;margin-bottom:4px;">Is it free?</div>
+          <div style="font-size:0.95rem;line-height:1.65;color:#a8a29e;">Yes. No account, no signup. Pages save locally in your browser.</div>
+        </div>
+        <div style="margin-bottom:14px;text-align:left;">
+          <div style="font-size:1rem;font-weight:600;color:#8b7355;margin-bottom:4px;">How is this different from a regular text editor?</div>
+          <div style="font-size:0.95rem;line-height:1.65;color:#a8a29e;">No editing affordances, no autocorrect, no formatting toolbar. The lack of features is the feature: it removes the temptation to revise as you write, which is what blocks the practice.</div>
+        </div>
+      </div>
+    </div>
+</details>
+
+<div id="root"><div style="display:flex;align-items:center;justify-content:center;min-height:40vh;color:#999;font-family:Georgia,serif;font-style:italic;font-size:16px;">Opening your pages&hellip;</div></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+// ─── Icons ───
+const Icons = {
+  write: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
+  history: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  seed: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c-4-3-8-6-8-10a8 8 0 0 1 16 0c0 4-4 7-8 10z"/><path d="M12 12V8"/><path d="M9.5 14.5 12 12l2.5 2.5"/></svg>,
+  stats: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>,
+  back: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>,
+  download: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  trash: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>,
+  folder: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
+  filePlus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>,
+  link: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+  unlink: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18.84 12.25l1.72-1.71a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M5.16 11.75l-1.72 1.71a5 5 0 0 0 7.07 7.07l1.72-1.71"/><line x1="2" y1="2" x2="22" y2="22"/></svg>,
+  chevron: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+  filter: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>,
+  tag: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+  search: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+};
+
+// ═══════════════════════════════════════════════════
+// FILE SYSTEM ACCESS API + INDEXEDDB HANDLE STORAGE
+// ═══════════════════════════════════════════════════
+
+const DB_NAME = 'morning_pages_handles';
+const DB_STORE = 'file_handles';
+const HANDLE_KEY = 'current_file';
+const FALLBACK_KEY = 'morning_pages_data';
+
+let hasFileSystemAccess = false;
+try {
+  hasFileSystemAccess = typeof window.showOpenFilePicker === 'function'
+    && typeof window.showSaveFilePicker === 'function'
+    && window.isSecureContext !== false;
+} catch { hasFileSystemAccess = false; }
+
+function openHandleDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(DB_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function storeHandle(handle) {
+  const db = await openHandleDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put(handle, HANDLE_KEY);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function getStoredHandle() {
+  try {
+    const db = await openHandleDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readonly');
+      const req = tx.objectStore(DB_STORE).get(HANDLE_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch { return null; }
+}
+
+async function clearStoredHandle() {
+  try {
+    const db = await openHandleDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(DB_STORE, 'readwrite');
+      tx.objectStore(DB_STORE).delete(HANDLE_KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {}
+}
+
+async function readFileHandle(handle) {
+  const file = await handle.getFile();
+  const text = await file.text();
+  return JSON.parse(text);
+}
+
+async function writeFileHandle(handle, data) {
+  const writable = await handle.createWritable();
+  await writable.write(JSON.stringify(data, null, 2));
+  await writable.close();
+}
+
+async function verifyPermission(handle, readWrite) {
+  const options = readWrite ? { mode: 'readwrite' } : {};
+  if ((await handle.queryPermission(options)) === 'granted') return true;
+  if ((await handle.requestPermission(options)) === 'granted') return true;
+  return false;
+}
+
+const emptyData = () => ({ entries: [], seeds: [], settings: { showTimer: true, showNudges: true, firstLineStarters: false }, version: 1 });
+
+function mergeData(a, b) {
+  const entriesByDate = {};
+  [...(a.entries || []), ...(b.entries || [])].forEach(e => {
+    const existing = entriesByDate[e.date];
+    if (!existing || e.wordCount > existing.wordCount) entriesByDate[e.date] = e;
+  });
+  const seedIds = new Set();
+  const mergedSeeds = [];
+  [...(a.seeds || []), ...(b.seeds || [])].forEach(s => {
+    const key = s.text + '|' + s.sourceDate;
+    if (!seedIds.has(key)) { seedIds.add(key); mergedSeeds.push(s); }
+  });
+  return {
+    entries: Object.values(entriesByDate),
+    seeds: mergedSeeds,
+    settings: { ...emptyData().settings, ...(a.settings || {}), ...(b.settings || {}) },
+    version: 1,
+  };
+}
+
+function loadLocalData() {
+  try {
+    const raw = localStorage.getItem(FALLBACK_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+function saveLocalData(data) {
+  try { localStorage.setItem(FALLBACK_KEY, JSON.stringify(data)); } catch {}
+}
+
+// ─── Helpers ───
+const WORD_TARGET = 750;
+function wordCount(text) { return text.trim() ? text.trim().split(/\s+/).length : 0; }
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+const NUDGES = [
+  "Just write what you're feeling right now.",
+  "What's on your mind this morning?",
+  "Start with what you notice in your body.",
+  "It's okay to write nonsense.",
+  "Write about what you can see from where you're sitting.",
+  "What sounds can you hear right now?",
+  "Write about the first thing you thought of when you woke up.",
+  "Describe the quality of light where you are.",
+  "What are you resisting today?",
+  "What would you do if no one was watching?",
+];
+
+const STARTERS = [
+  "Right now I feel...",
+  "The thing I keep thinking about is...",
+  "If I'm honest with myself today...",
+  "The thing I'm avoiding is...",
+  "What I really want to say is...",
+];
+
+
+// ═══════════════════════════════════
+// INFO MODAL
+// ═══════════════════════════════════
+function InfoModal({ onClose, onStartTutorial }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal wide" onClick={e => e.stopPropagation()} style={{maxHeight:'85vh', overflowY:'auto'}}>
+        <h3>What are Morning Pages?</h3>
+        <div className="info-modal-quote">
+          "Morning Pages are three pages of longhand, stream of consciousness writing, done first thing in the morning. There is no wrong way to do Morning Pages."
+        </div>
+        <div className="info-section">
+          <h4>The Practice</h4>
+          <p>Morning Pages come from Julia Cameron's <em>The Artist's Way</em>. The idea is simple: every morning, before your inner critic wakes up, write three pages of whatever comes to mind. Not a journal, not a diary, not "good writing" — just a stream of consciousness brain dump.</p>
+        </div>
+        <div className="info-section">
+          <h4>Why 750 Words?</h4>
+          <p>Three handwritten pages come to roughly 750 words when typed. This app uses 750 words as the digital equivalent of Cameron's three-page target. The number is a goal, not a limit — keep going if you want.</p>
+        </div>
+        <div className="info-section">
+          <h4>The Rules</h4>
+          <p>There's only one: write. Don't stop, don't edit, don't re-read while you're writing. If you get stuck, write "I don't know what to write" until something else comes. The pages are private and for your eyes only.</p>
+        </div>
+        <div className="info-section">
+          <h4>The Seedbank</h4>
+          <p>Sometimes in the midst of morning pages, a phrase or idea jumps out — something that feels alive. The seedbank lets you save those fragments. They're raw material for your creative life: song lyrics, story ideas, observations, truths.</p>
+        </div>
+        <div className="modal-actions" style={{justifyContent:'space-between'}}>
+          <button className="btn" onClick={() => { onClose(); onStartTutorial(); }}>Take a tour</button>
+          <button className="btn btn-primary" onClick={onClose}>Got it</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════
+// TUTORIAL OVERLAY
+// ═══════════════════════════════════
+const TUTORIAL_STEPS = [
+  {
+    title: 'Write',
+    description: 'This is your writing space. Just start typing — there are no rules except to keep going. The word counter at the top tracks your progress toward the 750-word target.',
+    selector: '[data-tour="write"]',
+    position: 'right',
+  },
+  {
+    title: 'Unsticking Nudges',
+    description: 'If you stop writing for 30 seconds, a gentle nudge will appear to help you keep going. You can turn these off in Settings if you prefer silence.',
+    selector: '[data-tour="write"]',
+    position: 'right',
+  },
+  {
+    title: 'Save & Finish',
+    description: 'When you\'re done writing (or want to stop), click "Save & finish" at the bottom of your writing. This marks today\'s entry as complete. You can always reopen it later.',
+    selector: '[data-tour="write"]',
+    position: 'right',
+  },
+  {
+    title: 'History',
+    description: 'All your past entries are stored here. Search by keyword, date, or tag. Click any entry to re-read it, highlight phrases for the seedbank, or add retrospective tags.',
+    selector: '[data-tour="history"]',
+    position: 'right',
+  },
+  {
+    title: 'Seedbank',
+    description: 'When reading a past entry, highlight any phrase that feels alive and save it here. Tag your seeds, filter by tag, and click any seed to jump back to the full original entry.',
+    selector: '[data-tour="seeds"]',
+    position: 'right',
+  },
+  {
+    title: 'Progress & Settings',
+    description: 'Track your writing streak, view your calendar, and adjust settings like the timer, nudges, and first-line starters. You can also manage file storage and backups here.',
+    selector: '[data-tour="stats"]',
+    position: 'right',
+  },
+  {
+    title: 'File Storage & Sync',
+    description: 'Connect a JSON file to save your pages locally — store it in iCloud Drive, Dropbox, or any folder to sync across your iPhone and Mac. Download a dated backup anytime.',
+    selector: '[data-tour="file-status"]',
+    position: 'right',
+  },
+  {
+    title: 'Info & Help',
+    description: 'Click this button anytime to learn about Morning Pages or retake this tour. Happy writing!',
+    selector: '[data-tour="info-btn"]',
+    position: 'right',
+  },
+];
+
+function TutorialOverlay({ step, totalSteps, onNext, onPrev, onClose }) {
+  const currentStep = TUTORIAL_STEPS[step];
+  const [rect, setRect] = useState(null);
+  const cardRef = useRef(null);
+
+  // Measure the target element whenever step changes
+  useEffect(() => {
+    if (!currentStep) return;
+    const el = document.querySelector(currentStep.selector);
+    if (el) {
+      const r = el.getBoundingClientRect();
+      setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      // Scroll into view if needed
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      setRect(null);
+    }
+  }, [step]);
+
+  // Also update on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (!currentStep) return;
+      const el = document.querySelector(currentStep.selector);
+      if (el) {
+        const r = el.getBoundingClientRect();
+        setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [step]);
+
+  if (!currentStep) return null;
+
+  const pad = 8; // padding around highlighted element
+  const highlightStyle = rect ? {
+    top: rect.top - pad,
+    left: rect.left - pad,
+    width: rect.width + pad * 2,
+    height: rect.height + pad * 2,
+    background: 'transparent',
+  } : null;
+
+  // Position the card near the highlighted element
+  let cardStyle = { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
+  if (rect) {
+    const pos = currentStep.position || 'right';
+    if (pos === 'right') {
+      cardStyle = {
+        top: Math.max(16, Math.min(rect.top - pad, window.innerHeight - 280)),
+        left: rect.left + rect.width + pad + 16,
+      };
+      // If card would go off-screen right, position below instead
+      if (rect.left + rect.width + 16 + 380 > window.innerWidth) {
+        cardStyle = {
+          top: rect.top + rect.height + pad + 12,
+          left: Math.max(16, Math.min(rect.left - pad, window.innerWidth - 396)),
+        };
+      }
+    } else if (pos === 'below') {
+      cardStyle = {
+        top: rect.top + rect.height + pad + 12,
+        left: Math.max(16, Math.min(rect.left, window.innerWidth - 396)),
+      };
+    }
+  }
+
+  return (
+    <>
+      {/* Dark overlay with cutout for the highlighted element */}
+      {rect ? (
+        <div className="tutorial-highlight" style={highlightStyle} />
+      ) : (
+        <div className="tutorial-backdrop" onClick={onClose} />
+      )}
+      <div className="tutorial-card" ref={cardRef} style={cardStyle} key={step}>
+        <div className="tutorial-step-num">Step {step + 1} of {totalSteps}</div>
+        <h4>{currentStep.title}</h4>
+        <p>{currentStep.description}</p>
+        <div className="tutorial-footer">
+          <div className="tutorial-dots">
+            {Array.from({length: totalSteps}, (_, i) => (
+              <div key={i} className={`tutorial-dot ${i === step ? 'active' : ''}`} />
+            ))}
+          </div>
+          <div className="tutorial-btns">
+            {step > 0 && <button className="btn btn-sm" onClick={onPrev}>Back</button>}
+            {step < totalSteps - 1 ? (
+              <button className="btn btn-sm btn-primary" onClick={onNext}>Next</button>
+            ) : (
+              <button className="btn btn-sm btn-primary" onClick={onClose}>Done</button>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+
+// ═══════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════
+function App() {
+  const [data, setData] = useState(emptyData);
+  const [view, setView] = useState('write');
+  const [detailId, setDetailId] = useState(null);
+  const [fileHandle, setFileHandle] = useState(null);
+  const [fileName, setFileName] = useState(null);
+  const [fileStatus, setFileStatus] = useState('disconnected');
+  const [initialized, setInitialized] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(-1); // -1 = no tutorial
+  const hasShownFirstVisit = useRef(false);
+  const [seedReturnState, setSeedReturnState] = useState(null); // for seed->entry->back navigation
+  const saveTimeoutRef = useRef(null);
+  const fileHandleRef = useRef(null);
+  const hiddenInputRef = useRef(null);
+
+  useEffect(() => { fileHandleRef.current = fileHandle; }, [fileHandle]);
+
+  const showToast = useCallback((message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  // ── Initialization ──
+  useEffect(() => {
+    async function init() {
+      const localData = loadLocalData();
+      if (hasFileSystemAccess) {
+        const stored = await getStoredHandle();
+        if (stored) {
+          try {
+            const ok = await verifyPermission(stored, true);
+            if (ok) {
+              const fileData = await readFileHandle(stored);
+              const merged = localData ? mergeData(fileData, localData) : fileData;
+              setData(merged);
+              setFileHandle(stored);
+              setFileName(stored.name);
+              setFileStatus('connected');
+              setInitialized(true);
+              return;
+            }
+          } catch (e) {
+            console.log('Could not reconnect to stored file:', e);
+          }
+        }
+      }
+      if (localData && (localData.entries?.length > 0 || localData.seeds?.length > 0)) {
+        setData(localData);
+        setInitialized(true);
+      } else {
+        setShowWelcome(true);
+        setInitialized(true);
+      }
+    }
+    init();
+  }, []);
+
+  // ── First-visit: auto-show info modal ──
+  useEffect(() => {
+    if (!initialized || hasShownFirstVisit.current) return;
+    hasShownFirstVisit.current = true;
+    try {
+      var visited = localStorage.getItem('mp-has-visited');
+      if (!visited) {
+        localStorage.setItem('mp-has-visited', '1');
+        // Small delay so the UI renders first
+        setTimeout(() => setShowInfo(true), 600);
+      }
+    } catch (e) { /* localStorage unavailable */ }
+  }, [initialized]);
+
+  // ── Auto-save ──
+  useEffect(() => {
+    if (!initialized) return;
+    saveLocalData(data);
+    if (fileHandleRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+      saveTimeoutRef.current = setTimeout(async () => {
+        try {
+          setFileStatus('saving');
+          await writeFileHandle(fileHandleRef.current, data);
+          setFileStatus('connected');
+        } catch (e) {
+          console.error('File save error:', e);
+          setFileStatus('disconnected');
+          setFileHandle(null);
+          setFileName(null);
+          showToast('Lost connection to file. Data safe in browser.', 'error');
+        }
+      }, 1000);
+    }
+  }, [data, initialized]);
+
+  // ── File operations ──
+  const createNewFile = useCallback(async () => {
+    if (hasFileSystemAccess) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'morning-pages.json',
+          types: [{ description: 'Morning Pages Data', accept: { 'application/json': ['.json'] } }],
+        });
+        const dataToSave = { ...data, version: 1 };
+        await writeFileHandle(handle, dataToSave);
+        const check = await readFileHandle(handle);
+        if (!check || typeof check !== 'object') throw new Error('Write verification failed');
+        await storeHandle(handle);
+        setFileHandle(handle);
+        setFileName(handle.name);
+        setFileStatus('connected');
+        setShowWelcome(false);
+        showToast('File created and connected — auto-saving enabled', 'success');
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        console.error('File System Access API failed:', e);
+        showToast('Native file access failed — falling back to download', 'error');
+      }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'morning-pages.json'; a.click();
+    URL.revokeObjectURL(url);
+    setShowWelcome(false);
+    showToast('File downloaded. Use "Open file" to load it back anytime.', 'info');
+  }, [data, showToast]);
+
+  const openExistingFile = useCallback(async () => {
+    if (hasFileSystemAccess) {
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          types: [{ description: 'Morning Pages Data', accept: { 'application/json': ['.json'] } }],
+        });
+        const ok = await verifyPermission(handle, true);
+        if (!ok) { showToast('Permission denied', 'error'); return; }
+        const fileData = await readFileHandle(handle);
+        if (!fileData || typeof fileData !== 'object') throw new Error('Invalid file data');
+        const merged = mergeData(data, fileData);
+        setData(merged);
+        await storeHandle(handle);
+        setFileHandle(handle);
+        setFileName(handle.name);
+        setFileStatus('connected');
+        setShowWelcome(false);
+        showToast(`Opened ${handle.name} — ${merged.entries.length} entries loaded`, 'success');
+        return;
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        console.error('File System Access open failed:', e);
+        showToast('Native file picker failed — using fallback', 'error');
+      }
+    }
+    hiddenInputRef.current?.click();
+  }, [data, showToast]);
+
+  const handleFallbackFileLoad = useCallback((e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const fileData = JSON.parse(reader.result);
+        const merged = mergeData(data, fileData);
+        setData(merged);
+        setFileName(file.name);
+        setFileStatus('connected');
+        setShowWelcome(false);
+        showToast(`Loaded ${file.name} — ${merged.entries.length} entries`, 'success');
+      } catch {
+        showToast('Invalid file format', 'error');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }, [data, showToast]);
+
+  const disconnectFile = useCallback(async () => {
+    await clearStoredHandle();
+    setFileHandle(null);
+    setFileName(null);
+    setFileStatus('disconnected');
+    showToast('Disconnected from file. Data still in browser.', 'info');
+  }, [showToast]);
+
+  const saveToFileNow = useCallback(async () => {
+    if (!hasFileSystemAccess) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fileName || 'morning-pages.json'; a.click();
+      URL.revokeObjectURL(url);
+      showToast('File downloaded', 'success');
+      return;
+    }
+    if (fileHandleRef.current) {
+      try {
+        setFileStatus('saving');
+        await writeFileHandle(fileHandleRef.current, data);
+        setFileStatus('connected');
+        showToast('Saved', 'success');
+      } catch {
+        showToast('Save failed', 'error');
+      }
+    }
+  }, [data, fileName, showToast]);
+
+  const downloadBackup = useCallback(() => {
+    const today = todayStr();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `morning-pages-${today}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Backup downloaded: morning-pages-${today}.json`, 'success');
+  }, [data, showToast]);
+
+  // ── Data mutations ──
+  const updateSettings = (key, val) => setData(d => ({ ...d, settings: { ...d.settings, [key]: val } }));
+  const todayEntry = data.entries.find(e => e.date === todayStr());
+
+  const streak = useMemo(() => {
+    let count = 0;
+    const sorted = [...data.entries].filter(e => e.wordCount >= WORD_TARGET).sort((a,b) => b.date.localeCompare(a.date));
+    if (!sorted.length) return 0;
+    let checkDate = new Date(todayStr() + 'T12:00:00');
+    if (!sorted.find(e => e.date === todayStr())) checkDate.setDate(checkDate.getDate() - 1);
+    for (let i = 0; i < 365; i++) {
+      const ds = checkDate.toISOString().split('T')[0];
+      if (sorted.find(e => e.date === ds)) { count++; checkDate.setDate(checkDate.getDate() - 1); }
+      else break;
+    }
+    return count;
+  }, [data.entries]);
+
+  const saveEntry = useCallback((entry) => {
+    setData(d => {
+      const idx = d.entries.findIndex(e => e.date === entry.date);
+      const newEntries = [...d.entries];
+      if (idx >= 0) newEntries[idx] = entry; else newEntries.unshift(entry);
+      return { ...d, entries: newEntries };
+    });
+  }, []);
+
+  const addSeed = useCallback((text, sourceDate, seedId) => {
+    const id = seedId || Date.now().toString();
+    setData(d => ({ ...d, seeds: [...d.seeds, { id, text, sourceDate, createdAt: new Date().toISOString(), tags: [] }] }));
+    return id;
+  }, []);
+
+  const removeSeed = useCallback((id) => {
+    setData(d => {
+      const seed = d.seeds.find(s => s.id === id);
+      let entries = d.entries;
+      // Also remove the highlight from the source entry
+      if (seed) {
+        entries = d.entries.map(e => {
+          if (e.date === seed.sourceDate && e.highlights?.length) {
+            // Only remove this highlight if no other seed from the same entry uses the same text
+            const otherSeedsWithSameText = d.seeds.filter(s => s.id !== id && s.sourceDate === seed.sourceDate && s.text === seed.text);
+            if (otherSeedsWithSameText.length === 0) {
+              return { ...e, highlights: e.highlights.filter(h => h !== seed.text) };
+            }
+          }
+          return e;
+        });
+      }
+      return { ...d, seeds: d.seeds.filter(s => s.id !== id), entries };
+    });
+  }, []);
+
+  const updateSeedTags = useCallback((id, tags) => {
+    setData(d => ({ ...d, seeds: d.seeds.map(s => s.id === id ? { ...s, tags } : s) }));
+  }, []);
+
+  const updateEntryTags = useCallback((date, tags) => {
+    setData(d => ({ ...d, entries: d.entries.map(e => e.date === date ? { ...e, tags } : e) }));
+  }, []);
+
+  const updateEntryHighlights = useCallback((date, highlights) => {
+    setData(d => ({ ...d, entries: d.entries.map(e => e.date === date ? { ...e, highlights } : e) }));
+  }, []);
+
+  const deleteEntry = useCallback((date) => {
+    setData(d => ({ ...d, entries: d.entries.filter(e => e.date !== date), seeds: d.seeds.filter(s => s.sourceDate !== date) }));
+  }, []);
+
+  // ── Navigation helpers for seed -> entry -> back ──
+  const navigateToEntryFromSeed = useCallback((entryDate, seedState) => {
+    setSeedReturnState(seedState);
+    setView('history');
+    setDetailId(entryDate);
+  }, []);
+
+  const handleBackFromSeedEntry = useCallback(() => {
+    setView('seeds');
+    setDetailId(null);
+    // seedReturnState will be consumed by SeedsView
+  }, []);
+
+  // Tutorial handlers
+  const startTutorial = useCallback(() => setTutorialStep(0), []);
+
+  const hiddenInput = <input ref={hiddenInputRef} type="file" accept=".json" style={{display:'none'}} onChange={handleFallbackFileLoad} />;
+
+  if (!initialized) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--text-faint)'}}>Loading...</div>;
+
+  if (showWelcome) {
+    return (
+      <>
+        {hiddenInput}
+        <WelcomeScreen
+          onCreateNew={createNewFile}
+          onOpenExisting={openExistingFile}
+          onSkip={() => setShowWelcome(false)}
+          hasFileSystemAccess={hasFileSystemAccess}
+        />
+      </>
+    );
+  }
+
+  return (
+    <div className="app">
+      {hiddenInput}
+      <Sidebar
+        view={view} setView={setView} streak={streak} setDetailId={setDetailId}
+        fileStatus={fileStatus} fileName={fileName}
+        onOpenFile={openExistingFile} onCreateFile={createNewFile}
+        onDisconnect={disconnectFile} onSaveNow={saveToFileNow}
+        onDownloadBackup={downloadBackup}
+        hasFileSystemAccess={hasFileSystemAccess}
+        onShowInfo={() => setShowInfo(true)}
+      />
+      <MobileFileBar
+        fileStatus={fileStatus} fileName={fileName}
+        onOpenFile={openExistingFile} onSaveNow={saveToFileNow}
+        onShowInfo={() => setShowInfo(true)}
+      />
+      <div className="main">
+        {view === 'write' && <WritingView entry={todayEntry} saveEntry={saveEntry} settings={data.settings} onSaveToFile={saveToFileNow} onDownloadBackup={downloadBackup} fileStatus={fileStatus} hasFileSystemAccess={hasFileSystemAccess} />}
+        {view === 'history' && !detailId && <HistoryView entries={data.entries} setDetailId={setDetailId} />}
+        {view === 'history' && detailId && <EntryDetail entry={data.entries.find(e => e.date === detailId)} onBack={seedReturnState ? handleBackFromSeedEntry : () => setDetailId(null)} addSeed={addSeed} removeSeed={removeSeed} updateSeedTags={updateSeedTags} seeds={data.seeds} updateTags={updateEntryTags} updateHighlights={updateEntryHighlights} deleteEntry={(d) => { deleteEntry(d); setDetailId(null); }} backLabel={seedReturnState ? 'Back to seedbank' : 'Back to entries'} />}
+        {view === 'seeds' && <SeedsView seeds={data.seeds} removeSeed={removeSeed} updateSeedTags={updateSeedTags} navigateToEntry={navigateToEntryFromSeed} returnState={seedReturnState} clearReturnState={() => setSeedReturnState(null)} entries={data.entries} />}
+        {view === 'stats' && <StatsView entries={data.entries} streak={streak} settings={data.settings} updateSettings={updateSettings} data={data} onOpenFile={openExistingFile} onCreateFile={createNewFile} onDisconnect={disconnectFile} onSaveNow={saveToFileNow} onDownloadBackup={downloadBackup} fileStatus={fileStatus} fileName={fileName} hasFileSystemAccess={hasFileSystemAccess} />}
+      </div>
+      <MobileNav view={view} setView={setView} setDetailId={setDetailId} />
+      {toast && <div className={`toast ${toast.type}`}>{toast.message}</div>}
+      {showInfo && <InfoModal onClose={() => setShowInfo(false)} onStartTutorial={startTutorial} />}
+      {tutorialStep >= 0 && (
+        <TutorialOverlay
+          step={tutorialStep}
+          totalSteps={TUTORIAL_STEPS.length}
+          onNext={() => setTutorialStep(s => s + 1)}
+          onPrev={() => setTutorialStep(s => s - 1)}
+          onClose={() => setTutorialStep(-1)}
+        />
+      )}
+    </div>
+  );
+}
+
+
+// ─── Welcome Screen ───
+function WelcomeScreen({ onCreateNew, onOpenExisting, onSkip, hasFileSystemAccess }) {
+  return (
+    <div className="welcome-screen">
+      <div className="welcome-card">
+        <h1>Morning Pages</h1>
+        <p className="subtitle">Write freely. Think clearly.</p>
+        <div className="welcome-options">
+          <div className="welcome-option" onClick={onCreateNew}>
+            {Icons.filePlus}
+            <div className="welcome-option-text">
+              <h3>Create new pages file</h3>
+              <p>{hasFileSystemAccess ? 'Choose where to save — iCloud Drive, Dropbox, or anywhere on your Mac.' : 'Download a pages file you can store in iCloud Drive or anywhere you like.'}</p>
+            </div>
+          </div>
+          <div className="welcome-option" onClick={onOpenExisting}>
+            {Icons.folder}
+            <div className="welcome-option-text">
+              <h3>Open existing file</h3>
+              <p>Already have a morning-pages.json? Open it to pick up where you left off.</p>
+            </div>
+          </div>
+        </div>
+        <button className="welcome-skip" onClick={onSkip}>
+          Skip for now — just write in the browser
+        </button>
+        {hasFileSystemAccess && (
+          <p className="welcome-note">
+            Your browser supports persistent file access. The app will remember your file location and reconnect automatically next time.
+          </p>
+        )}
+        {!hasFileSystemAccess && (
+          <p className="welcome-note">
+            Your browser (Safari/iOS) doesn't support persistent file access. You can still open and save files manually — perfect for keeping a file in iCloud Drive via the Files app.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ─── Sidebar ───
+function Sidebar({ view, setView, streak, setDetailId, fileStatus, fileName, onOpenFile, onCreateFile, onDisconnect, onSaveNow, onDownloadBackup, hasFileSystemAccess, onShowInfo }) {
+  const nav = (v) => { setView(v); setDetailId(null); };
+  return (
+    <div className="sidebar">
+      <div className="sidebar-logo">
+        <div className="sidebar-logo-text">
+          <h1>Morning Pages</h1>
+          <p>Write freely. Think clearly.</p>
+        </div>
+        <button className="info-btn" data-tour="info-btn" onClick={onShowInfo} title="What are Morning Pages?"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Info</button>
+      </div>
+      <div className="sidebar-nav">
+        <button data-tour="write" className={`nav-item ${view==='write'?'active':''}`} onClick={() => nav('write')}>{Icons.write}<span>Write</span></button>
+        <button data-tour="history" className={`nav-item ${view==='history'?'active':''}`} onClick={() => nav('history')}>{Icons.history}<span>History</span></button>
+        <button data-tour="seeds" className={`nav-item ${view==='seeds'?'active':''}`} onClick={() => nav('seeds')}>{Icons.seed}<span>Seedbank</span></button>
+        <button data-tour="stats" className={`nav-item ${view==='stats'?'active':''}`} onClick={() => nav('stats')}>{Icons.stats}<span>Progress</span></button>
+      </div>
+      <div className="file-status" data-tour="file-status">
+        <div className="file-status-row">
+          <span className={`file-dot ${fileStatus}`}></span>
+          <span className="file-status-label">
+            {fileStatus === 'saving' ? 'Saving...' : fileStatus === 'connected' ? 'Synced to file' : 'No file connected'}
+          </span>
+        </div>
+        {fileName && <div className="file-status-name">{fileName}</div>}
+        <div className="file-status-actions">
+          {fileStatus === 'disconnected' ? (
+            <>
+              <button className="file-btn primary" onClick={onOpenFile}>Open file</button>
+              <button className="file-btn" onClick={onCreateFile}>New</button>
+            </>
+          ) : (
+            <>
+              {!hasFileSystemAccess && <button className="file-btn" onClick={onSaveNow}>Save</button>}
+              <button className="file-btn" onClick={onDisconnect}>Disconnect</button>
+            </>
+          )}
+        </div>
+        <div className="file-status-actions" style={{marginTop:4}}>
+          <button className="file-btn" onClick={onDownloadBackup}>{Icons.download} Download backup</button>
+        </div>
+      </div>
+      <div className="nav-streak">
+        <div className="streak-num">{streak}</div>
+        <div className="streak-label">day streak</div>
+      </div>
+    </div>
+  );
+}
+
+function MobileFileBar({ fileStatus, fileName, onOpenFile, onSaveNow, onShowInfo }) {
+  return (
+    <div className="mobile-file-bar">
+      <div style={{display:'flex',alignItems:'center',gap:8}}>
+        <div className="file-status-row">
+          <span className={`file-dot ${fileStatus}`}></span>
+          <span className="file-status-label" style={{fontSize:'0.72rem'}}>
+            {fileStatus === 'connected' ? (fileName || 'Synced') : fileStatus === 'saving' ? 'Saving...' : 'Browser only'}
+          </span>
+        </div>
+      </div>
+      <div style={{display:'flex',gap:6,alignItems:'center'}}>
+        <button className="info-btn" onClick={onShowInfo} title="What are Morning Pages?" style={{padding:'3px 8px',fontSize:'0.68rem'}}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:12,height:12}}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>Info</button>
+        {fileStatus === 'disconnected' && <button className="file-btn" onClick={onOpenFile}>Open file</button>}
+        {fileStatus !== 'disconnected' && !hasFileSystemAccess && <button className="file-btn" onClick={onSaveNow}>Save</button>}
+      </div>
+    </div>
+  );
+}
+
+function MobileNav({ view, setView, setDetailId }) {
+  const nav = (v) => { setView(v); setDetailId(null); };
+  return (
+    <div className="mobile-nav">
+      <button className={view==='write'?'active':''} onClick={() => nav('write')}>{Icons.write}<span>Write</span></button>
+      <button className={view==='history'?'active':''} onClick={() => nav('history')}>{Icons.history}<span>History</span></button>
+      <button className={view==='seeds'?'active':''} onClick={() => nav('seeds')}>{Icons.seed}<span>Seeds</span></button>
+      <button className={view==='stats'?'active':''} onClick={() => nav('stats')}>{Icons.stats}<span>Progress</span></button>
+    </div>
+  );
+}
+
+
+// ─── Writing View ───
+function WritingView({ entry, saveEntry, settings, onSaveToFile, onDownloadBackup, fileStatus, hasFileSystemAccess }) {
+  const today = todayStr();
+  const [text, setText] = useState(entry?.content || '');
+  const [elapsed, setElapsed] = useState(entry?.timeSpent || 0);
+  const [showNudge, setShowNudge] = useState(false);
+  const [nudgeText, setNudgeText] = useState('');
+  const [showComplete, setShowComplete] = useState(false);
+  const [hasShownComplete, setHasShownComplete] = useState(entry?.wordCount >= WORD_TARGET);
+  const [isFinished, setIsFinished] = useState(entry?.finished || false);
+  const [justFinished, setJustFinished] = useState(false);
+  const textareaRef = useRef(null);
+  const idleTimer = useRef(null);
+  const timerRef = useRef(null);
+
+  const wc = wordCount(text);
+  const progress = Math.min(wc / WORD_TARGET, 1);
+
+  useEffect(() => {
+    if (isFinished && !justFinished) return;
+    const t = setTimeout(() => {
+      saveEntry({ date: today, content: text, wordCount: wc, timeSpent: elapsed, highlights: entry?.highlights || [], tags: entry?.tags || [], finished: isFinished });
+    }, 500);
+    return () => clearTimeout(t);
+  }, [text, elapsed, isFinished]);
+
+  useEffect(() => {
+    if (text.length > 0 && !isFinished) {
+      timerRef.current = setInterval(() => setElapsed(e => e + 1), 1000);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [text.length > 0, isFinished]);
+
+  useEffect(() => {
+    if (!settings.showNudges || isFinished) return;
+    clearTimeout(idleTimer.current);
+    setShowNudge(false);
+    if (text.length > 0 && wc < WORD_TARGET) {
+      idleTimer.current = setTimeout(() => {
+        setNudgeText(NUDGES[Math.floor(Math.random() * NUDGES.length)]);
+        setShowNudge(true);
+        setTimeout(() => setShowNudge(false), 5000);
+      }, 30000);
+    }
+    return () => clearTimeout(idleTimer.current);
+  }, [text, settings.showNudges, isFinished]);
+
+  useEffect(() => {
+    if (wc >= WORD_TARGET && !hasShownComplete) {
+      setShowComplete(true); setHasShownComplete(true);
+      setTimeout(() => setShowComplete(false), 3000);
+    }
+  }, [wc, hasShownComplete]);
+
+  useEffect(() => { if (textareaRef.current && !isFinished) textareaRef.current.focus(); }, []);
+
+  const placeholder = settings.firstLineStarters ? STARTERS[Math.floor(Math.random() * STARTERS.length)] : '';
+
+  const handleFinish = () => {
+    saveEntry({ date: today, content: text, wordCount: wc, timeSpent: elapsed, highlights: entry?.highlights || [], tags: entry?.tags || [], finished: true });
+    setIsFinished(true);
+    setJustFinished(true);
+    if (onSaveToFile && fileStatus !== 'disconnected') {
+      setTimeout(() => onSaveToFile(), 200);
+    }
+  };
+
+  const handleResume = () => {
+    setIsFinished(false);
+    setJustFinished(false);
+    saveEntry({ date: today, content: text, wordCount: wc, timeSpent: elapsed, highlights: entry?.highlights || [], tags: entry?.tags || [], finished: false });
+    setTimeout(() => { if (textareaRef.current) textareaRef.current.focus(); }, 50);
+  };
+
+  if (isFinished && !justFinished) {
+    return (
+      <div className="writing-container">
+        <div className="finished-state">
+          <h2>Today's pages are done.</h2>
+          <p>{wc} words · {formatTime(elapsed)}</p>
+          <div style={{display:'flex', gap:12, justifyContent:'center', marginTop:20, flexWrap:'wrap'}}>
+            <button className="btn" onClick={onDownloadBackup}>{Icons.download} Download backup</button>
+            <button className="resume-link" onClick={handleResume}>Keep writing</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (justFinished) {
+    setTimeout(() => setJustFinished(false), 3000);
+    return (
+      <div className="writing-container">
+        <div className="finished-state" style={{animation:'fadeIn 0.3s ease-out'}}>
+          <h2>Saved.</h2>
+          <p>{wc} words · {formatTime(elapsed)}</p>
+          <div style={{display:'flex', gap:12, justifyContent:'center', marginTop:20, flexWrap:'wrap'}}>
+            <button className="btn btn-primary" onClick={onDownloadBackup}>{Icons.download} Download backup</button>
+          </div>
+          <p style={{fontSize:'0.75rem', marginTop:12, color:'var(--text-faint)', fontStyle:'italic'}}>
+            Save this file to iCloud Drive to keep it synced across your devices.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="writing-container">
+        <div className="writing-header">
+          <div className="writing-date">{formatDate(today)}</div>
+          <div className="writing-meta">
+            {settings.showTimer && <span>{formatTime(elapsed)}</span>}
+            <span style={{ color: wc >= WORD_TARGET ? 'var(--success)' : 'var(--text-faint)', fontWeight: wc >= WORD_TARGET ? 500 : 400 }}>
+              {wc} / {WORD_TARGET}
+            </span>
+          </div>
+        </div>
+        <textarea ref={textareaRef} className="writing-area" value={text} onChange={e => setText(e.target.value)} placeholder={placeholder} spellCheck={false} autoCorrect="off" autoCapitalize="off" />
+        {wc > 0 && (
+          <div className="writing-footer">
+            <span style={{fontSize:'0.78rem', color:'var(--text-faint)'}}>
+              {wc < WORD_TARGET ? `${WORD_TARGET - wc} words to go` : 'Target reached'}
+            </span>
+            <button className="finish-btn" onClick={handleFinish}>
+              Save &amp; finish
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="progress-wrap">
+        <div className={`progress-bar ${wc >= WORD_TARGET ? 'complete' : ''}`} style={{ width: `${progress * 100}%` }} />
+      </div>
+      {showNudge && <div className="nudge" key={nudgeText}>{nudgeText}</div>}
+      {showComplete && <div className="complete-banner">750 words — well done. Keep going if you'd like.</div>}
+    </>
+  );
+}
+
+
+// ─── History View ───
+function HistoryView({ entries, setDetailId }) {
+  const [search, setSearch] = useState('');
+  const filtered = entries.filter(e => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return e.content.toLowerCase().includes(q) || e.date.includes(q) || (e.tags || []).some(t => t.toLowerCase().includes(q));
+  }).sort((a,b) => b.date.localeCompare(a.date));
+
+  return (
+    <div className="view-container">
+      <h2 className="view-title">Your Pages</h2>
+      <p className="view-subtitle">{entries.length} entries written</p>
+      <div className="search-bar">
+        <input className="search-input" placeholder="Search by keyword, date, or tag..." value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+      {filtered.length === 0 && (
+        <div className="empty-state">
+          <p>{entries.length === 0 ? 'No entries yet.' : 'No entries match your search.'}</p>
+          <p className="hint">{entries.length === 0 ? 'Start writing today — your pages will appear here.' : 'Try a different search term.'}</p>
+        </div>
+      )}
+      {filtered.map(entry => (
+        <div key={entry.date} className="entry-card slide-in" onClick={() => setDetailId(entry.date)}>
+          <div className="entry-card-header">
+            <div className="entry-card-date">
+              <span className={`completion-dot ${entry.wordCount >= WORD_TARGET ? 'done' : 'partial'}`}></span>
+              {formatDate(entry.date)}
+            </div>
+            <div className="entry-card-meta">
+              <span>{entry.wordCount} words</span>
+              <span>{formatTime(entry.timeSpent || 0)}</span>
+            </div>
+          </div>
+          <div className="entry-card-preview">{entry.content}</div>
+          {entry.tags?.length > 0 && <div className="entry-card-tags">{entry.tags.map(t => <span key={t} className="tag">{t}</span>)}</div>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+// ─── Entry Detail ───
+function EntryDetail({ entry, onBack, addSeed, removeSeed, updateSeedTags, seeds, updateTags, updateHighlights, deleteEntry, backLabel }) {
+  const [tagInput, setTagInput] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedText, setSelectedText] = useState('');
+  const [justSavedSeedId, setJustSavedSeedId] = useState(null); // ID of seed just created
+  const [seedTagInput, setSeedTagInput] = useState('');
+
+  if (!entry) return <div className="view-container"><button className="back-btn" onClick={onBack}>{Icons.back} Back</button><p>Entry not found.</p></div>;
+
+  const [activeSeedId, setActiveSeedId] = useState(null); // seed being managed (just saved or clicked highlight)
+
+  // The seed currently being managed (just saved or clicked from highlight)
+  const activeSeed = activeSeedId ? seeds.find(s => s.id === activeSeedId) : null;
+
+  const handleTextSelect = () => {
+    if (activeSeedId) return; // don't override if managing a seed
+    const sel = window.getSelection();
+    if (sel && sel.toString().trim().length > 0) setSelectedText(sel.toString().trim());
+  };
+
+  const handleAddSeed = () => {
+    if (selectedText) {
+      const seedId = Date.now().toString();
+      addSeed(selectedText, entry.date, seedId);
+      const hl = [...(entry.highlights || [])];
+      if (!hl.includes(selectedText)) { hl.push(selectedText); updateHighlights(entry.date, hl); }
+      setSelectedText('');
+      setActiveSeedId(seedId);
+      setJustSavedSeedId(seedId);
+      setSeedTagInput('');
+      window.getSelection().removeAllRanges();
+    }
+  };
+
+  const handleHighlightClick = (highlightText) => {
+    // Find the seed that matches this highlight for this entry
+    const matchingSeed = seeds.find(s => s.text === highlightText && s.sourceDate === entry.date);
+    if (matchingSeed) {
+      setActiveSeedId(matchingSeed.id);
+      setJustSavedSeedId(null); // not a new save, it's an existing seed
+      setSeedTagInput('');
+      setSelectedText('');
+    }
+  };
+
+  const handleRemoveActiveSeed = () => {
+    if (activeSeedId) {
+      removeSeed(activeSeedId);
+      setActiveSeedId(null);
+      setJustSavedSeedId(null);
+      setSeedTagInput('');
+    }
+  };
+
+  const handleDismissSeedPanel = () => {
+    setActiveSeedId(null);
+    setJustSavedSeedId(null);
+    setSeedTagInput('');
+  };
+
+  const handleAddSeedTag = () => {
+    const t = seedTagInput.trim().toLowerCase();
+    if (t && activeSeed && !(activeSeed.tags || []).includes(t)) {
+      updateSeedTags(activeSeedId, [...(activeSeed.tags || []), t]);
+    }
+    setSeedTagInput('');
+  };
+
+  const handleRemoveSeedTag = (tag) => {
+    if (activeSeed) {
+      updateSeedTags(activeSeedId, (activeSeed.tags || []).filter(t => t !== tag));
+    }
+  };
+
+  const handleAddTag = () => {
+    const t = tagInput.trim().toLowerCase();
+    if (t && !(entry.tags || []).includes(t)) updateTags(entry.date, [...(entry.tags || []), t]);
+    setTagInput('');
+  };
+
+  const removeTag = (t) => updateTags(entry.date, (entry.tags || []).filter(x => x !== t));
+
+  const renderContent = () => {
+    let content = entry.content;
+    const highlights = entry.highlights || [];
+    if (highlights.length === 0) return content;
+    let parts = [content];
+    highlights.forEach(hl => {
+      const newParts = [];
+      parts.forEach(part => {
+        if (typeof part !== 'string') { newParts.push(part); return; }
+        const idx = part.indexOf(hl);
+        if (idx === -1) { newParts.push(part); return; }
+        if (idx > 0) newParts.push(part.slice(0, idx));
+        newParts.push(<span key={hl+idx} className="highlight" title="Click to manage this seed" onClick={(e) => { e.stopPropagation(); handleHighlightClick(hl); }}>{hl}</span>);
+        if (idx + hl.length < part.length) newParts.push(part.slice(idx + hl.length));
+      });
+      parts = newParts;
+    });
+    return parts;
+  };
+
+  return (
+    <div className="view-container fade-in">
+      <button className="back-btn" onClick={onBack}>{Icons.back} {backLabel || 'Back to entries'}</button>
+      <div className="entry-detail-header">
+        <div>
+          <h2 className="view-title">{formatDate(entry.date)}</h2>
+          <p className="view-subtitle" style={{marginBottom:0}}>
+            {entry.wordCount} words · {formatTime(entry.timeSpent || 0)}
+            {entry.wordCount >= WORD_TARGET && <span style={{color:'var(--success)', marginLeft:8}}>&#10003; Complete</span>}
+          </p>
+        </div>
+        <button className="btn btn-sm btn-danger" onClick={() => setShowDeleteModal(true)} title="Delete entry">{Icons.trash}</button>
+      </div>
+
+      {/* Text selection → Save to seedbank prompt */}
+      {selectedText && !activeSeedId && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', background: '#fff', border: '1px solid var(--accent-light)', borderRadius: 'var(--radius)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-light)', flex: 1 }}>"{selectedText.slice(0, 80)}{selectedText.length > 80 ? '...' : ''}"</span>
+          <button className="btn btn-sm btn-primary" onClick={handleAddSeed}>Save to seedbank</button>
+        </div>
+      )}
+
+      {/* Seed management panel: for just-saved seeds OR clicked highlights */}
+      {activeSeed && (
+        <div className="fade-in" style={{ marginBottom: 16, padding: '14px 16px', background: '#fff', border: '1px solid ' + (justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent-light)'), borderRadius: 'var(--radius)', borderLeft: '3px solid ' + (justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent)') }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '0.75rem', color: justSavedSeedId === activeSeedId ? 'var(--success)' : 'var(--accent)', fontWeight: 500, marginBottom: 4 }}>
+                {justSavedSeedId === activeSeedId ? 'Saved to seedbank' : 'Seed'}
+              </div>
+              <div style={{ fontSize: '0.82rem', color: 'var(--text-light)', fontStyle: 'italic', fontFamily: 'var(--serif)', lineHeight: 1.5 }}>
+                "{activeSeed.text.slice(0, 120)}{activeSeed.text.length > 120 ? '...' : ''}"
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <button className="btn btn-sm btn-danger" onClick={handleRemoveActiveSeed} title="Remove this seed">Remove seed</button>
+              <button className="btn btn-sm" onClick={handleDismissSeedPanel} title="Dismiss">Done</button>
+            </div>
+          </div>
+          {/* Seed tags inline */}
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', alignItems: 'center', marginTop: 6 }}>
+            {(activeSeed.tags || []).map(t => (
+              <span key={t} className="seed-tag">
+                {t} <span className="seed-tag-remove" onClick={() => handleRemoveSeedTag(t)}>×</span>
+              </span>
+            ))}
+            <input
+              className="seed-tag-input"
+              placeholder="Add tag..."
+              value={seedTagInput}
+              onChange={e => setSeedTagInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleAddSeedTag(); }}
+              style={{ width: 100 }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="entry-content" onMouseUp={handleTextSelect}>{renderContent()}</div>
+      <div className="tags-section">
+        <div className="tags-section-title">Page themes</div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-faint)', marginBottom: 8, fontStyle: 'italic' }}>Retrospective tags for this whole entry — what was on your mind today?</div>
+        <div className="tags-input-row">
+          {(entry.tags || []).map(t => <span key={t} className="tag-removable">{t} <span className="tag-remove" onClick={() => removeTag(t)}>×</span></span>)}
+          <input className="tag-input" placeholder="e.g. work, anxiety, ideas..." value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); }} />
+        </div>
+      </div>
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <h3>Delete this entry?</h3>
+            <p>This will permanently remove your pages from {formatDate(entry.date)}, along with any seeds harvested from it. This cannot be undone.</p>
+            <div className="modal-actions">
+              <button className="btn" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button className="btn btn-danger" onClick={() => { deleteEntry(entry.date); setShowDeleteModal(false); }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ─── Seeds View (expanded with tags, filters, click-through) ───
+function SeedsView({ seeds, removeSeed, updateSeedTags, navigateToEntry, returnState, clearReturnState, entries }) {
+  const [search, setSearch] = useState(returnState?.search || '');
+  const [activeTags, setActiveTags] = useState(returnState?.activeTags || []);
+  const [filterOpen, setFilterOpen] = useState(returnState?.filterOpen || false);
+  const [tagInputId, setTagInputId] = useState(null);
+  const [tagInputValue, setTagInputValue] = useState('');
+
+  // Clear return state after restoring
+  useEffect(() => {
+    if (returnState) {
+      setSearch(returnState.search || '');
+      setActiveTags(returnState.activeTags || []);
+      setFilterOpen(returnState.filterOpen || false);
+      clearReturnState();
+    }
+  }, [returnState]);
+
+  // Gather all unique tags across seeds with counts
+  const allTags = useMemo(() => {
+    const tagMap = {};
+    seeds.forEach(s => {
+      (s.tags || []).forEach(t => { tagMap[t] = (tagMap[t] || 0) + 1; });
+    });
+    return Object.entries(tagMap).sort((a,b) => b[1] - a[1]);
+  }, [seeds]);
+
+  // Filter seeds
+  const filtered = useMemo(() => {
+    return seeds.filter(s => {
+      const matchesSearch = !search.trim() ||
+        s.text.toLowerCase().includes(search.toLowerCase()) ||
+        (s.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase()));
+      const matchesTags = activeTags.length === 0 ||
+        activeTags.every(t => (s.tags || []).includes(t));
+      return matchesSearch && matchesTags;
+    });
+  }, [seeds, search, activeTags]);
+
+  const toggleTag = (tag) => {
+    setActiveTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
+  };
+
+  const handleAddSeedTag = (seedId) => {
+    const t = tagInputValue.trim().toLowerCase();
+    if (!t) return;
+    const seed = seeds.find(s => s.id === seedId);
+    if (seed && !(seed.tags || []).includes(t)) {
+      updateSeedTags(seedId, [...(seed.tags || []), t]);
+    }
+    setTagInputValue('');
+    setTagInputId(null);
+  };
+
+  const removeSeedTag = (seedId, tag) => {
+    const seed = seeds.find(s => s.id === seedId);
+    if (seed) updateSeedTags(seedId, (seed.tags || []).filter(t => t !== tag));
+  };
+
+  const handleSeedClick = (seed) => {
+    // Check if the source entry exists
+    const entry = entries.find(e => e.date === seed.sourceDate);
+    if (entry) {
+      navigateToEntry(seed.sourceDate, { search, activeTags, filterOpen });
+    }
+  };
+
+  return (
+    <div className="view-container">
+      <h2 className="view-title">Seedbank</h2>
+      <p className="view-subtitle">Phrases and lines that feel alive — raw material for creative work.</p>
+
+      {/* Search bar - always show */}
+      <div className="search-bar">
+        <input className="search-input" placeholder="Search seeds by text or tag..." value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+
+      {/* Filter panel */}
+      {allTags.length > 0 && (
+        <div className="filter-panel">
+          <div className="filter-header" onClick={() => setFilterOpen(!filterOpen)}>
+            <span style={{display:'flex',alignItems:'center',gap:6}}>{Icons.filter} Filter by tag {activeTags.length > 0 && <span style={{fontSize:'0.7rem',background:'var(--accent)',color:'#fff',borderRadius:10,padding:'1px 7px'}}>{activeTags.length}</span>}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={filterOpen ? 'open' : ''}><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          {filterOpen && (
+            <div className="filter-body fade-in">
+              <div className="filter-tags">
+                {allTags.map(([tag, count]) => (
+                  <button key={tag} className={`filter-tag ${activeTags.includes(tag) ? 'active' : ''}`} onClick={() => toggleTag(tag)}>
+                    {tag} <span className="count">({count})</span>
+                  </button>
+                ))}
+                {activeTags.length > 0 && (
+                  <button className="filter-tag" onClick={() => setActiveTags([])} style={{fontStyle:'italic',color:'var(--text-faint)'}}>Clear all</button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {filtered.length === 0 && (
+        <div className="empty-state">
+          <p>{seeds.length === 0 ? 'No seeds yet.' : 'No seeds match your search or filters.'}</p>
+          <p className="hint">{seeds.length === 0 ? 'Highlight text in your entries to save seeds here.' : 'Try a different search term or clear your filters.'}</p>
+        </div>
+      )}
+
+      {filtered.map(seed => (
+        <div key={seed.id} className="seed-card slide-in clickable" onClick={() => handleSeedClick(seed)}>
+          <div className="seed-text">"{seed.text}"</div>
+          <div className="seed-source">
+            From {formatDate(seed.sourceDate)}
+            {entries.find(e => e.date === seed.sourceDate) && <span style={{marginLeft:6,fontSize:'0.7rem',color:'var(--accent)'}}>— click to view entry</span>}
+          </div>
+
+          {/* Seed tags */}
+          <div className="seed-tags" onClick={e => e.stopPropagation()}>
+            {(seed.tags || []).map(t => (
+              <span key={t} className="seed-tag">
+                {t} <span className="seed-tag-remove" onClick={() => removeSeedTag(seed.id, t)}>×</span>
+              </span>
+            ))}
+            {tagInputId === seed.id ? (
+              <input
+                className="seed-tag-input"
+                autoFocus
+                placeholder="tag..."
+                value={tagInputValue}
+                onChange={e => setTagInputValue(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleAddSeedTag(seed.id); if (e.key === 'Escape') { setTagInputId(null); setTagInputValue(''); } }}
+                onBlur={() => { if (tagInputValue.trim()) handleAddSeedTag(seed.id); else { setTagInputId(null); setTagInputValue(''); } }}
+              />
+            ) : (
+              <button className="seed-tag" style={{cursor:'pointer',borderStyle:'dashed',color:'var(--text-faint)'}} onClick={() => { setTagInputId(seed.id); setTagInputValue(''); }}>
+                + tag
+              </button>
+            )}
+          </div>
+
+          <div className="seed-actions" onClick={e => e.stopPropagation()}>
+            <button className="btn btn-ghost btn-sm btn-danger" onClick={() => removeSeed(seed.id)}>{Icons.trash}</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+// ─── Stats & Settings View ───
+function StatsView({ entries, streak, settings, updateSettings, data, onOpenFile, onCreateFile, onDisconnect, onSaveNow, onDownloadBackup, fileStatus, fileName, hasFileSystemAccess }) {
+  const [calMonth, setCalMonth] = useState(() => { const d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; });
+
+  const totalWords = entries.reduce((s, e) => s + e.wordCount, 0);
+  const completedDays = entries.filter(e => e.wordCount >= WORD_TARGET).length;
+  const avgWords = entries.length > 0 ? Math.round(totalWords / entries.length) : 0;
+  const avgTime = entries.length > 0 ? Math.round(entries.reduce((s, e) => s + (e.timeSpent || 0), 0) / entries.length) : 0;
+
+  const calendarDays = useMemo(() => {
+    const { year, month } = calMonth;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = todayStr();
+    const days = [];
+    for (let i = 0; i < firstDay; i++) days.push({ empty: true });
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const entry = entries.find(e => e.date === dateStr);
+      days.push({ day: d, dateStr, isToday: dateStr === today, completed: entry?.wordCount >= WORD_TARGET, partial: entry && entry.wordCount < WORD_TARGET });
+    }
+    return days;
+  }, [calMonth, entries]);
+
+  const monthLabel = new Date(calMonth.year, calMonth.month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const prevMonth = () => setCalMonth(m => m.month === 0 ? { year: m.year - 1, month: 11 } : { ...m, month: m.month - 1 });
+  const nextMonth = () => setCalMonth(m => m.month === 11 ? { year: m.year + 1, month: 0 } : { ...m, month: m.month + 1 });
+
+  const exportText = () => {
+    const text = [...entries].sort((a,b) => a.date.localeCompare(b.date)).map(e => `═══ ${formatDate(e.date)} ═══\n${e.wordCount} words\n\n${e.content}\n`).join('\n\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `morning-pages-${todayStr()}.txt`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="view-container">
+      <h2 className="view-title">Progress</h2>
+      <p className="view-subtitle">Your writing habit at a glance.</p>
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-value">{streak}</div><div className="stat-label">day streak</div></div>
+        <div className="stat-card"><div className="stat-value">{completedDays}</div><div className="stat-label">pages completed</div></div>
+        <div className="stat-card"><div className="stat-value">{totalWords.toLocaleString()}</div><div className="stat-label">total words</div></div>
+      </div>
+      <div className="stats-grid" style={{gridTemplateColumns:'repeat(2, 1fr)'}}>
+        <div className="stat-card"><div className="stat-value" style={{fontSize:'1.4rem'}}>{avgWords}</div><div className="stat-label">avg words per session</div></div>
+        <div className="stat-card"><div className="stat-value" style={{fontSize:'1.4rem'}}>{formatTime(avgTime)}</div><div className="stat-label">avg time per session</div></div>
+      </div>
+
+      <div className="calendar">
+        <div className="calendar-header">
+          <div className="calendar-title">{monthLabel}</div>
+          <div className="calendar-nav"><button onClick={prevMonth}>‹</button><button onClick={nextMonth}>›</button></div>
+        </div>
+        <div className="calendar-grid">
+          {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => <div key={d} className="calendar-day-label">{d}</div>)}
+          {calendarDays.map((d, i) => <div key={i} className={`calendar-day ${d.empty?'empty':''} ${d.completed?'completed':''} ${d.partial?'partial':''} ${d.isToday?'today':''}`}>{d.empty ? '·' : d.day}</div>)}
+        </div>
+      </div>
+
+      {/* File Storage Section */}
+      <div className="settings-section">
+        <div className="settings-title">File Storage</div>
+        <div style={{fontSize:'0.85rem', color:'var(--text-light)', marginBottom:16, lineHeight:1.5}}>
+          {fileStatus === 'connected'
+            ? <>Connected to <strong>{fileName}</strong>. {hasFileSystemAccess ? 'Changes save automatically.' : 'Use Save to update the file.'}</>
+            : <>Not connected to a file. Your data is stored in this browser only. Connect a file to sync across devices via iCloud Drive, Dropbox, or any shared folder.</>
+          }
+        </div>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+          {fileStatus === 'disconnected' ? (
+            <>
+              <button className="btn btn-primary" onClick={onOpenFile}>Open existing file</button>
+              <button className="btn" onClick={onCreateFile}>Create new file</button>
+            </>
+          ) : (
+            <>
+              {!hasFileSystemAccess && <button className="btn btn-primary" onClick={onSaveNow}>Save to file</button>}
+              <button className="btn" onClick={onOpenFile}>Open different file</button>
+              <button className="btn" onClick={onDisconnect}>Disconnect</button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-title">Settings</div>
+        <div className="setting-row">
+          <div className="setting-info"><div className="setting-label">Show timer</div><div className="setting-desc">Display elapsed time while writing</div></div>
+          <button className={`toggle ${settings.showTimer?'on':''}`} onClick={() => updateSettings('showTimer', !settings.showTimer)} />
+        </div>
+        <div className="setting-row">
+          <div className="setting-info"><div className="setting-label">Unsticking nudges</div><div className="setting-desc">Show gentle prompts after 30 seconds of inactivity</div></div>
+          <button className={`toggle ${settings.showNudges?'on':''}`} onClick={() => updateSettings('showNudges', !settings.showNudges)} />
+        </div>
+        <div className="setting-row">
+          <div className="setting-info"><div className="setting-label">First line starters</div><div className="setting-desc">Show starter phrases as placeholder text (departs from traditional practice)</div></div>
+          <button className={`toggle ${settings.firstLineStarters?'on':''}`} onClick={() => updateSettings('firstLineStarters', !settings.firstLineStarters)} />
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-title">Backup &amp; Export</div>
+        <p style={{fontSize:'0.85rem', color:'var(--text-light)', marginBottom:14, lineHeight:1.5}}>
+          Download a dated backup of all your data. Save it to iCloud Drive to access from any device — the newest file is always the one with today's date.
+        </p>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:12}}>
+          <button className="btn btn-primary" onClick={onDownloadBackup}>{Icons.download} Download backup (morning-pages-{todayStr()}.json)</button>
+        </div>
+        <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+          <button className="btn" onClick={exportText}>{Icons.download} Export as plain text</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<script src="uz-nav.js"></script>
+<script src="uz-footer.js"></script>
+</body>
+</html>
