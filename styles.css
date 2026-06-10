@@ -5296,3 +5296,15 @@ body.show-notes .fb-note{display:inline;}
 .cp-lbl-toggle{display:inline-flex;gap:0;border:1px solid #3a3a48;border-radius:7px;overflow:hidden;margin-left:auto;}
 .cp-lbl-opt{background:transparent;border:0;color:#9a96a8;font-family:'JetBrains Mono',monospace;font-size:0.66rem;letter-spacing:0.04em;text-transform:uppercase;padding:5px 10px;cursor:pointer;}
 .cp-lbl-opt.on{background:#d4a853;color:#1a1a1f;font-weight:700;}
+
+
+/* v103 — mobile: lyrics tab anchors bottom-left so it can't overlap the title */
+@media (max-width: 480px) {
+  .lyrics-panel-tab {
+    top: auto;
+    bottom: 80px;
+    transform: none;
+    font-size: 12px;
+    padding: 10px 6px;
+  }
+}

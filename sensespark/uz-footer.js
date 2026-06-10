@@ -6,7 +6,7 @@
   if (window.__uzFooterRootLoaded) return;
   window.__uzFooterRootLoaded = true;
   var s = document.createElement('script');
-  s.src = '../uz-footer.js?v=14';
+  s.src = '../uz-footer.js?v=15';
   s.async = false;
   document.body.appendChild(s);
 })();

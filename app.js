@@ -1921,6 +1921,7 @@ function renderFilePopupBody() {
         </div>
         <div class="file-body-row">
             <button class="file-btn" data-action="openMidiExport" title="Export as MIDI file">🎵 MIDI</button>
+            <button class="file-btn" data-action="copyShareLink" title="Copy a link to this progression">🔗 Share link</button>
         </div>
         <div class="file-body-row">
             <button class="file-btn clear-btn" data-action="clearProgression" title="Clear">🗑️ Clear progression</button>
@@ -4853,12 +4854,20 @@ function setupEventListeners() {
                 state.showFretboard = !state.showFretboard;
                 document.getElementById('btnShowScale').classList.toggle('active', state.showFretboard);
                 renderScaleBoards();
+                if (state.showFretboard) {
+                    const fc = document.getElementById('fretboardContainer');
+                    if (fc) setTimeout(() => fc.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                }
             }
             // Arpeggiator Actions
             if (action === 'toggleArpeggiator') {
                 state.showArpeggiator = !state.showArpeggiator;
                 document.getElementById('btnArpeggiator').classList.toggle('active', state.showArpeggiator);
                 renderArpeggiator();
+                if (state.showArpeggiator) {
+                    const ac = document.getElementById('arpeggiatorContainer');
+                    if (ac) setTimeout(() => ac.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                }
             }
             if (action === 'setArpRoot') {
                 state.arpRoot = actionBtn.dataset.root;
@@ -5570,6 +5579,18 @@ function setupEventListeners() {
             // Tutorial / Playback / File popup toggles
             if (action === 'openTutorial') {
                 if (typeof window.uzShowTutorial === 'function') window.uzShowTutorial();
+            }
+            if (action === 'copyShareLink') {
+                const url = buildShareUrl();
+                if (!url) {
+                    actionBtn.textContent = 'Add chords first';
+                    setTimeout(() => { actionBtn.innerHTML = '🔗 Share link'; }, 1500);
+                } else {
+                    navigator.clipboard.writeText(url).then(() => {
+                        actionBtn.textContent = '✓ Link copied!';
+                        setTimeout(() => { actionBtn.innerHTML = '🔗 Share link'; }, 1500);
+                    }).catch(() => { window.prompt('Copy this link:', url); });
+                }
             }
             if (action === 'openMidiExport') {
                 // Close the file panel so the MIDI dialog is unambiguous
@@ -7966,6 +7987,47 @@ loadStateFromLocalStorage();
 if (state.selectedTab === 'dark') {
     document.body.classList.add('dark-mode');
 }
+
+// ========== SHAREABLE PROGRESSION URLS ==========
+// ?key=C&p=C-G-Am-F|F-G-C  (lines split by |, chords by -; URL-encoded)
+const SHARE_CHORD_RE = /^[A-G][#b]?[A-Za-z0-9#°+()/-]{0,12}$/;
+
+function buildShareUrl() {
+    const lines = state.progressionLines
+        .map(l => l.chords.filter(c => c.chord && c.chord !== '?').map(c => c.chord).join('-'))
+        .filter(Boolean);
+    if (!lines.length) return null;
+    const params = new URLSearchParams();
+    params.set('key', state.selectedKey);
+    params.set('p', lines.join('|'));
+    if (state.songName) params.set('n', state.songName.slice(0, 60));
+    return location.origin + location.pathname + '?' + params.toString();
+}
+
+(function importSharedProgression() {
+    const params = new URLSearchParams(window.location.search);
+    const p = params.get('p');
+    if (!p) return;
+    const lines = p.split('|').map(seg =>
+        seg.split('-').map(t => t.trim()).filter(t => SHARE_CHORD_RE.test(t))
+    ).filter(l => l.length);
+    if (!lines.length) return;
+    const key = params.get('key');
+    if (key && /^[A-G][#b]?m?$/.test(key)) {
+        state.selectedKey = key;
+        state.progressionKey = key;
+    }
+    state.progressionLines = lines.map(chords => ({
+        chords: chords.map((chord, i) => ({ chord, id: 'shared-' + i, active: false })),
+        repeats: 1, tab: [], showTab: false
+    }));
+    state.currentLineIndex = 0;
+    const name = params.get('n');
+    if (name) state.songName = name.slice(0, 60);
+    saveStateToLocalStorage();
+    // Strip the params so a reload doesn't clobber later edits.
+    history.replaceState(null, '', location.pathname);
+})();
 
 // Pop-out mode: ?popout=<panelId> in the URL means this window is a popped-out
 // tool view. Add body classes so CSS can hide the surrounding chrome and open

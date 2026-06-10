@@ -62,6 +62,15 @@
   var isMorningPages = activeApp === 'morning' ||
     window.location.href.toLowerCase().indexOf('morningpages') !== -1;
 
+  // Hide the floating Ko-fi bubble on small screens — it covers content.
+  // The footer's own donate button remains available on every page.
+  (function () {
+    var st = document.createElement('style');
+    st.id = 'uz-kofi-mobile-hide';
+    st.textContent = '@media (max-width: 640px) { [class*="floatingchat"], [id*="kofi-widget"], iframe[src*="ko-fi"] { display: none !important; } }';
+    document.head.appendChild(st);
+  })();
+
   if (!isMorningPages) {
     var kofiInjected = false;
     function injectKofi() {
