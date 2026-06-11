@@ -1,6 +1,6 @@
 import * as Data from './data.js?v=99';
 import * as Audio from './audio.js?v=100';
-import * as Melody from './melody.js?v=2';
+import * as Melody from './melody.js?v=3';
 
 const state = {
   selectedKey: 'C',

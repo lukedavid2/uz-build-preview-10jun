@@ -20,13 +20,13 @@ const NOTE_IDX = { 'C':0,'C#':1,'Db':1,'D':2,'D#':3,'Eb':3,'E':4,'F':5,'F#':6,'G
 const MAJ_OFF = [0, 2, 4, 5, 7, 9, 11];
 
 // ── module state (transient — committed data lives in D.state.melody) ──
-let drag = null, hover = null, ghosts = null;
+let drag = null, hover = null, ghosts = null, justPlaced = null;
 let playingBar = -1;            // bar index within the ACTIVE line, -1 = none
 let playWindow = [];            // [{t0, dur, lineIdx, chordIdx}] scheduled measures
 let rafId = null;
 
 export function defaults() {
-    return { lines: {}, instrument: 'pluck', resolution: 8, octaves: 2, labelMode: 'degrees', open: false, activeLine: 0 };
+    return { lines: {}, instrument: 'pluck', resolution: 8, octaves: 2, labelMode: 'degrees', open: false, activeLine: 0, zoom: 1 };
 }
 
 function st() {
@@ -36,6 +36,7 @@ function st() {
     if (!m.lines) m.lines = {};
     if (m.resolution !== 8 && m.resolution !== 16) m.resolution = 8;
     if (m.octaves !== 2 && m.octaves !== 3) m.octaves = 2;
+    if (!(m.zoom >= 0.7 && m.zoom <= 2)) m.zoom = 1;
     return m;
 }
 
@@ -109,7 +110,7 @@ function rgba(hex, a) {
 function geo() {
     const m = st();
     const slots = m.resolution;
-    const cellW = slots === 16 ? 15 : 30;
+    const cellW = Math.round((slots === 16 ? 15 : 30) * (m.zoom || 1));
     const prog = bars();
     const topP = m.octaves * 7;
     const rows = topP + 1;
@@ -144,9 +145,9 @@ export function render() {
         ? `<button class="mel-btn mel-play playing" data-action="toggleLooper">■ STOP</button>`
         : `<button class="mel-btn mel-play" data-action="toggleLooper">▶ PLAY</button>`;
     const suggestCluster = ghosts
-        ? `<button class="mel-btn mel-btn-on" data-action="melKeep">✓ KEEP</button>
+        ? `<button class="mel-btn mel-btn-on" data-action="melKeep" title="Commit every remaining suggested note">✓ KEEP ALL</button>
            <button class="mel-btn" data-action="melAnother">↻ ANOTHER</button>
-           <button class="mel-btn" data-action="melDiscard">× DISCARD</button>`
+           <button class="mel-btn" data-action="melSuggest" title="Hide the suggestion">× HIDE</button>`
         : `<button class="mel-btn mel-suggest" data-action="melSuggest">✨ SUGGEST A SHAPE</button>`;
     const header = `
     <div class="mel-header">
@@ -242,16 +243,16 @@ export function render() {
         const style = ghost
             ? `background:transparent;border:1.5px dashed ${rgba(col, 0.7)};opacity:0.85;`
             : `background:linear-gradient(${rgba(col, 0.22)},${rgba(col, 0.22)}),${surface};border:1.5px solid ${rgba(col, 0.9)};box-shadow:0 1px 3px rgba(0,0,0,0.3);`;
-        return `<div class="mel-note" data-melnote="${i}" style="position:absolute;left:${x + 2}px;top:${y + 2.5}px;width:${w - 4}px;height:${ROW_H - 5}px;border-radius:${ROW_H / 2}px;display:flex;align-items:center;z-index:3;${style}">${num}</div>`;
+        const anim = (!ghost && justPlaced && n.bar === justPlaced.bar && n.slot === justPlaced.slot && n.d === justPlaced.d && n.o === justPlaced.o) ? ' mel-note-anim' : '';
+        return `<div class="mel-note${anim}" data-melnote="${i}" style="position:absolute;left:${x + 2}px;top:${y + 2.5}px;width:${w - 4}px;height:${ROW_H - 5}px;border-radius:${ROW_H / 2}px;display:flex;align-items:center;z-index:3;${style}">${num}</div>`;
     };
     notes.forEach((n, i) => { L += renderNote(n, i, false); });
     (ghosts || []).forEach((n, i) => { L += renderNote(n, i, true); });
 
-    // hover affordance
-    if (!drag && hover && !noteAt(notes, hover, g)) {
-        const x = g.barX(hover.bar) + hover.slot * g.cellW, y = g.rowY(hover.p);
-        L += `<span style="position:absolute;left:${x + 2}px;top:${y + 2.5}px;width:${g.cellW - 4}px;height:${ROW_H - 5}px;border-radius:${ROW_H / 2}px;border:1.5px dashed rgba(253,216,53,0.45);background:rgba(253,216,53,0.05);display:flex;align-items:center;justify-content:center;color:rgba(253,216,53,0.65);font-size:12px;z-index:4;pointer-events:none;">+</span>`;
-    }
+    // hover affordance: persistent overlay cell, moved on pointermove
+    // without re-rendering (re-renders made every note replay its
+    // entrance animation — the "flashing" bug).
+    L += `<span id="melHoverCell" style="display:none;position:absolute;width:${g.cellW - 4}px;height:${ROW_H - 5}px;border-radius:${ROW_H / 2}px;border:1.5px dashed rgba(253,216,53,0.45);background:rgba(253,216,53,0.05);align-items:center;justify-content:center;color:rgba(253,216,53,0.65);font-size:12px;z-index:4;pointer-events:none;will-change:left,top;">+</span>`;
 
     const emptyNote = (!notes.length && !ghosts)
         ? `<div class="mel-placeholder">Tap to add notes for this section</div>` : '';
@@ -260,16 +261,16 @@ export function render() {
         ? `Green rows are <b>${g.prog[playingBar].toneNames.join(' · ').replace(/#/g, '♯')}</b> while the loop is on ${g.prog[playingBar].chord} — safe places to land.`
         : `Green rows are the current chord's tones — safe places to land.`;
 
-    let cursor = 'default';
-    if (drag) cursor = drag.kind === 'move' ? 'grabbing' : 'col-resize';
-    else if (hover) {
-        const idx = noteAt(notes, hover, g);
-        cursor = idx >= 0 ? (isEdgeHit(notes[idx], hover) ? 'col-resize' : 'pointer') : 'pointer';
-    }
+    let cursor = drag ? (drag.kind === 'move' ? 'grabbing' : 'col-resize') : 'default';
 
+    const _justPlacedConsumed = justPlaced; justPlaced = null;
     c.innerHTML = `
     <div class="mel-card">
       ${header}
+      <div class="mel-toolbar">
+        <span class="mel-tool-group"><span class="mel-scroll-label">Zoom</span><input type="range" id="melZoomSlider" min="0.7" max="2" step="0.1" value="${m.zoom || 1}"><span class="mel-zoom-value">${(m.zoom || 1).toFixed(1)}x</span></span>
+        <span class="mel-tool-group mel-tool-scroll"><span class="mel-scroll-label">Scroll</span><input type="range" id="melScrollSlider" min="0" max="100" step="1" value="0"></span>
+      </div>
       <div class="mel-stage">
         <div id="melGridWrap" style="position:relative;width:${g.width}px;height:${HEADER_H + g.bodyH}px;font-family:${BODY};cursor:${cursor};touch-action:none;user-select:none;-webkit-user-select:none;">
           ${L}${emptyNote}
@@ -277,7 +278,6 @@ export function render() {
       </div>
       <div class="mel-footer">
         <span class="mel-legend"><i style="background:${TIER.chord}"></i> chord tone — safe, always lands <i style="background:${TIER.scale};margin-left:10px;"></i> colour note — passes through</span>
-        <span class="mel-scroll"><span class="mel-scroll-label">Scroll</span><input type="range" id="melScrollSlider" min="0" max="100" step="1" value="0"></span>
         <span class="mel-hint" id="melHint">${hintBar}</span>
       </div>
     </div>`;
@@ -332,6 +332,17 @@ export function attachPointer() {
     pointerAttached = true;
     // Scroll slider (same pattern as the tab editor's tab-scroll-slider)
     document.addEventListener('input', (e) => {
+        if (e.target.id === 'melZoomSlider') {
+            const m2 = st();
+            m2.zoom = parseFloat(e.target.value) || 1;
+            D.saveState();
+            const stage = document.querySelector('.mel-stage');
+            const ratio = stage && stage.scrollWidth > stage.clientWidth ? stage.scrollLeft / (stage.scrollWidth - stage.clientWidth) : 0;
+            render();
+            const stage2 = document.querySelector('.mel-stage');
+            if (stage2) stage2.scrollLeft = ratio * Math.max(0, stage2.scrollWidth - stage2.clientWidth);
+            return;
+        }
         if (e.target.id !== 'melScrollSlider') return;
         const stage = e.target.closest('.mel-card')?.querySelector('.mel-stage');
         if (!stage) return;
@@ -359,22 +370,52 @@ export function attachPointer() {
             const kind = isEdgeHit(notes[idx], loc) ? 'resize' : 'move';
             drag = { kind, work: notes.map(n => ({ ...n })), idx, grabOff: loc.slot - notes[idx].slot, moved: false, startLoc: loc };
         } else {
+            // Tap on a ghost adopts just that suggested note (ghosts stay
+            // visible so you can cherry-pick — toggle ✨ or × to clear).
+            const gIdx = ghosts ? noteAt(ghosts, loc, g) : -1;
+            if (gIdx >= 0) {
+                const adopted = { ...ghosts[gIdx] };
+                ghosts = ghosts.filter((_, i2) => i2 !== gIdx);
+                if (!ghosts.length) ghosts = null;
+                const work = [...notes.map(n => ({ ...n })), adopted];
+                st().lines[li] = mono(work, work.length - 1);
+                preview(adopted.d, adopted.o);
+                justPlaced = adopted;
+                D.saveState();
+                render();
+                return;
+            }
             const nn = { bar: loc.bar, slot: loc.slot, ...fromP(loc.p), len: 1 };
             preview(nn.d, nn.o);
             drag = { kind: 'create', work: [...notes.map(n => ({ ...n })), nn], idx: notes.length, grabOff: 0, moved: false, startLoc: loc };
         }
-        if (ghosts) ghosts = null; // manual edit clears suggestions
         hover = null;
         render();
     });
     document.addEventListener('pointermove', (e) => {
         const overGrid = e.target.closest && e.target.closest('#melGridWrap');
         if (!drag) {
-            if (!overGrid) { if (hover) { hover = null; refresh(); } return; }
-            const loc = locate(e);
-            const changed = JSON.stringify(loc) !== JSON.stringify(hover);
-            hover = loc;
-            if (changed) refresh();
+            const cell = document.getElementById('melHoverCell');
+            const wrap = document.getElementById('melGridWrap');
+            if (!overGrid) { hover = null; if (cell) cell.style.display = 'none'; if (wrap) wrap.style.cursor = 'default'; return; }
+            hover = locate(e);
+            if (!cell || !wrap) return;
+            if (!hover) { cell.style.display = 'none'; wrap.style.cursor = 'default'; return; }
+            const g = geo();
+            const li = activeLineIdx();
+            const notes = notesOf(li);
+            const idx = noteAt(notes, hover, g);
+            const gIdx = ghosts ? noteAt(ghosts, hover, g) : -1;
+            if (idx >= 0) {
+                cell.style.display = 'none';
+                wrap.style.cursor = isEdgeHit(notes[idx], hover) ? 'col-resize' : 'pointer';
+            } else {
+                cell.style.left = (g.barX(hover.bar) + hover.slot * g.cellW + 2) + 'px';
+                cell.style.top = (g.rowY(hover.p) + 2.5) + 'px';
+                cell.style.width = (g.cellW - 4) + 'px';
+                cell.style.display = gIdx >= 0 ? 'none' : 'flex';
+                wrap.style.cursor = 'pointer';
+            }
             return;
         }
         const loc = locate(e);
@@ -404,6 +445,7 @@ export function attachPointer() {
         if (drag.kind === 'move' && !drag.moved) {
             m.lines[li] = notesOf(li).filter((_, i) => i !== drag.idx); // tap = remove
         } else {
+            if (drag.kind === 'create') justPlaced = { ...drag.work[drag.idx] };
             m.lines[li] = mono(drag.work, drag.idx);
         }
         drag = null;
@@ -429,9 +471,16 @@ export function handleAction(action, btn) {
         }
     }
     else if (action === 'melOctaves') { m.octaves = m.octaves === 2 ? 3 : 2; }
-    else if (action === 'melSuggest' || action === 'melAnother') { ghosts = suggest(); }
+    else if (action === 'melSuggest') { ghosts = ghosts ? null : suggest(); }
+    else if (action === 'melAnother') { ghosts = suggest(); }
     else if (action === 'melKeep') {
-        if (ghosts) { m.lines[activeLineIdx()] = ghosts; ghosts = null; }
+        if (ghosts) {
+            const li = activeLineIdx();
+            let work = notesOf(li).map(n => ({ ...n }));
+            ghosts.forEach(gn => { work = mono([...work, { ...gn }], work.length); });
+            m.lines[li] = work;
+            ghosts = null;
+        }
     }
     else if (action === 'melDiscard') { ghosts = null; }
     else if (action === 'melToTab') { melodyToTab(); return true; }
