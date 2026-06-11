@@ -66,6 +66,7 @@
   --additive: #e06b5e;
   --assonance: #e8a94e;
   --consonance: #a86bd4;
+  --ending: #d46ba8;
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
@@ -401,6 +402,8 @@ body {
 .type-assonance .section-badge { color: var(--assonance); border-color: rgba(232,169,78,0.3); }
 .type-consonance .section-dot { background: var(--consonance); }
 .type-consonance .section-badge { color: var(--consonance); border-color: rgba(168,107,212,0.3); }
+.type-ending .section-dot { background: var(--ending); }
+.type-ending .section-badge { color: var(--ending); border-color: rgba(212,107,168,0.3); }
 
 /* ===== FAVORITES PANEL ===== */
 .favorites-toggle {
@@ -1683,9 +1686,10 @@ const WORD_DATA = new Map(); // word -> { primary: variantData, variants: [varia
 
 // Indexes for fast lookup. Built as Sets for cross-variant dedup, then frozen as arrays.
 const TAIL_INDEX = new Map();       // tailStr -> [words] (perfect rhyme index)
+const END_INDEX = new Map();        // v4.3 unstressed-final-syllable -> [words]
 const VOWEL_INDEX = new Map();      // first vowel -> [words] (assonance index)
 const CONSONANT_INDEX = new Map();  // consonant pattern -> [words] (consonance index)
-const _tailSet = new Map(), _vowelSet = new Map(), _consSet = new Map();
+const _tailSet = new Map(), _vowelSet = new Map(), _consSet = new Map(), _endSet = new Map();
 
 function _addIndex(map, setMap, key, word) {
   if (!setMap.has(key)) setMap.set(key, new Set());
@@ -1697,10 +1701,24 @@ function _addIndex(map, setMap, key, word) {
 }
 
 // v4.0 Change 3 — build variant data once per pronunciation.
+// v4.3 — "ending rhyme" key: the final syllable (last vowel + trailing
+// consonants) when that vowel is UNSTRESSED. window/shadow/yellow share
+// endKey "OW"; spirit/minute share "AH T". Null when the final vowel is
+// stressed (those words rhyme through the normal tail).
+function getEndKey(phonemes) {
+  let vIdx = -1;
+  for (let i = phonemes.length - 1; i >= 0; i--) {
+    if (isVowel(phonemes[i])) { vIdx = i; break; }
+  }
+  if (vIdx === -1 || !phonemes[vIdx].endsWith('0')) return null;
+  return phonemes.slice(vIdx).map(stripStress).join(' ');
+}
+
 function buildVariantData(word, phoneStr) {
   const phonemes = phoneStr.split(/\s+/);
   const tail = getRhymeTail(phonemes).map(stripStress);
   const tailStr = tail.join(' ');
+  const endKey = getEndKey(phonemes);
   const vowels = tail.filter(p => VOWELS.has(p));
   const consonants = tail.filter(p => !VOWELS.has(p));
   const syllables = phonemes.filter(p => isVowel(p)).length;
@@ -1717,7 +1735,7 @@ function buildVariantData(word, phoneStr) {
   const displayTail = approximateDisplayTail(word, tail.length);
 
   return {
-    phonemes, tail, tailStr, vowels, consonants,
+    phonemes, tail, tailStr, vowels, consonants, endKey,
     vowelStr: vowels.join(','), consStr: consonants.join(','),
     syllables, stressInTail, stressPattern, displayTail
   };
@@ -1784,6 +1802,7 @@ raw.split('\n').forEach(line => {
   // index every pronunciation, deduping word entries per index bucket
   for (const data of variantData) {
     _addIndex(TAIL_INDEX, _tailSet, data.tailStr, word);
+    if (data.endKey) _addIndex(END_INDEX, _endSet, data.endKey, word);
     if (data.vowels.length > 0) _addIndex(VOWEL_INDEX, _vowelSet, data.vowels[0], word);
     if (data.consonants.length > 0) _addIndex(CONSONANT_INDEX, _consSet, data.consonants.join(','), word);
   }
@@ -1892,7 +1911,7 @@ function findRhymes(inputWord) {
   const variants = getWordVariants(inputWord);
   const results = {
     perfect: [], perfectNear: [], family: [],
-    additive: [], subtractive: [],
+    additive: [], subtractive: [], ending: [],
     assonance: [], vowelSlant: [], consonance: []
   };
   const classified = new Set();
@@ -2107,6 +2126,21 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
       }
     }
   }
+
+  // --- ENDING RHYME (v4.3) ---
+  // Words sharing an UNSTRESSED final syllable: window/shadow/yellow,
+  // spirit/minute. The classic feminine slant — weaker than a perfect
+  // rhyme but completely idiomatic in song.
+  const inputEndKey = getEndKey(inputPhonemes);
+  if (inputEndKey) {
+    const bucket = END_INDEX.get(inputEndKey) || [];
+    for (const word of bucket) {
+      if (word === inputWord || classified.has(word)) continue;
+      const data = WORD_DATA.get(word);
+      const matchedVariant = data.variants.find(v => v.endKey === inputEndKey) || data;
+      pushScored('ending', word, matchedVariant);
+    }
+  }
 }
 
 // v4.0 Change 9 — morphological shadow search (S/Z/T/D inflections only).
@@ -2202,6 +2236,7 @@ const RHYME_TYPES = [
   { key: 'assonance', title: 'Assonance', subtitle: 'Matching vowel sounds', cssClass: 'type-assonance',
     subTier: { key: 'vowelSlant', title: 'Vowel Slant',
       subtitle: 'Vowel-family swap — pen ↔ pin, cot ↔ caught', pinTop: true } },
+  { key: 'ending', title: 'Ending Rhyme', subtitle: 'Shared final syllable — window ↔ shadow', cssClass: 'type-ending' },
   { key: 'consonance', title: 'Consonance', subtitle: 'Matching consonant sounds', cssClass: 'type-consonance' }
 ];
 
@@ -3523,7 +3558,7 @@ function renderResults() {
   // v4.0 Change 9 — morphological shadow section ("Rhymes for <root>")
   if (results.morph && results.morph.results) {
     const m = results.morph;
-    const sumCount = ['perfect','perfectNear','family','additive','subtractive','assonance','vowelSlant','consonance']
+    const sumCount = ['perfect','perfectNear','family','additive','subtractive','assonance','vowelSlant','consonance','ending']
       .reduce((s, k) => s + (m.results[k] ? m.results[k].length : 0), 0);
     if (sumCount > 5) {
       html += '<div class="morph-section">';
