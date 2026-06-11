@@ -1319,9 +1319,9 @@ body.uz-embed { --uz-rail-h: 0px; }
   </div>
   <div class="control-group">
     <span class="control-label">Sort:</span>
-    <button class="sort-btn active" data-sort="syllables">By Syllables</button>
+    <button class="sort-btn" data-sort="syllables">By Syllables</button>
     <button class="sort-btn" data-sort="alpha">A&rarr;Z</button>
-    <button class="sort-btn" data-sort="score">Best Match</button>
+    <button class="sort-btn active" data-sort="score">Best Match</button>
   </div>
   <div class="control-group compound-looseness-group" id="compoundLooseGroup" style="display:none">
     <span class="control-label">Match:</span>
@@ -1508,12 +1508,14 @@ function isVoicingPair(a, b) {
 }
 
 function getRhymeTail(phonemes) {
+  // v4.2 — rhyme from the LAST stressed vowel, primary OR secondary.
+  // Words with early primary + late secondary stress (butterfly, yesterday,
+  // satellite) rhyme on the secondary in practice: butterfly/sky,
+  // yesterday/day. The old primary-only rule made their tails span nearly
+  // the whole word, so they matched nothing.
   let idx = -1;
   for (let i = phonemes.length - 1; i >= 0; i--) {
-    if (phonemes[i].endsWith('1')) { idx = i; break; }
-  }
-  if (idx === -1) for (let i = phonemes.length - 1; i >= 0; i--) {
-    if (phonemes[i].endsWith('2')) { idx = i; break; }
+    if (/[12]$/.test(phonemes[i])) { idx = i; break; }
   }
   if (idx === -1) for (let i = phonemes.length - 1; i >= 0; i--) {
     if (isVowel(phonemes[i])) { idx = i; break; }
@@ -1526,9 +1528,11 @@ function getRhymeTail(phonemes) {
 // they're an identity rhyme (e.g. write/right, cent/sent) and must be excluded
 // from Perfect / Voice-Pair regardless of tail equality.
 function getStressOnset(phonemes) {
+  // v4.2 — anchor on the same vowel the rhyme tail uses (stress 1 OR 2)
+  // so the identity-rhyme guard stays consistent with getRhymeTail.
   let stressIdx = -1;
   for (let i = phonemes.length - 1; i >= 0; i--) {
-    if (phonemes[i].endsWith('1')) { stressIdx = i; break; }
+    if (/[12]$/.test(phonemes[i])) { stressIdx = i; break; }
   }
   if (stressIdx === -1) return '';
   const onset = [];
@@ -1720,7 +1724,21 @@ function buildVariantData(word, phoneStr) {
 }
 
 // Parse and index. Lines may carry multiple pronunciations separated by ';'.
+const FREQ_TIER1 = new Set();   // top-5k songwriter words
+const FREQ_TIER2 = new Set();   // rest of the curated 15k
+
 function ingestDict(raw) {
+// v4.2 — dict.txt carries two frequency tiers after #FREQ1 / #FREQ2
+// markers (from the curated, frequency-ordered 15k word list).
+const fi = raw.indexOf('#FREQ1');
+if (fi !== -1) {
+  const tail = raw.slice(fi);
+  const m1 = tail.match(/#FREQ1\n([^\n]*)/);
+  const m2 = tail.match(/#FREQ2\n([^\n]*)/);
+  if (m1) m1[1].split(',').forEach(w => FREQ_TIER1.add(w));
+  if (m2) m2[1].split(',').forEach(w => FREQ_TIER2.add(w));
+  raw = raw.slice(0, fi);
+}
 raw.split('\n').forEach(line => {
   const pipe = line.indexOf('|');
   if (pipe === -1) return;
@@ -1752,7 +1770,7 @@ raw.split('\n').forEach(line => {
 }
 
 // Kick off the async dictionary load immediately.
-fetch('dict.txt?v=1')
+fetch('dict.txt?v=2')
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
   .then(t => {
     ingestDict(t);
@@ -1890,7 +1908,10 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
   function pushScored(bucket, word, candData) {
     if (word === inputWord || classified.has(word)) return;
     if (RHYME_STOPWORDS.has(word) || word.length === 1) return;
-    const score = computeQualityScore(inputData, candData);
+    // v4.2 — frequency-aware ranking: common singable words outrank
+    // dictionary obscurities at equal phonetic quality ("above" > "gov").
+    const freqBonus = FREQ_TIER1.has(word) ? 12 : (FREQ_TIER2.has(word) ? 6 : 0);
+    const score = computeQualityScore(inputData, candData) + freqBonus;
     results[bucket].push({
       word,
       syllables: candData.syllables,
@@ -2381,6 +2402,8 @@ WORDS.forEach(word => {
 // === VOWEL FAMILY CLUSTERS ===
 // Vowels that sound similar in song — within-cluster swaps get reduced penalty
 const VOWEL_FAMILIES = [
+  new Set(['IY', 'IH']),           // v4.2 tense/lax I: "feel" / "still"
+  new Set(['AE', 'EH']),           // v4.2 short A/E: "man" / "then"
   new Set(['IH', 'EH']),           // short I/E: "bin" / "ben"
   new Set(['AH', 'UH', 'ER']),     // neutral/schwa family
   new Set(['EY', 'IY']),           // long A/E: often interchangeable in song
@@ -2940,7 +2963,7 @@ const MAX_DISPLAY = 80;
 let searchHistory = [];
 const MAX_HISTORY = 15;
 let syllableFilter = 'all';
-let sortMode = 'syllables';
+let sortMode = 'score'; // v4.2 — Best Match default (frequency-aware)
 
 // ============ DOM REFS ============
 const searchInput = document.getElementById('searchInput');
@@ -3195,6 +3218,12 @@ randomBtn.addEventListener('click', () => {
 function doSearch(word) {
   word = word.toLowerCase().trim();
   if (!word) return;
+  // v4.2 — phrases rhyme on their last word ("my heart" -> "heart")
+  // instead of falling through to the letter-level G2P estimator.
+  if (word.includes(' ')) {
+    const parts = word.split(/\s+/).filter(Boolean);
+    word = parts[parts.length - 1];
+  }
   if (!DICT_READY) {
     PENDING_SEARCH = word;
     statusBar.innerHTML = 'Loading the 54,000-word dictionary&hellip; <span class="phoneme">your search for &ldquo;' + word.replace(/[<>&"]/g, '') + '&rdquo; will run automatically</span>';
