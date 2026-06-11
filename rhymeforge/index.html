@@ -1967,12 +1967,13 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
     stressPattern: inputStressPattern
   };
 
-  function pushScored(bucket, word, candData, extraBonus = 0) {
+  function pushScored(bucket, word, candData, extraBonus = 0, scoreOverride = null) {
     if (word === inputWord || classified.has(word)) return;
     if (RHYME_STOPWORDS.has(word) || word.length === 1) return;
     // v4.2 — frequency-aware ranking: common singable words outrank
     // dictionary obscurities at equal phonetic quality ("above" > "gov").
-    const score = computeQualityScore(inputData, candData) + uzFreqBonus(word) + extraBonus;
+    const base = scoreOverride !== null ? scoreOverride : computeQualityScore(inputData, candData);
+    const score = base + uzFreqBonus(word) + extraBonus;
     results[bucket].push({
       word,
       syllables: candData.syllables,
@@ -2156,13 +2157,24 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
   const inputEndKey = getEndKey(inputPhonemes);
   if (inputEndKey) {
     const inputEndOnset = getEndOnset(inputPhonemes);
+    const primaryV = (ph) => {
+      for (const x of ph) if (x.endsWith('1')) return stripStress(x);
+      return '';
+    };
+    const inputPrimaryV = primaryV(inputPhonemes);
     const bucket = END_INDEX.get(inputEndKey) || [];
     for (const word of bucket) {
       if (word === inputWord || classified.has(word)) continue;
       const data = WORD_DATA.get(word);
       const matchedVariant = data.variants.find(v => v.endKey === inputEndKey) || data;
-      const onsetBonus = (inputEndOnset && getEndOnset(matchedVariant.phonemes) === inputEndOnset) ? 8 : 0;
-      pushScored('ending', word, matchedVariant, onsetBonus);
+      // Dedicated ending-rhyme score: the tail formula misranks this tier
+      // (it compares whole tails, which differ by construction here).
+      let es = 40;
+      if (inputEndOnset && getEndOnset(matchedVariant.phonemes) === inputEndOnset) es += 15;
+      const candPV = primaryV(matchedVariant.phonemes);
+      if (inputPrimaryV && candPV === inputPrimaryV) es += 10;
+      if (Math.abs(inputSyllables - matchedVariant.syllables) <= 0) es += 5;
+      pushScored('ending', word, matchedVariant, 0, es);
     }
   }
 }
