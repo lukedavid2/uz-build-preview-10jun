@@ -1727,6 +1727,27 @@ function buildVariantData(word, phoneStr) {
 const FREQ_TIER1 = new Set();   // top-5k songwriter words
 const FREQ_TIER2 = new Set();   // rest of the curated 15k
 
+// Common-word ranking bonus. Three signals: the curated frequency tiers,
+// the page's COMMON_WORDS set, and a light suffix-strip so inflections of
+// common words ("higher" -> "high") inherit a bonus too.
+function uzFreqBonus(word) {
+  if (FREQ_TIER1.has(word)) return 12;
+  if (FREQ_TIER2.has(word)) return 6;
+  if (typeof COMMON_WORDS !== 'undefined' && COMMON_WORDS.has(word)) return 6;
+  for (const suf of ['s', 'ed', 'er', 'est', 'ing']) {
+    if (word.length > suf.length + 2 && word.endsWith(suf)) {
+      const stem = word.slice(0, -suf.length);
+      if (FREQ_TIER1.has(stem) || FREQ_TIER2.has(stem)) return 6;
+      // doubled final consonant: "bigger" -> "big"
+      const undoubled = stem.slice(0, -1);
+      if (stem.length > 2 && stem[stem.length - 1] === stem[stem.length - 2] && (FREQ_TIER1.has(undoubled) || FREQ_TIER2.has(undoubled))) return 6;
+      // "-ies"/"-ied"/"-ier" style: "carried" -> "carry"
+      if (stem.endsWith('i') && (FREQ_TIER1.has(stem.slice(0, -1) + 'y') || FREQ_TIER2.has(stem.slice(0, -1) + 'y'))) return 6;
+    }
+  }
+  return 0;
+}
+
 function ingestDict(raw) {
 // v4.2 — dict.txt carries two frequency tiers after #FREQ1 / #FREQ2
 // markers (from the curated, frequency-ordered 15k word list).
@@ -1910,8 +1931,7 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
     if (RHYME_STOPWORDS.has(word) || word.length === 1) return;
     // v4.2 — frequency-aware ranking: common singable words outrank
     // dictionary obscurities at equal phonetic quality ("above" > "gov").
-    const freqBonus = FREQ_TIER1.has(word) ? 12 : (FREQ_TIER2.has(word) ? 6 : 0);
-    const score = computeQualityScore(inputData, candData) + freqBonus;
+    const score = computeQualityScore(inputData, candData) + uzFreqBonus(word);
     results[bucket].push({
       word,
       syllables: candData.syllables,
