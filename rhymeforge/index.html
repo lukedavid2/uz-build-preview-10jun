@@ -1710,8 +1710,30 @@ function getEndKey(phonemes) {
   for (let i = phonemes.length - 1; i >= 0; i--) {
     if (isVowel(phonemes[i])) { vIdx = i; break; }
   }
-  if (vIdx === -1 || !phonemes[vIdx].endsWith('0')) return null;
+  if (vIdx === -1) return null;
+  const fin = phonemes[vIdx];
+  // unstressed final — always ending-eligible. CMU marks final "-o" /-oʊ/
+  // inconsistently (window OW0, shadow OW2), so a SECONDARY-stressed final
+  // also qualifies when a primary stress sits earlier in the word.
+  let ok = fin.endsWith('0');
+  if (!ok && fin.endsWith('2')) {
+    for (let i = 0; i < vIdx; i++) {
+      if (phonemes[i].endsWith('1')) { ok = true; break; }
+    }
+  }
+  if (!ok) return null;
   return phonemes.slice(vIdx).map(stripStress).join(' ');
+}
+
+// consonant immediately before the final vowel ("D" in window/shadow) —
+// matching it makes an ending rhyme land much harder, so it earns a bonus.
+function getEndOnset(phonemes) {
+  let vIdx = -1;
+  for (let i = phonemes.length - 1; i >= 0; i--) {
+    if (isVowel(phonemes[i])) { vIdx = i; break; }
+  }
+  if (vIdx <= 0) return '';
+  return isVowel(phonemes[vIdx - 1]) ? '' : stripStress(phonemes[vIdx - 1]);
 }
 
 function buildVariantData(word, phoneStr) {
@@ -1945,12 +1967,12 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
     stressPattern: inputStressPattern
   };
 
-  function pushScored(bucket, word, candData) {
+  function pushScored(bucket, word, candData, extraBonus = 0) {
     if (word === inputWord || classified.has(word)) return;
     if (RHYME_STOPWORDS.has(word) || word.length === 1) return;
     // v4.2 — frequency-aware ranking: common singable words outrank
     // dictionary obscurities at equal phonetic quality ("above" > "gov").
-    const score = computeQualityScore(inputData, candData) + uzFreqBonus(word);
+    const score = computeQualityScore(inputData, candData) + uzFreqBonus(word) + extraBonus;
     results[bucket].push({
       word,
       syllables: candData.syllables,
@@ -2133,12 +2155,14 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
   // rhyme but completely idiomatic in song.
   const inputEndKey = getEndKey(inputPhonemes);
   if (inputEndKey) {
+    const inputEndOnset = getEndOnset(inputPhonemes);
     const bucket = END_INDEX.get(inputEndKey) || [];
     for (const word of bucket) {
       if (word === inputWord || classified.has(word)) continue;
       const data = WORD_DATA.get(word);
       const matchedVariant = data.variants.find(v => v.endKey === inputEndKey) || data;
-      pushScored('ending', word, matchedVariant);
+      const onsetBonus = (inputEndOnset && getEndOnset(matchedVariant.phonemes) === inputEndOnset) ? 8 : 0;
+      pushScored('ending', word, matchedVariant, onsetBonus);
     }
   }
 }
