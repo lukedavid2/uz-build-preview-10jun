@@ -39,7 +39,7 @@ function st() {
     return m;
 }
 
-export function init(deps) { D = deps; st(); }
+export function init(deps) { D = deps; st(); attachPointer(); }
 
 // ── music helpers ───────────────────────────────────────────────────
 function scaleNoteNames() {
@@ -140,6 +140,9 @@ export function render() {
     const tabs = s.progressionLines.map((line, i) =>
         `<button class="mel-tab ${i === li ? 'active' : ''}" data-action="melLine" data-line="${i}">${(line.name || 'Line ' + (i + 1)).toUpperCase()}</button>`
     ).join('');
+    const playBtn = D.state.looperPlaying
+        ? `<button class="mel-btn mel-play playing" data-action="toggleLooper">■ STOP</button>`
+        : `<button class="mel-btn mel-play" data-action="toggleLooper">▶ PLAY</button>`;
     const suggestCluster = ghosts
         ? `<button class="mel-btn mel-btn-on" data-action="melKeep">✓ KEEP</button>
            <button class="mel-btn" data-action="melAnother">↻ ANOTHER</button>
@@ -150,6 +153,7 @@ export function render() {
       <span class="mel-title">✏️ MELODY SKETCH</span>
       <span class="mel-tabs">${tabs}</span>
       <span class="mel-controls">
+        ${playBtn}
         <span class="mel-seg">
           <button class="mel-btn ${m.labelMode === 'degrees' ? 'mel-btn-on' : ''}" data-action="melLabelMode" data-mode="degrees">DEGREES</button>
           <button class="mel-btn ${m.labelMode === 'notes' ? 'mel-btn-on' : ''}" data-action="melLabelMode" data-mode="notes">NOTES</button>
@@ -161,6 +165,7 @@ export function render() {
         <button class="mel-btn ${m.octaves === 3 ? 'mel-btn-on' : ''}" data-action="melOctaves">+8VA</button>
         <button class="mel-btn" title="Melody voice">PLUCK ▾</button>
         ${suggestCluster}
+        <button class="mel-btn" data-action="melToTab" title="Write this melody into the line's ♫ Tab as fret numbers">→ TAB</button>
         <button class="mel-close" data-action="toggleMelodySketcher" aria-label="Close">×</button>
       </span>
     </div>`;
@@ -272,6 +277,7 @@ export function render() {
       </div>
       <div class="mel-footer">
         <span class="mel-legend"><i style="background:${TIER.chord}"></i> chord tone — safe, always lands <i style="background:${TIER.scale};margin-left:10px;"></i> colour note — passes through</span>
+        <span class="mel-scroll"><span class="mel-scroll-label">Scroll</span><input type="range" id="melScrollSlider" min="0" max="100" step="1" value="0"></span>
         <span class="mel-hint" id="melHint">${hintBar}</span>
       </div>
     </div>`;
@@ -324,6 +330,21 @@ let pointerAttached = false;
 export function attachPointer() {
     if (pointerAttached) return;
     pointerAttached = true;
+    // Scroll slider (same pattern as the tab editor's tab-scroll-slider)
+    document.addEventListener('input', (e) => {
+        if (e.target.id !== 'melScrollSlider') return;
+        const stage = e.target.closest('.mel-card')?.querySelector('.mel-stage');
+        if (!stage) return;
+        const max = stage.scrollWidth - stage.clientWidth;
+        stage.scrollLeft = (parseFloat(e.target.value) / 100) * Math.max(0, max);
+    });
+    document.addEventListener('scroll', (e) => {
+        if (!e.target.classList || !e.target.classList.contains('mel-stage')) return;
+        const slider = document.getElementById('melScrollSlider');
+        if (!slider) return;
+        const max = e.target.scrollWidth - e.target.clientWidth;
+        if (max > 0) slider.value = Math.round((e.target.scrollLeft / max) * 100);
+    }, true);
     document.addEventListener('pointerdown', (e) => {
         const wrap = e.target.closest && e.target.closest('#melGridWrap');
         if (!wrap) return;
@@ -413,10 +434,42 @@ export function handleAction(action, btn) {
         if (ghosts) { m.lines[activeLineIdx()] = ghosts; ghosts = null; }
     }
     else if (action === 'melDiscard') { ghosts = null; }
+    else if (action === 'melToTab') { melodyToTab(); return true; }
     else return false;
     D.saveState();
     render();
     return true;
+}
+
+// Standard-tuning open-string MIDI pitches, high e -> low E
+// (matches the tab editor's string order: index 0 = high e).
+const TAB_OPEN_MIDI = [64, 59, 55, 50, 45, 40];
+
+export function melodyToTab() {
+    const s = D.state;
+    const li = activeLineIdx();
+    const line = s.progressionLines[li];
+    if (!line) return;
+    const notes = notesOf(li);
+    if (!notes.length) { alert('No melody notes on this line yet — sketch something first.'); return; }
+    const hasTab = (line.tab || []).some(col => col && col.some(v => v !== null && v !== ''));
+    if (hasTab && !confirm('This line already has tab. Replace it with the sketched melody?')) return;
+    const cols = [...notes]
+        .sort((a, b) => (a.bar - b.bar) || (a.slot - b.slot))
+        .map(n => {
+            const midi = midiPitch(n.d, n.o);
+            const col = [null, null, null, null, null, null];
+            for (let str = 0; str < 6; str++) {
+                const fret = midi - TAB_OPEN_MIDI[str];
+                if (fret >= 0 && fret <= 15) { col[str] = String(fret); break; }
+            }
+            return col;
+        });
+    line.tab = cols;
+    line.tabArtic = [];
+    line.showTab = true;
+    D.saveState();
+    if (D.renderProgression) D.renderProgression();
 }
 
 export function toggle() {

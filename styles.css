@@ -5507,3 +5507,19 @@ body.dark-mode .mel-legend { border-color: #3a3e48; color: #999; }
   .mel-controls { margin-left: 0; }
   .mel-card { padding: 10px 8px 12px; }
 }
+
+
+/* v104 — melody sketcher: play button, scroll slider, stage scrollbar */
+.mel-btn.mel-play { background: #c8a04a; color: #fff; border-color: #c8a04a; font-weight: 700; }
+.mel-btn.mel-play:hover { background: #b8923f; color: #fff; }
+.mel-btn.mel-play.playing { background: #d9534f; border-color: #d9534f; color: #fff; }
+.mel-scroll { display: inline-flex; align-items: center; gap: 6px; flex: 1; min-width: 120px; max-width: 260px; }
+.mel-scroll-label { font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 600; color: #999; letter-spacing: 0.04em; }
+.mel-scroll input[type="range"] { flex: 1; accent-color: #c8a04a; }
+.mel-stage::-webkit-scrollbar { height: 8px; }
+.mel-stage::-webkit-scrollbar-track { background: #1a1a20; border-radius: 10px; }
+.mel-stage::-webkit-scrollbar-thumb { background: #5a5a60; border-radius: 10px; }
+.mel-stage::-webkit-scrollbar-thumb:hover { background: #7a7a80; }
+@media (max-width: 480px) {
+  .mel-scroll { max-width: none; width: 100%; }
+}

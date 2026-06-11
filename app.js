@@ -1,6 +1,6 @@
 import * as Data from './data.js?v=99';
 import * as Audio from './audio.js?v=100';
-import * as Melody from './melody.js?v=1';
+import * as Melody from './melody.js?v=2';
 
 const state = {
   selectedKey: 'C',
@@ -8397,6 +8397,7 @@ Melody.init({
     transposeChord,
     displayChordForKey,
     saveState: saveStateToLocalStorage,
+    renderProgression,
 });
 if (state.__pendingMelodyParam) {
     Melody.deserialize(state.__pendingMelodyParam);
