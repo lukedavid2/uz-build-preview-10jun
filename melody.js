@@ -5,7 +5,7 @@
 // Jun 2026). Vanilla port of the React prototype: template-literal
 // renderer repainting from state, pointer interactions, chord-tone
 // tints + pills, rule-based Suggest, loop-synced playback + playhead.
-import * as Audio from './audio.js?v=100';
+import * as Audio from './audio.js?v=101';
 
 let D = null; // injected deps: { state, getScaleNotes, transposeChord, displayChordForKey, saveState, onPreviewBlocked }
 
@@ -21,12 +21,31 @@ const MAJ_OFF = [0, 2, 4, 5, 7, 9, 11];
 
 // ── module state (transient — committed data lives in D.state.melody) ──
 let drag = null, hover = null, ghosts = null, justPlaced = null;
+let undoStack = [];
+
+function pushUndo() {
+    const m = st();
+    undoStack.push(JSON.stringify({ lines: m.lines, activeLine: m.activeLine, resolution: m.resolution }));
+    if (undoStack.length > 20) undoStack.shift();
+}
+
+function popUndo() {
+    if (!undoStack.length) return;
+    const snap = JSON.parse(undoStack.pop());
+    const m = st();
+    m.lines = snap.lines;
+    m.activeLine = snap.activeLine;
+    if (snap.resolution === 8 || snap.resolution === 16) m.resolution = snap.resolution;
+    ghosts = null;
+    D.saveState();
+    render();
+}
 let playingBar = -1;            // bar index within the ACTIVE line, -1 = none
 let playWindow = [];            // [{t0, dur, lineIdx, chordIdx}] scheduled measures
 let rafId = null;
 
 export function defaults() {
-    return { lines: {}, instrument: 'pluck', resolution: 8, octaves: 2, labelMode: 'degrees', open: false, activeLine: 0, zoom: 1 };
+    return { lines: {}, instrument: 'pluck', resolution: 8, octaves: 2, labelMode: 'degrees', open: false, activeLine: 0, zoom: 1, showChordTones: true, showKeyScale: false };
 }
 
 function st() {
@@ -37,6 +56,8 @@ function st() {
     if (m.resolution !== 8 && m.resolution !== 16) m.resolution = 8;
     if (m.octaves !== 2 && m.octaves !== 3) m.octaves = 2;
     if (!(m.zoom >= 0.7 && m.zoom <= 2)) m.zoom = 1;
+    if (typeof m.showChordTones !== 'boolean') m.showChordTones = true;
+    if (typeof m.showKeyScale !== 'boolean') m.showKeyScale = false;
     return m;
 }
 
@@ -166,6 +187,7 @@ export function render() {
         <button class="mel-btn ${m.octaves === 3 ? 'mel-btn-on' : ''}" data-action="melOctaves">+8VA</button>
         <button class="mel-btn" title="Melody voice">PLUCK ▾</button>
         ${suggestCluster}
+        <button class="mel-btn ${undoStack.length ? '' : 'mel-btn-dim'}" data-action="melUndo" title="Undo last melody edit">↶ UNDO</button>
         <button class="mel-btn" data-action="melToTab" title="Write this melody into the line's ♫ Tab as fret numbers">→ TAB</button>
         <button class="mel-close" data-action="toggleMelodySketcher" aria-label="Close">×</button>
       </span>
@@ -216,13 +238,19 @@ export function render() {
         }
     });
 
-    // chord-tone row tints
+    // row tints: chord tones (green) and, optionally, the rest of the
+    // key scale (amber) — every row in this grid is in key, the wash
+    // makes that explicit.
     g.prog.forEach((bar, b) => {
         const playing = b === playingBar;
         for (let p = g.topP; p >= 0; p--) {
             const deg = (p % 7) + 1;
-            if (!bar.tones.includes(deg)) continue;
-            L += `<div class="mel-tint ${playing ? 'bar-active' : ''}" data-meltint-bar="${b}" style="position:absolute;left:${g.barX(b)}px;top:${g.rowY(p)}px;width:${g.barW}px;height:${ROW_H}px;"></div>`;
+            const isTone = bar.tones.includes(deg);
+            if (isTone && m.showChordTones) {
+                L += `<div class="mel-tint ${playing ? 'bar-active' : ''}" data-meltint-bar="${b}" style="position:absolute;left:${g.barX(b)}px;top:${g.rowY(p)}px;width:${g.barW}px;height:${ROW_H}px;"></div>`;
+            } else if (!isTone && m.showKeyScale) {
+                L += `<div class="mel-tint-scale ${playing ? 'bar-active' : ''}" data-meltint-bar="${b}" style="position:absolute;left:${g.barX(b)}px;top:${g.rowY(p)}px;width:${g.barW}px;height:${ROW_H}px;"></div>`;
+            }
         }
     });
 
@@ -270,6 +298,10 @@ export function render() {
       <div class="mel-toolbar">
         <span class="mel-tool-group"><span class="mel-scroll-label">Zoom</span><input type="range" id="melZoomSlider" min="0.7" max="2" step="0.1" value="${m.zoom || 1}"><span class="mel-zoom-value">${(m.zoom || 1).toFixed(1)}x</span></span>
         <span class="mel-tool-group mel-tool-scroll"><span class="mel-scroll-label">Scroll</span><input type="range" id="melScrollSlider" min="0" max="100" step="1" value="0"></span>
+        <span class="mel-tool-group">
+          <button class="mel-btn ${m.showChordTones ? 'mel-btn-on' : ''}" data-action="melChordTones" title="Highlight each bar's chord tones (green)">♪ CHORD TONES</button>
+          <button class="mel-btn ${m.showKeyScale ? 'mel-btn-on' : ''}" data-action="melKeyScale" title="Wash the remaining in-key rows (amber) — every row here is in the key of ${D.state.selectedKey}">♪ KEY SCALE</button>
+        </span>
       </div>
       <div class="mel-stage">
         <div id="melGridWrap" style="position:relative;width:${g.width}px;height:${HEADER_H + g.bodyH}px;font-family:${BODY};cursor:${cursor};touch-action:none;user-select:none;-webkit-user-select:none;">
@@ -333,14 +365,10 @@ export function attachPointer() {
     // Scroll slider (same pattern as the tab editor's tab-scroll-slider)
     document.addEventListener('input', (e) => {
         if (e.target.id === 'melZoomSlider') {
-            const m2 = st();
-            m2.zoom = parseFloat(e.target.value) || 1;
-            D.saveState();
-            const stage = document.querySelector('.mel-stage');
-            const ratio = stage && stage.scrollWidth > stage.clientWidth ? stage.scrollLeft / (stage.scrollWidth - stage.clientWidth) : 0;
-            render();
-            const stage2 = document.querySelector('.mel-stage');
-            if (stage2) stage2.scrollLeft = ratio * Math.max(0, stage2.scrollWidth - stage2.clientWidth);
+            // live readout only — re-rendering here would replace the slider
+            // mid-drag and kill the gesture (the "one notch at a time" bug)
+            const v = document.querySelector('.mel-zoom-value');
+            if (v) v.textContent = (parseFloat(e.target.value) || 1).toFixed(1) + 'x';
             return;
         }
         if (e.target.id !== 'melScrollSlider') return;
@@ -348,6 +376,17 @@ export function attachPointer() {
         if (!stage) return;
         const max = stage.scrollWidth - stage.clientWidth;
         stage.scrollLeft = (parseFloat(e.target.value) / 100) * Math.max(0, max);
+    });
+    document.addEventListener('change', (e) => {
+        if (e.target.id !== 'melZoomSlider') return;
+        const m2 = st();
+        m2.zoom = parseFloat(e.target.value) || 1;
+        D.saveState();
+        const stage = document.querySelector('.mel-stage');
+        const ratio = stage && stage.scrollWidth > stage.clientWidth ? stage.scrollLeft / (stage.scrollWidth - stage.clientWidth) : 0;
+        render();
+        const stage2 = document.querySelector('.mel-stage');
+        if (stage2) stage2.scrollLeft = ratio * Math.max(0, stage2.scrollWidth - stage2.clientWidth);
     });
     document.addEventListener('scroll', (e) => {
         if (!e.target.classList || !e.target.classList.contains('mel-stage')) return;
@@ -374,6 +413,7 @@ export function attachPointer() {
             // visible so you can cherry-pick — toggle ✨ or × to clear).
             const gIdx = ghosts ? noteAt(ghosts, loc, g) : -1;
             if (gIdx >= 0) {
+                pushUndo();
                 const adopted = { ...ghosts[gIdx] };
                 ghosts = ghosts.filter((_, i2) => i2 !== gIdx);
                 if (!ghosts.length) ghosts = null;
@@ -442,6 +482,7 @@ export function attachPointer() {
         if (!drag) return;
         const li = activeLineIdx();
         const m = st();
+        pushUndo();
         if (drag.kind === 'move' && !drag.moved) {
             m.lines[li] = notesOf(li).filter((_, i) => i !== drag.idx); // tap = remove
         } else {
@@ -462,6 +503,7 @@ export function handleAction(action, btn) {
     else if (action === 'melRes') {
         const target = parseInt(btn.dataset.res, 10);
         if (target !== m.resolution) {
+            pushUndo();
             const f = target / m.resolution;
             Object.keys(m.lines).forEach(k => {
                 m.lines[k] = m.lines[k].map(n => ({ ...n, slot: Math.round(n.slot * f), len: Math.max(1, Math.round(n.len * f)) }));
@@ -473,8 +515,12 @@ export function handleAction(action, btn) {
     else if (action === 'melOctaves') { m.octaves = m.octaves === 2 ? 3 : 2; }
     else if (action === 'melSuggest') { ghosts = ghosts ? null : suggest(); }
     else if (action === 'melAnother') { ghosts = suggest(); }
+    else if (action === 'melUndo') { popUndo(); return true; }
+    else if (action === 'melChordTones') { m.showChordTones = !m.showChordTones; }
+    else if (action === 'melKeyScale') { m.showKeyScale = !m.showKeyScale; }
     else if (action === 'melKeep') {
         if (ghosts) {
+            pushUndo();
             const li = activeLineIdx();
             let work = notesOf(li).map(n => ({ ...n }));
             ghosts.forEach(gn => { work = mono([...work, { ...gn }], work.length); });

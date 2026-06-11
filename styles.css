@@ -5534,10 +5534,16 @@ body.dark-mode .mel-legend { border-color: #3a3e48; color: #999; }
 .mel-toolbar + .mel-stage { border-radius: 0 0 8px 8px; }
 .mel-tool-group { display: inline-flex; align-items: center; gap: 8px; }
 .mel-tool-group input[type="range"] { width: 130px; accent-color: #c8a04a; }
-.mel-tool-scroll { flex: 1; min-width: 160px; }
+.mel-tool-scroll { flex: 0 1 240px; min-width: 140px; max-width: 240px; }
 .mel-tool-scroll input[type="range"] { flex: 1; width: auto; }
 .mel-zoom-value { font-family: 'JetBrains Mono','Courier New',monospace; font-size: 10px; color: #888; min-width: 30px; }
 @media (max-width: 480px) {
   .mel-toolbar { gap: 10px; }
   .mel-tool-group input[type="range"] { width: 90px; }
 }
+
+
+/* v106 — melody: key-scale wash, dimmed undo */
+.mel-tint-scale { background: rgba(232,184,74,0.045); transition: background 0.10s ease, box-shadow 0.10s ease; }
+.mel-tint-scale.bar-active { background: rgba(232,184,74,0.11); box-shadow: inset 0 0 8px rgba(232,184,74,0.14); }
+.mel-btn-dim { opacity: 0.4; }

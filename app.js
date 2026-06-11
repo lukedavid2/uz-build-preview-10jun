@@ -1,6 +1,6 @@
 import * as Data from './data.js?v=99';
-import * as Audio from './audio.js?v=100';
-import * as Melody from './melody.js?v=3';
+import * as Audio from './audio.js?v=101';
+import * as Melody from './melody.js?v=4';
 
 const state = {
   selectedKey: 'C',
@@ -4699,10 +4699,17 @@ function setupEventListeners() {
     let audioInitialized = false;
 
     document.body.addEventListener('click', async e => {
-        // Initialize audio on first interaction - MUST await for Safari
+        // Initialize audio on first interaction - MUST await for Safari.
+        // Hardened: a stalled resume() must never wedge the click pipeline
+        // (every later play call re-attempts resume via getAudioContext).
         if (!audioInitialized) {
-            await Audio.initAudio();
             audioInitialized = true;
+            try {
+                await Promise.race([
+                    Audio.initAudio(),
+                    new Promise(resolve => setTimeout(resolve, 1500))
+                ]);
+            } catch (e) { /* audio unlocks on a later gesture */ }
         }
 
         // Key selection - transpose progression instead of clearing

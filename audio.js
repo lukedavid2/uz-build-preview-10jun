@@ -1323,3 +1323,22 @@ export async function initAudio() {
     safeDisconnect(gain);
   };
 }
+
+
+// ── Gesture-level resume guard (v101) ───────────────────────────────
+// "Sound sometimes works, sometimes doesn't": browsers suspend the
+// AudioContext after interruptions (tab switch, iOS audio focus, power
+// saving). Any pointer gesture is a legal moment to resume — so always
+// try. Cheap no-op when already running.
+if (typeof document !== 'undefined') {
+  document.addEventListener('pointerdown', () => {
+    if (audioCtx && audioCtx.state !== 'running') {
+      audioCtx.resume().catch(() => {});
+    }
+  }, { capture: true, passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+  });
+}
