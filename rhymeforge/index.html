@@ -1863,7 +1863,7 @@ function sameVowelFamilySafe(a, b) {
 }
 
 // v4.1 — function words & non-lexical fillers are never useful rhyme suggestions
-const RHYME_STOPWORDS = new Set(['a','an','the','to','uh','um','huh','duh','dah','da','de','ah','eh','er','err','hm','hmm','mm','mmm','brugh','shh','psst','tsk']);
+const RHYME_STOPWORDS = new Set(['a','an','the','to','uh','um','huh','duh','dah','da','de','ah','eh','er','err','hm','hmm','mm','mmm','brugh','shh','psst','tsk','gov','com','org','www','edu','http','https','html','htm','url']);
 
 function findRhymes(inputWord) {
   inputWord = inputWord.toLowerCase().trim();
