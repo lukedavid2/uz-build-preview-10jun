@@ -5681,6 +5681,7 @@ function setupEventListeners() {
             if (action === 'newSongHub') { createNewSong(); }
             if (action === 'deleteSong') { deleteSongById(actionBtn.dataset.song); }
             if (action === 'exportSong') { exportSongById(actionBtn.dataset.song); }
+            if (action === 'replaceSong') { replaceSongById(actionBtn.dataset.song); }
             if (action === 'importSongHub') { importSongFile(); }
             if (action === 'exportAllSongs') { exportAllSongs(); }
             if (action === 'toggleMelodySketcher') {
@@ -8258,6 +8259,39 @@ function importSongsFromList(datas) {
     renderMySongs();
 }
 
+// Per-song ⬆ — replace this song in place with a local .json (keeps the
+// same registry id, so it's an update rather than a duplicate).
+function replaceSongById(id) {
+    const reg = getSongsRegistry();
+    if (!reg || !reg.songs[id]) return;
+    const input = document.getElementById('fileInput');
+    input.setAttribute('accept', '.json,.txt');
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        input.value = '';
+        if (!file) return;
+        try {
+            const data = JSON.parse(await file.text());
+            if (!data || !data.lines) throw new Error('not a song file');
+            const curName = reg.songs[id].data.songName || 'Untitled song';
+            const newName = data.songName || 'Untitled song';
+            const label = curName === newName ? `"${curName}"` : `"${curName}" with "${newName}"`;
+            if (!confirm(`Replace ${label} using ${file.name}? The version in this browser will be overwritten.`)) return;
+            reg.songs[id] = { data, updatedAt: Date.now() };
+            saveSongsRegistry(reg);
+            if (reg.currentId === id) {
+                loadProgressionData(data);
+                saveStateToLocalStorage();
+            }
+            renderMySongs();
+        } catch (err) {
+            alert('Could not read that file — expected a song .json.');
+            console.warn('replaceSongById:', err);
+        }
+    };
+    input.click();
+}
+
 function importSongFile() {
     const input = document.getElementById('fileInput');
     input.setAttribute('accept', '.json,.zip,.txt');
@@ -8315,6 +8349,7 @@ function renderMySongs() {
             </div>
             <div class="song-card-actions">
                 ${isCurrent ? '' : `<button class="file-btn" data-action="switchSong" data-song="${id}">Open</button>`}
+                <button class="file-btn" data-action="replaceSong" data-song="${id}" title="Replace this song with a local .json (e.g. a newer copy)">⬆</button>
                 <button class="file-btn" data-action="exportSong" data-song="${id}" title="Download .json">⬇</button>
                 <button class="file-btn" data-action="deleteSong" data-song="${id}" title="Delete">×</button>
             </div>
