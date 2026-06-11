@@ -1924,6 +1924,10 @@ function sameVowelFamilySafe(a, b) {
   return a === b;
 }
 
+// v4.3 — explicit/vulgar words stay searchable but sink to the bottom of
+// suggestion lists: a free songwriting tool shouldn't lead with them.
+const UZ_EXPLICIT = new Set(['dildo','dildos','crap','crappy','crappie','shit','shitty','bullshit','fuck','fucking','fucked','fucker','bitch','bitches','bitchy','cock','cocks','cunt','cunts','dick','dicks','piss','pissed','whore','whores','slut','sluts','tits','titties','wank','wanker','jizz','smegma','spunk','arse','arsehole','asshole','assholes','douche','douchebag','dyke','fag','faggot','retard','retarded','nigger','niggers','spastic','horny','orgasm','orgasms','penis','penises','vagina','vaginas','rectum','scrotum','testicle','testicles','clitoris','anal','anus','enema','feces','faeces','poop','urine','vomit','snot']);
+
 // v4.1 — function words & non-lexical fillers are never useful rhyme suggestions
 const RHYME_STOPWORDS = new Set(['a','an','the','to','uh','um','huh','duh','dah','da','de','ah','eh','er','err','hm','hmm','mm','mmm','brugh','shh','psst','tsk','gov','com','org','www','edu','http','https','html','htm','url']);
 
@@ -1973,7 +1977,7 @@ function findRhymesForVariant(inputWord, inputPhonemes, results, classified) {
     // v4.2 — frequency-aware ranking: common singable words outrank
     // dictionary obscurities at equal phonetic quality ("above" > "gov").
     const base = scoreOverride !== null ? scoreOverride : computeQualityScore(inputData, candData);
-    const score = base + uzFreqBonus(word) + extraBonus;
+    const score = base + uzFreqBonus(word) + extraBonus - (UZ_EXPLICIT.has(word) ? 30 : 0);
     results[bucket].push({
       word,
       syllables: candData.syllables,
