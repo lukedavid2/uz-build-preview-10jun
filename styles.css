@@ -5332,3 +5332,178 @@ body.dark-mode .my-songs-title { color: #d8d8d8; }
 body.dark-mode .song-card { background: #2a2e38; border-color: #3a3e48; }
 body.dark-mode .song-card.current { border-color: #c8a04a; }
 body.dark-mode .song-card-name { color: #d8d8d8; }
+
+
+/* v103 — Tools menu: one consistent recipe for every item */
+.tool-buttons .tool-menu-btn,
+.tool-buttons .uz-shapes-menu-item {
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  color: #8b7355;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  transition: all 0.15s;
+  min-height: 0;
+}
+.tool-buttons .tool-menu-btn:hover,
+.tool-buttons .uz-shapes-menu-item:hover { background: #f5f5f5; color: #333; }
+.tool-buttons .tool-menu-btn.active { background: #fdd835; color: #1a1a1a; border-color: #e6b800; }
+
+/* v103 — Select toggle relocated next to the Tools button (always visible) */
+.controls-right #uzSelectToggle {
+  background: #fff;
+  color: #8b7355;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  min-height: 0;
+}
+.controls-right #uzSelectToggle:hover { background: #f5f5f5; color: #333; border-color: #ccc; }
+.controls-right #uzSelectToggle.uz-select-toggle-active { background: #fdd835; color: #1a1a1a; border-color: #e6b800; }
+body.dark-mode .controls-right #uzSelectToggle { background: #2a2e38; color: #aaa; border-color: #3a3e48; }
+body.dark-mode .controls-right #uzSelectToggle.uz-select-toggle-active { background: #c8a04a; color: #111; }
+
+/* v103 — Playback quick-info is now a button opening the playback panel */
+.looper-quickinfo {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  transition: all 0.15s;
+}
+.looper-quickinfo:hover { border-color: #ccc; background: #f7f5ef; color: #333; }
+body.dark-mode .looper-quickinfo:hover { border-color: #3a3e48; background: #2a2e38; color: #ddd; }
+
+
+/* v103 — My Songs close lives in the modal corner, not the screen corner */
+.my-songs-content { position: relative; }
+.my-songs-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  margin-left: 2px;
+}
+.my-songs-close:hover { color: #333; }
+body.dark-mode .my-songs-close { color: #888; }
+body.dark-mode .my-songs-close:hover { color: #ddd; }
+
+
+/* ════════ v104 — Melody Sketcher band ════════ */
+.melody-sketcher-band { display: none; }
+.melody-sketcher-band.open {
+  display: block;
+  margin: 14px 0;
+  animation: uzBandSlideIn 0.22s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes uzBandSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mel-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  padding: 12px 16px 14px;
+}
+body.dark-mode .mel-card { background: #22262e; border-color: #3a3e48; }
+
+.mel-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.mel-title { font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #666; }
+body.dark-mode .mel-title { color: #aaa; }
+.mel-tabs { display: inline-flex; gap: 4px; }
+.mel-tab {
+  font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 4px 12px; border-radius: 5px; cursor: pointer;
+  background: transparent; color: #999; border: 1px solid #ddd;
+}
+.mel-tab.active { background: #fdd835; color: #1a1a1a; border-color: #e6b800; }
+body.dark-mode .mel-tab { border-color: #3a3e48; color: #888; }
+body.dark-mode .mel-tab.active { background: #fdd835; color: #1a1a1a; border-color: #e6b800; }
+.mel-controls { display: inline-flex; gap: 6px; align-items: center; margin-left: auto; flex-wrap: wrap; }
+.mel-seg { display: inline-flex; gap: 3px; }
+.mel-btn {
+  font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+  padding: 3px 10px; border-radius: 4px; cursor: pointer;
+  background: #fff; color: #666; border: 1px solid #ccc;
+  transition: all 0.15s;
+}
+.mel-btn:hover { background: #f5f5f5; color: #333; }
+.mel-btn.mel-btn-on { background: #fdd835; color: #1a1a1a; border-color: #e6b800; font-weight: 700; }
+.mel-btn.mel-suggest { background: rgba(200,160,74,0.10); color: #c8a04a; border-color: rgba(200,160,74,0.5); }
+.mel-btn.mel-suggest:hover { background: rgba(200,160,74,0.2); }
+body.dark-mode .mel-btn { background: #2a2e38; color: #aaa; border-color: #3a3e48; }
+body.dark-mode .mel-btn:hover { background: #3a3e48; color: #ddd; }
+body.dark-mode .mel-btn.mel-btn-on { background: #fdd835; color: #1a1a1a; border-color: #e6b800; }
+.mel-close { background: none; border: none; color: #bbb; font-size: 15px; cursor: pointer; padding: 0 4px; }
+.mel-close:hover { color: #666; }
+
+.mel-stage {
+  background: #111118;
+  border: 1px solid rgba(200,160,74,0.15);
+  border-radius: 8px;
+  padding: 10px 12px 12px;
+  overflow-x: auto;
+}
+.mel-empty-note { color: #777; font-size: 12px; font-family: 'Outfit', sans-serif; padding: 18px; }
+.mel-placeholder {
+  position: absolute; left: 50%; top: 55%; transform: translate(-50%,-50%);
+  color: rgba(255,255,255,0.25); font-size: 12px; font-style: italic; pointer-events: none; z-index: 1;
+}
+
+.mel-chip {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  padding: 2px 9px; border-radius: 6px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.10);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.mel-chip b { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: #c8a04a; }
+.mel-chip i { font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 600; font-style: normal; color: #777; }
+.mel-chip.playing {
+  border-color: #fdd835; background: rgba(253,216,53,0.10);
+  box-shadow: 0 0 12px rgba(253,216,53,0.4);
+}
+.mel-pill {
+  font-family: 'JetBrains Mono','Courier New',monospace; font-size: 9px; font-weight: 600; line-height: 1.4;
+  padding: 1px 5px; border-radius: 3px;
+  color: #5ec878; background: rgba(94,200,120,0.2); border: 1px solid rgba(94,200,120,0.3);
+}
+.mel-tint { background: rgba(94,200,120,0.06); transition: background 0.10s ease, box-shadow 0.10s ease; }
+.mel-tint.bar-active { background: rgba(94,200,120,0.15); box-shadow: inset 0 0 8px rgba(94,200,120,0.18); }
+.mel-note { animation: melNoteIn 0.13s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes melNoteIn {
+  from { opacity: 0; transform: scaleX(0.4) scaleY(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.mel-footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 9px; }
+.mel-legend {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Outfit', sans-serif; font-size: 10px; color: #666;
+  border: 1px solid #e4ddca; border-radius: 6px; padding: 3px 9px;
+}
+body.dark-mode .mel-legend { border-color: #3a3e48; color: #999; }
+.mel-legend i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.mel-hint { font-size: 11px; font-style: italic; color: #999; }
+.mel-hint b { color: #5ec878; }
+
+@media (max-width: 480px) {
+  .mel-controls { margin-left: 0; }
+  .mel-card { padding: 10px 8px 12px; }
+}

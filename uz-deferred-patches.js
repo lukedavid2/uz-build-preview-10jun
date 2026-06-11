@@ -447,9 +447,11 @@
 
   function setupToolbarSelectToggle() {
     function tryInject() {
-      var toolButtons = document.getElementById('toolButtons');
+      // v5: live next to the Tools toggle (always visible), not in the menu
+      var controlsRight = document.querySelector('.controls-right');
+      var toolButtons = controlsRight || document.getElementById('toolButtons');
       if (!toolButtons) return false;
-      if (toolButtons.querySelector('#uzSelectToggle')) return true;
+      if (document.getElementById('uzSelectToggle')) return true;
       var btn = document.createElement('button');
       btn.id = 'uzSelectToggle';
       btn.className = 'uz-select-toggle-btn';
@@ -461,7 +463,9 @@
         if (selectMode) { exitSelectMode(); btn.classList.remove('uz-select-toggle-active'); }
         else { enterSelectMode(); btn.classList.add('uz-select-toggle-active'); }
       });
-      toolButtons.appendChild(btn);
+      var menuToggle = document.getElementById('toolMenuToggle');
+      if (controlsRight && menuToggle) controlsRight.insertBefore(btn, menuToggle);
+      else toolButtons.appendChild(btn);
       return true;
     }
     if (tryInject()) return;

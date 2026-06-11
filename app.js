@@ -1,5 +1,6 @@
 import * as Data from './data.js?v=99';
-import * as Audio from './audio.js?v=99';
+import * as Audio from './audio.js?v=100';
+import * as Melody from './melody.js?v=1';
 
 const state = {
   selectedKey: 'C',
@@ -28,6 +29,8 @@ const state = {
   arpExtension: '',
   arpViewMode: 'all', // 'all' or 'shapes'
   arpSelectedShape: null,
+  // Melody sketcher state (see melody.js)
+  melody: null,
   // Looper State
   looperPlaying: false,
   looperStyle: 'pop',
@@ -159,6 +162,11 @@ function restartLooperIfPlaying() {
       (idx) => {
         if (idx >= 0 && idx < flatProgression.length) {
           highlightProgressionChord(flatProgression[idx].lineIdx, flatProgression[idx].chordIdx);
+        }
+      },
+      (idx, t0, dur) => {
+        if (idx >= 0 && idx < flatProgression.length) {
+          Melody.onScheduleMeasure(flatProgression[idx], t0, dur);
         }
       }
     );
@@ -1692,6 +1700,7 @@ function renderTabAnalysis(analysis, lineIdx) {
 }
 
 function renderProgression() {
+    if (typeof Melody !== 'undefined' && Melody.refresh) { try { Melody.refresh(); } catch (e) {} }
     const area = document.getElementById('progressionArea');
     const hasChords = state.progressionLines.some(line => line.chords.length > 0);
 
@@ -1713,7 +1722,7 @@ function renderProgression() {
             <button class="looper-play-btn ${state.looperPlaying ? 'playing' : ''}" data-action="toggleLooper" ${!hasChords ? 'disabled' : ''}>
                 ${state.looperPlaying ? '■ Stop' : '▶ Loop'}
             </button>
-            <span class="looper-quickinfo">${state.looperBpm} BPM &middot; ${state.looperStyle} ${state.looperStyleVariant === 2 ? 'V2' : 'V1'}</span>
+            <button class="looper-quickinfo" data-action="openPlaybackPanel" title="Playback settings — style, tempo, tracks">🎶 ${state.looperBpm} BPM &middot; ${state.looperStyle} ${state.looperStyleVariant === 2 ? 'V2' : 'V1'} ▾</button>
         </div>
     </div>`;
 
@@ -2085,6 +2094,53 @@ function midiBuildTempoTrack(tempoBpm) {
     return body;
 }
 
+// Build the melody track (channel 1, acoustic guitar) from the sketcher's
+// per-line melodies, flattened across lines/repeats exactly like the chords.
+function midiBuildMelodyTrack(ppq, beatsPerChord) {
+    const m = state.melody;
+    if (!m || !m.lines) return null;
+    const flat = [];
+    state.progressionLines.forEach((line, lineIdx) => {
+        const reps = (typeof line.repeats === 'number' && line.repeats > 0 && line.repeats < 999) ? line.repeats : 1;
+        for (let r = 0; r < reps; r++) {
+            line.chords.forEach((c, chordIdx) => {
+                if (c && c.chord && c.chord !== '?') flat.push({ lineIdx, chordIdx });
+            });
+        }
+    });
+    if (!flat.length) return null;
+    const ticksPerBar = ppq * beatsPerChord;
+    const res = (m.resolution === 16) ? 16 : 8;
+    const slotTicks = ticksPerBar / res;
+    const events = []; // {tick, on, pitch}
+    flat.forEach((bar, i) => {
+        const notes = m.lines[bar.lineIdx] || [];
+        notes.forEach(n => {
+            if (n.bar !== bar.chordIdx) return;
+            const pitch = Melody.midiPitch(n.d, n.o) & 0x7F;
+            const start = i * ticksPerBar + Math.round(n.slot * slotTicks);
+            const end = start + Math.max(1, Math.round(n.len * slotTicks)) - 1;
+            events.push({ tick: start, on: true, pitch });
+            events.push({ tick: end, on: false, pitch });
+        });
+    });
+    if (!events.length) return null;
+    events.sort((x, y) => x.tick - y.tick || (x.on === y.on ? 0 : (x.on ? 1 : -1)));
+    const body = [];
+    const name = 'Melody';
+    body.push(...midiVarLen(0), 0xFF, 0x03, name.length);
+    midiPushStr(body, name);
+    body.push(...midiVarLen(0), 0xC1, 24); // program 25 (0-indexed 24): acoustic nylon guitar
+    let cursor = 0;
+    events.forEach(ev => {
+        const delta = Math.max(0, ev.tick - cursor);
+        cursor = ev.tick;
+        body.push(...midiVarLen(delta), ev.on ? 0x91 : 0x81, ev.pitch, ev.on ? 80 : 0x40);
+    });
+    body.push(...midiVarLen(0), 0xFF, 0x2F, 0x00);
+    return body;
+}
+
 function midiBuildSMF(chords, opts) {
     const ppq = 480;
     const tempo = opts.tempo || 120;
@@ -2093,6 +2149,8 @@ function midiBuildSMF(chords, opts) {
     const tempoTrack = midiBuildTempoTrack(tempo);
     const chordTrack = midiBuildChordTrack(chords, ppq, beatsPerChord);
     const tracks = [tempoTrack, chordTrack];
+    const melodyTrack = midiBuildMelodyTrack(ppq, beatsPerChord);
+    if (melodyTrack) tracks.push(melodyTrack);
     if (includeClick) {
         // Click runs the full progression length, 4 beats per bar
         const numBars = chords.length;
@@ -2772,7 +2830,8 @@ function saveStateToLocalStorage() {
         looperBass: state.looperBass,
         looperKeys: state.looperKeys,
         songName: state.songName,
-        lyrics: state.lyrics || null
+        lyrics: state.lyrics || null,
+        melody: state.melody || null
     };
     localStorage.setItem('undercoverZestState', JSON.stringify(savedState));
     if (typeof getSongsRegistry === 'function') {
@@ -2802,6 +2861,7 @@ function loadStateFromLocalStorage() {
         if (typeof parsed.looperKeys === 'boolean') state.looperKeys = parsed.looperKeys;
         if (parsed.songName) state.songName = parsed.songName;
         if (parsed.lyrics) state.lyrics = parsed.lyrics;
+        if (parsed.melody) state.melody = parsed.melody;
     } catch (err) {
         console.warn('Failed to load saved state:', err);
     }
@@ -2832,7 +2892,8 @@ function buildSaveData() {
             tabArtic: line.tabArtic || [],
             showTab: line.showTab || false
         })),
-        lyrics: state.lyrics || null
+        lyrics: state.lyrics || null,
+        melody: state.melody || null
     };
 }
 
@@ -3325,6 +3386,8 @@ function loadProgressionData(data) {
 
     // Lyrics: same leak-prevention — reset to empty when the file has none.
     state.lyrics = data.lyrics || { freeText: '', sections: [], currentView: 'freewrite', currentTab: 'lyrics' };
+    // Melody: leak-safe reset too.
+    state.melody = data.melody || Melody.defaults();
 
     state.currentLineIndex = 0;
     render();
@@ -4985,6 +5048,11 @@ function setupEventListeners() {
                                 if (idx >= 0 && idx < flatProgression.length) {
                                     highlightProgressionChord(flatProgression[idx].lineIdx, flatProgression[idx].chordIdx);
                                 }
+                            },
+                            (idx, t0, dur) => {
+                                if (idx >= 0 && idx < flatProgression.length) {
+                                    Melody.onScheduleMeasure(flatProgression[idx], t0, dur);
+                                }
                             }
                         );
                     }
@@ -5607,6 +5675,15 @@ function setupEventListeners() {
             if (action === 'deleteSong') { deleteSongById(actionBtn.dataset.song); }
             if (action === 'exportSong') { exportSongById(actionBtn.dataset.song); }
             if (action === 'importSongHub') { importSongFile(); }
+            if (action === 'exportAllSongs') { exportAllSongs(); }
+            if (action === 'toggleMelodySketcher') {
+                Melody.toggle();
+                const tb3 = document.getElementById('toolButtons');
+                if (tb3) tb3.classList.remove('open');
+            }
+            if (action && action.startsWith('mel') && action !== 'melodyNoop') {
+                Melody.handleAction(action, actionBtn);
+            }
             if (action === 'copyShareLink') {
                 const url = buildShareUrl();
                 if (!url) {
@@ -8045,7 +8122,7 @@ function blankSongData() {
              bpm: 100, style: 'pop', styleVariant: 1,
              drums: false, bass: true, keys: true,
              lines: [{ chords: [], repeats: 1, name: '', tab: [], tabArtic: [], showTab: false }],
-             lyrics: null };
+             lyrics: null, melody: null };
 }
 
 function switchToSong(id) {
@@ -8099,40 +8176,109 @@ function exportSongById(id) {
     const reg = getSongsRegistry();
     if (!reg || !reg.songs[id]) return;
     const data = reg.songs[id].data;
-    const name = (data.songName || 'untitled-song').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'untitled-song';
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const aEl = document.createElement('a');
-    aEl.href = url; aEl.download = name + '.json';
+    aEl.href = url; aEl.download = songFileName(data, new Set());
     document.body.appendChild(aEl); aEl.click(); aEl.remove();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
+let _jszipPromise = null;
+function loadJSZip() {
+    if (window.JSZip) return Promise.resolve(window.JSZip);
+    if (_jszipPromise) return _jszipPromise;
+    _jszipPromise = new Promise((resolve, reject) => {
+        const sc = document.createElement('script');
+        sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        sc.onload = () => resolve(window.JSZip);
+        sc.onerror = () => { _jszipPromise = null; reject(new Error('JSZip failed to load')); };
+        document.head.appendChild(sc);
+    });
+    return _jszipPromise;
+}
+
+function songFileName(data, taken) {
+    let base = (data.songName || 'untitled-song').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'untitled-song';
+    let name = base, k = 2;
+    while (taken.has(name)) { name = base + '-' + k; k++; }
+    taken.add(name);
+    return name + '.json';
+}
+
+async function exportAllSongs() {
+    persistCurrentSong();
+    const reg = getSongsRegistry();
+    if (!reg) return;
+    try {
+        const JSZip = await loadJSZip();
+        const zip = new JSZip();
+        const taken = new Set();
+        Object.values(reg.songs)
+            .sort((x, y) => y.updatedAt - x.updatedAt)
+            .forEach(entry => zip.file(songFileName(entry.data, taken), JSON.stringify(entry.data, null, 2)));
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(blob);
+        const aEl = document.createElement('a');
+        const d = new Date();
+        aEl.href = url;
+        aEl.download = 'undercover-zest-songs-' + d.toISOString().slice(0, 10) + '.zip';
+        document.body.appendChild(aEl); aEl.click(); aEl.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } catch (err) {
+        alert('Could not build the zip — check your connection and try again.');
+        console.warn('exportAllSongs:', err);
+    }
+}
+
+function importSongsFromList(datas) {
+    // import many parsed song objects; open the first
+    const valid = datas.filter(d => d && d.lines);
+    if (!valid.length) { alert('No valid song files found.'); return; }
+    persistCurrentSong();
+    const reg = getSongsRegistry();
+    let firstId = null;
+    valid.forEach((data, i) => {
+        const id = 's' + Date.now() + '-' + i;
+        reg.songs[id] = { data, updatedAt: Date.now() };
+        if (!firstId) firstId = id;
+    });
+    reg.currentId = firstId;
+    saveSongsRegistry(reg);
+    loadProgressionData(reg.songs[firstId].data);
+    saveStateToLocalStorage();
+    renderMySongs();
+}
+
 function importSongFile() {
     const input = document.getElementById('fileInput');
-    input.onchange = (e) => {
+    input.setAttribute('accept', '.json,.zip,.txt');
+    input.onchange = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            try {
-                const data = JSON.parse(event.target.result);
-                if (!data || !data.lines) throw new Error('not a song file');
-                persistCurrentSong();
-                const reg = getSongsRegistry();
-                const id = 's' + Date.now();
-                reg.songs[id] = { data, updatedAt: Date.now() };
-                reg.currentId = id;
-                saveSongsRegistry(reg);
-                loadProgressionData(data);
-                saveStateToLocalStorage();
-                renderMySongs();
-            } catch (err) {
-                alert('Could not import file. Please ensure it is a valid song file.');
-            }
-        };
-        reader.readAsText(file);
         input.value = '';
+        if (!file) return;
+        try {
+            if (/\.zip$/i.test(file.name)) {
+                const JSZip = await loadJSZip();
+                const zip = await JSZip.loadAsync(file);
+                const texts = await Promise.all(
+                    Object.values(zip.files)
+                        .filter(f => !f.dir && /\.json$/i.test(f.name) && !/__MACOSX/.test(f.name))
+                        .map(f => f.async('string'))
+                );
+                const datas = texts.map(t => { try { return JSON.parse(t); } catch (e2) { return null; } });
+                importSongsFromList(datas);
+            } else {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (!data || !data.lines) throw new Error('not a song file');
+                importSongsFromList([data]);
+            }
+        } catch (err) {
+            alert('Could not import — expected a song .json or a .zip of song .json files.');
+            console.warn('importSongFile:', err);
+        }
     };
     input.click();
 }
@@ -8191,6 +8337,8 @@ function buildShareUrl() {
     params.set('key', state.selectedKey);
     params.set('p', lines.join('|'));
     if (state.songName) params.set('n', state.songName.slice(0, 60));
+    const mel = Melody.serialize();
+    if (mel) params.set('m', mel);
     return location.origin + location.pathname + '?' + params.toString();
 }
 
@@ -8214,6 +8362,11 @@ function buildShareUrl() {
     state.currentLineIndex = 0;
     const name = params.get('n');
     if (name) state.songName = name.slice(0, 60);
+    const melParam = params.get('m');
+    if (melParam) {
+        state.melody = null; // fresh container; deserialize fills it after init
+        state.__pendingMelodyParam = melParam;
+    }
     saveStateToLocalStorage();
     // Strip the params so a reload doesn't clobber later edits.
     history.replaceState(null, '', location.pathname);
@@ -8238,7 +8391,20 @@ function buildShareUrl() {
 })();
 
 setupEventListeners();
+Melody.init({
+    state,
+    getScaleNotes,
+    transposeChord,
+    displayChordForKey,
+    saveState: saveStateToLocalStorage,
+});
+if (state.__pendingMelodyParam) {
+    Melody.deserialize(state.__pendingMelodyParam);
+    delete state.__pendingMelodyParam;
+    saveStateToLocalStorage();
+}
 render();
+Melody.render();
 
 // In pop-out mode, the main render() doesn't call the panel-specific render
 // functions (renderArpeggiator etc — those only fire on user toggle). Call

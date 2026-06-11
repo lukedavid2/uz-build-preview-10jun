@@ -19,7 +19,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍋</text></svg>">
   <title>Guitar Chord Progression Builder — Undercover Zest</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=103">
+  <link rel="stylesheet" href="styles.css?v=104">
   <style>
     .welcome-modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -152,15 +152,15 @@
       <div class="controls-right">
         <button class="tool-toggle-btn" id="toolMenuToggle" data-action="toggleToolMenu">🛠 Tools ▾</button>
         <div class="tool-buttons" id="toolButtons">
-          <button class="playback-btn" id="btnPlayback" data-action="openPlaybackPanel" title="Playback tools">🎶 Playback</button>
-          <button class="file-btn-tool" id="btnFile" data-action="openFilePanel" title="File">📁 File</button>
-          <button class="keyfinder-btn" id="btnKeyFinder" data-action="openKeyFinder">🔍 Key Finder</button>
-          <button class="my-songs-btn" id="btnMySongs" data-action="toggleMySongs">🎵 My Songs</button>
-          <button class="fretboard-btn" id="btnShowScale" data-action="toggleFretboard">Show Scale</button>
-          <button class="arpeggiator-btn" id="btnArpeggiator" data-action="toggleArpeggiator">Arpeggiator</button>
-          <button class="chordpicker-btn" id="btnChordPicker" data-action="openChordPicker">Chord Picker</button>
-          <button class="tuner-btn" id="btnTuner" data-action="toggleTuner">🎯 Tuner</button>
-          <button class="tutorial-btn" id="btnTutorial" data-action="openTutorial" title="How to use">📖 Tutorial</button>
+          <button class="tool-menu-btn my-songs-btn" id="btnMySongs" data-action="toggleMySongs">🎵 My Songs</button>
+          <button class="tool-menu-btn file-btn-tool" id="btnFile" data-action="openFilePanel" title="Save, open, export">📁 File</button>
+          <button class="tool-menu-btn melody-btn" id="btnMelody" data-action="toggleMelodySketcher">✏️ Melody</button>
+          <button class="tool-menu-btn fretboard-btn" id="btnShowScale" data-action="toggleFretboard">📐 Show Scale</button>
+          <button class="tool-menu-btn arpeggiator-btn" id="btnArpeggiator" data-action="toggleArpeggiator">🎼 Arpeggiator</button>
+          <button class="tool-menu-btn chordpicker-btn" id="btnChordPicker" data-action="openChordPicker">🎹 Chord Picker</button>
+          <button class="tool-menu-btn keyfinder-btn" id="btnKeyFinder" data-action="openKeyFinder">🔍 Key Finder</button>
+          <button class="tool-menu-btn tuner-btn" id="btnTuner" data-action="toggleTuner">🎯 Tuner</button>
+          <button class="tool-menu-btn tutorial-btn" id="btnTutorial" data-action="openTutorial" title="How to use">📖 Tutorial</button>
         </div>
       </div>
     </div>
@@ -170,6 +170,8 @@
         <span class="progression-empty">Click chords to build a progression...</span>
       </div>
     </div>
+
+    <div id="melodySketcherContainer" class="melody-sketcher-band"></div>
 
     <div class="main-content">
       <div class="chord-section">
@@ -268,8 +270,9 @@
           <span class="my-songs-title">🎵 My Songs</span>
           <div class="my-songs-header-actions">
             <button class="file-btn" data-action="newSongHub">+ New song</button>
-            <button class="file-btn" data-action="importSongHub">📂 Import</button>
-            <button class="close-btn" data-action="closeMySongs">×</button>
+            <button class="file-btn" data-action="importSongHub" title="Import .json or a .zip of songs">📂 Import</button>
+            <button class="file-btn" data-action="exportAllSongs" title="Download every song as a zip">⬇ Export all</button>
+            <button class="my-songs-close" data-action="closeMySongs" aria-label="Close">×</button>
           </div>
         </div>
         <p class="my-songs-note">Songs live in this browser. Export anything you'd miss.</p>
@@ -417,10 +420,10 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script type="module" src="app.js?v=106"></script>
+  <script type="module" src="app.js?v=107"></script>
   <script src="uz-nav.js"></script>
   <script src="uz-footer.js?v=15"></script>
-  <script src="uz-deferred-patches.js?v=4"></script>
+  <script src="uz-deferred-patches.js?v=5"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {

@@ -760,12 +760,12 @@ function createHiHat(ctx, startTime, open = false, velocity = 0.25) {
 
 // ========== PUBLIC API ==========
 
-export function playNote(note, octave = 4, duration = 0.8, instrument = 'piano') {
+export function playNote(note, octave = 4, duration = 0.8, instrument = 'piano', startTime = null) {
   const ctx = getAudioContext();
   const dest = setupAudioChain();
   const freq = getNoteFrequency(note, octave);
   // Small buffer time to ensure audio context is ready
-  const now = ctx.currentTime + 0.02;
+  const now = startTime !== null ? startTime : ctx.currentTime + 0.02;
 
   let tone;
   if (instrument === 'bass') {
@@ -1192,7 +1192,7 @@ export function playBackingMeasure(chord, style, bpm, startTime, options = {}) {
 }
 
 // Start looping the backing track with improved timing using lookahead scheduling
-export function startBackingLoop(progression, style, bpm, options = {}, onMeasure = null) {
+export function startBackingLoop(progression, style, bpm, options = {}, onMeasure = null, onSchedule = null) {
   const ctx = getAudioContext();
   setupAudioChain();
 
@@ -1236,6 +1236,12 @@ export function startBackingLoop(progression, style, bpm, options = {}, onMeasur
       const chord = progression[measureIndex % progression.length].chord;
 
       playBackingMeasure(chord, style, bpm, nextScheduleTime, options);
+
+      // v100: ahead-of-time hook — lets callers schedule extra parts
+      // (melody sketcher) at the measure's precise audio start time.
+      if (onSchedule) {
+        try { onSchedule(measureIndex % progression.length, nextScheduleTime, measureDur); } catch (e) {}
+      }
 
       // Queue visual callback to fire at the precise audio time
       if (onMeasure) {
