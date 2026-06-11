@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <title>Reference library, songwriting tools and theory references | Undercover Zest</title>
+  <meta name="description" content="Free songwriting reference: chord progressions in every key, individual chord voicings, open-chord embellishments, arpeggio shapes, and practice drills. Built for working songwriters.">
+  <meta name="keywords" content="songwriting reference, free guitar reference, chord progressions, chord voicings, arpeggios, open chord embellishments">
+  <meta name="theme-color" content="#08080c">
+
+  <meta property="og:title" content="Reference library, Undercover Zest">
+  <meta property="og:description" content="Free songwriting reference: chord progressions, chord voicings, embellishments, arpeggios.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://undercoverzest.app/lemon-logo.png">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Reference library, Undercover Zest">
+  <meta name="twitter:description" content="Free songwriting reference: chord progressions, chord voicings, embellishments, arpeggios.">
+  <meta name="twitter:image" content="https://undercoverzest.app/lemon-logo.png">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍋</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../chord-progressions/chord-pages.css">
+
+  <style>
+    .rl-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 22px; margin: 28px 0 48px; }
+    .rl-card { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; padding: 26px 28px; transition: background 0.15s, border-color 0.15s; }
+    .rl-card:hover { background: var(--bg-card-hover); }
+    .rl-card.tonic { border-left-color: var(--tonic, #5ec269); }
+    .rl-card.dom { border-left-color: var(--dominant, #e06b5e); }
+    .rl-card.subdom { border-left-color: var(--subdominant, #4db8d4); }
+    .rl-card.predom { border-left-color: var(--predominant, #e8a94e); }
+    .rl-card h2 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 4px; }
+    .rl-card-meta { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; }
+    .rl-card-body { color: var(--text-secondary); font-size: 0.97rem; line-height: 1.65; margin-bottom: 16px; }
+    .rl-featured { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .rl-featured a { font-family: var(--font-mono); font-size: 0.82rem; color: var(--text-primary); background: var(--bg-secondary); border: 1px solid var(--border); padding: 5px 10px; border-radius: 4px; text-decoration: none; transition: background 0.12s, border-color 0.12s; }
+    .rl-featured a:hover { background: var(--bg-card-hover); border-color: var(--border-light); }
+    .rl-see-all { display: inline-block; font-size: 0.92rem; color: var(--accent); text-decoration: none; font-weight: 600; }
+    .rl-see-all:hover { color: var(--accent-hover); }
+    .rl-future { padding: 22px 28px; background: var(--bg-secondary); border: 1px dashed var(--border-light); border-radius: 10px; color: var(--text-muted); font-size: 0.92rem; line-height: 1.7; }
+    .rl-tools-back { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--border); }
+    .rl-tools-back h2 { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 10px; }
+    .rl-tools-back p { color: var(--text-secondary); line-height: 1.7; }
+    .rl-tools-back a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Reference library, Undercover Zest",
+  "description": "Free songwriting reference: chord progressions in every key, individual chord voicings, open-chord embellishments, arpeggio shapes.",
+  "url": "https://undercoverzest.app/resources/",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Undercover Zest",
+    "url": "https://undercoverzest.app/"
+  },
+  "hasPart": [
+    {"@type": "WebPage", "name": "Chord progressions in every key", "url": "https://undercoverzest.app/chord-progressions/"},
+    {"@type": "WebPage", "name": "Individual chord reference", "url": "https://undercoverzest.app/chord/"},
+    {"@type": "WebPage", "name": "Open-chord embellishments", "url": "https://undercoverzest.app/chord-embellishments/"},
+    {"@type": "WebPage", "name": "Arpeggio shapes", "url": "https://undercoverzest.app/arpeggios/"}
+  ]
+}
+  </script>
+</head>
+<body>
+
+  <main class="cp-wrap">
+
+    <section class="cp-hero">
+      <div class="cp-eyebrow">Undercover Zest · Reference library</div>
+      <h1 style="font-family: var(--font-display); font-size: clamp(2.2rem, 5vw, 3.4rem); font-weight: 700; line-height: 1.1; margin-bottom: 14px; text-align: center;">Reference library</h1>
+      <p class="cp-intro">Free songwriting reference, organised. Every common chord, every diatonic progression in every key, the open-chord embellishments that turn a plain progression into a song, the arpeggio shapes you'll actually use. Built to be skimmed quickly when you're mid-song, not to teach you music theory cover-to-cover.</p>
+    </section>
+
+    <div class="rl-cards">
+
+      <div class="rl-card" style="border-top:3px solid #2e6e8b;">
+        <h2>The Blues — deep dive <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:#2e6e8b;vertical-align:middle;border:1px solid #2e6e8b;border-radius:5px;padding:2px 7px;margin-left:6px;">Study guide</span></h2>
+        <div class="rl-card-meta">5 chapters · forms, soloing, turnarounds, players, practice plan</div>
+        <p class="rl-card-body">A complete study of the music under everything else you play: every blues form as a countable bar chart, how call-and-response phrasing actually works, the turnaround vocabulary, ten players' worth of language to steal, and a two-week practice plan that gets it into your hands.</p>
+        <div class="rl-featured">
+          <a href="../blues/forms/">The forms</a>
+          <a href="../blues/soloing/">Soloing &amp; phrasing</a>
+          <a href="../blues/turnarounds/">Turnarounds</a>
+          <a href="../blues/artists/">The players</a>
+          <a href="../blues/study-plan/">Study plan</a>
+        </div>
+        <a class="rl-see-all" href="../blues/">Open the blues deep dive &rarr;</a>
+      </div>
+
+      <div class="rl-card" style="border-top:3px solid #6b4a8b;">
+        <h2>Jazz — deep dive <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:#6b4a8b;vertical-align:middle;border:1px solid #6b4a8b;border-radius:5px;padding:2px 7px;margin-left:6px;">Study guide</span></h2>
+        <div class="rl-card-meta">6 chapters · forms, the ii–V–I engine, soloing, endings, players, ten standards</div>
+        <p class="rl-card-body">Jazz without the conservatory: the five forms behind a thousand standards, the six harmony devices that cover ninety percent of what happens in them, the learnable mechanics of improvising, how tunes start and stop, the guitar lineage, and the ten standards to learn first — in the right order.</p>
+        <div class="rl-featured">
+          <a href="../jazz/forms/">The forms</a>
+          <a href="../jazz/harmony/">Harmony essentials</a>
+          <a href="../jazz/soloing/">Soloing</a>
+          <a href="../jazz/transitions/">Intros &amp; endings</a>
+          <a href="../jazz/study-plan/">Ten standards</a>
+        </div>
+        <a class="rl-see-all" href="../jazz/">Open the jazz deep dive &rarr;</a>
+      </div>
+
+      <div class="rl-card tonic" style="border-top:3px solid var(--accent);">
+        <h2>Songwriting tools <span style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);vertical-align:middle;border:1px solid var(--accent);border-radius:5px;padding:2px 7px;margin-left:6px;">Interactive</span></h2>
+        <div class="rl-card-meta">4 worksheets · fill in online, save your work, or print</div>
+        <p class="rl-card-body">Four interactive worksheets that take a song from a first feeling to a finished draft: lyric expansion, thematic clustering, chord-progression development and a melody map. Work online with autosave, save your progress to a file to reload anywhere, or download the branded PDFs to write on paper.</p>
+        <div class="rl-featured">
+          <a href="../songwriting-tools/">Lyric Expansion</a>
+          <a href="../songwriting-tools/">Thematic Clustering</a>
+          <a href="../songwriting-tools/">Chord Progression</a>
+          <a href="../songwriting-tools/">Melody Map</a>
+        </div>
+        <a href="../songwriting-tools/" class="rl-see-all">Open the songwriting tools →</a>
+      </div>
+
+      <div class="rl-card tonic">
+        <h2>Chord progressions in every key</h2>
+        <div class="rl-card-meta">24 pages · one per major + minor key</div>
+        <p class="rl-card-body">The seven diatonic chords of any key, the six progressions songwriters actually use, the borrowed chords that add colour, the song examples that prove they work. Use it to find a progression in a key you're already playing in, or to transpose one you know.</p>
+        <div class="rl-featured">
+          <a href="../chord-progressions/in-c-major/">in C major</a>
+          <a href="../chord-progressions/in-g-major/">in G major</a>
+          <a href="../chord-progressions/in-d-major/">in D major</a>
+          <a href="../chord-progressions/in-a-major/">in A major</a>
+          <a href="../chord-progressions/in-a-minor/">in A minor</a>
+          <a href="../chord-progressions/in-e-minor/">in E minor</a>
+        </div>
+        <a href="../chord-progressions/" class="rl-see-all">All 24 keys →</a>
+      </div>
+
+      <div class="rl-card">
+        <h2>Individual chord reference</h2>
+        <div class="rl-card-meta">50 chords · voicings, theory, songs</div>
+        <p class="rl-card-body">Every common chord with 10+ voicings (CAGED full shapes, triad shapes, piano voicings), the theory behind it, common progressions including it, and real songs that lean on it. Tap a name to see all of it.</p>
+        <div class="rl-featured">
+          <a href="../chord/c-major/">C</a>
+          <a href="../chord/g-major/">G</a>
+          <a href="../chord/d-major/">D</a>
+          <a href="../chord/a-minor/">Am</a>
+          <a href="../chord/e-minor/">Em</a>
+          <a href="../chord/c-major-7/">Cmaj7</a>
+          <a href="../chord/a-minor-7/">Am7</a>
+          <a href="../chord/d-major-7/">Dmaj7</a>
+          <a href="../chord/d-sus-4/">Dsus4</a>
+          <a href="../chord/f-sharp-minor/">F#m</a>
+          <a href="../chord/b-flat-major/">B♭</a>
+          <a href="../chord/g-7/">G7</a>
+        </div>
+        <a href="../chord/" class="rl-see-all">All 50 chords →</a>
+      </div>
+
+      <div class="rl-card subdom">
+        <h2>Open-chord embellishments</h2>
+        <div class="rl-card-meta">8 chords · the safe and risky single-note moves</div>
+        <p class="rl-card-body">The eight open chords (E, A, D, G, C, Em, Am, Dm) with all the safe scale-degree moves that produce named variants (Cmaj7, Csus4, Cadd9, etc), plus the risky ones that need context. The trick every acoustic guitarist learns the slow way, here in one place.</p>
+        <div class="rl-featured">
+          <a href="../chord-embellishments/open-c/">open C</a>
+          <a href="../chord-embellishments/open-g/">open G</a>
+          <a href="../chord-embellishments/open-d/">open D</a>
+          <a href="../chord-embellishments/open-a/">open A</a>
+          <a href="../chord-embellishments/open-e/">open E</a>
+          <a href="../chord-embellishments/open-em/">open Em</a>
+        </div>
+        <a href="../chord-embellishments/" class="rl-see-all">All 8 chords + overview →</a>
+      </div>
+
+      <div class="rl-card predom">
+        <h2>Arpeggio shapes</h2>
+        <div class="rl-card-meta">10 shapes · CAGED system + practice drills</div>
+        <p class="rl-card-body">The five major CAGED arpeggio shapes (C, A, G, E, D) and their minor versions (Cm, Am, Gm, Em, Dm), each with 4-note and 3-note variations, theory, practice drills, and the songwriting contexts they actually appear in. Plus a 15-minute daily drill plan on the overview.</p>
+        <div class="rl-featured">
+          <a href="../arpeggios/c-shape-major/">C-shape major</a>
+          <a href="../arpeggios/a-shape-major/">A-shape major</a>
+          <a href="../arpeggios/e-shape-major/">E-shape major</a>
+          <a href="../arpeggios/am-shape-minor/">Am-shape minor</a>
+          <a href="../arpeggios/em-shape-minor/">Em-shape minor</a>
+          <a href="../arpeggios/dm-shape-minor/">Dm-shape minor</a>
+        </div>
+        <a href="../arpeggios/" class="rl-see-all">All 10 shapes + drills →</a>
+      </div>
+
+    </div>
+
+    <div class="rl-future">
+      <strong style="color: var(--text-secondary);">Coming next:</strong> deep dives on folk &amp; country, funk &amp; soul, rock riff-writing and bossa nova — plus scale and mode references, intervals, capo charts, song-form glossary. The reference library grows as new reference content makes it into the suite.
+    </div>
+
+    <section class="rl-tools-back">
+      <h2>Want a tool instead of a reference?</h2>
+      <p>The reference library is for looking things up. The <a href="../">chord progression builder</a> is for building progressions interactively, <a href="../rhymeforge/">RhymeForge</a> for finding rhymes, <a href="../collisionlab/">CollisionLab</a> for breaking out of literal language, <a href="../morningpages/">Morning Pages</a> for clearing the head before writing, <a href="../sensespark/">SenseSpark</a> for sensory prompts. All free, all in the browser.</p>
+    </section>
+
+    <p class="cp-footer-note">
+      Undercover Zest is a free suite of songwriting tools: a chord progression
+      builder, RhymeForge, CollisionLab, Morning Pages, and SenseSpark.
+      No account, no cost, no catch.
+    </p>
+
+  </main>
+
+  <script src="../uz-nav.js"></script>
+  <script src="../uz-footer.js"></script>
+</body>
+</html>

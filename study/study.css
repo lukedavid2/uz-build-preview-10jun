@@ -1,0 +1,80 @@
+/* Undercover Zest — genre deep-dive pages (blues, jazz, …) */
+:root {
+  --gold: #c8a04a; --gold-dim: rgba(200,160,74,0.5);
+  --ink: #2a2622; --muted: #6b6359; --faint: #9a917f;
+  --cream: #faf8f3; --card: #fff; --border: #e8e2d4;
+  --accent: #2e6e8b;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--cream); color: var(--ink); font-family: 'Outfit', sans-serif; font-size: 17px; line-height: 1.75; }
+.gs-wrap { max-width: 880px; margin: 0 auto; padding: 88px 22px 60px; }
+.gs-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+.gs-eyebrow a { color: inherit; text-decoration: none; }
+.gs-eyebrow a:hover { text-decoration: underline; }
+h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(30px, 5vw, 44px); line-height: 1.15; margin-bottom: 16px; }
+h1 em { color: var(--gold); font-style: normal; }
+.gs-intro { font-size: 18px; color: var(--muted); margin-bottom: 22px; max-width: 70ch; }
+h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 26px; margin: 44px 0 12px; }
+h3 { font-size: 18px; font-weight: 700; margin: 26px 0 8px; }
+p { margin: 0 0 14px; max-width: 74ch; }
+ul, ol { margin: 0 0 16px 22px; }
+li { margin-bottom: 7px; }
+a { color: var(--accent); }
+strong { font-weight: 600; }
+.gs-cta { display: inline-block; background: var(--gold); color: #fff; font-weight: 600; padding: 10px 20px; border-radius: 8px; text-decoration: none; margin: 6px 0 10px; }
+.gs-cta:hover { filter: brightness(1.05); }
+.gs-note { background: rgba(200,160,74,0.08); border-left: 3px solid var(--gold); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 18px 0; font-size: 15.5px; color: var(--muted); }
+.gs-note strong { color: var(--ink); }
+
+/* 12-bar style form charts: rows of bar cells */
+.gs-form { margin: 18px 0 22px; }
+.gs-form-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.gs-bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; max-width: 640px; }
+.gs-bar { background: var(--card); border: 1px solid var(--border); border-radius: 7px; padding: 9px 6px 7px; text-align: center; }
+.gs-bar .c { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 600; display: block; }
+.gs-bar .r { font-size: 11px; color: var(--faint); display: block; margin-top: 1px; }
+.gs-bar.hl { border-color: var(--gold); background: rgba(200,160,74,0.07); }
+.gs-bar.alt .c { color: var(--accent); }
+.gs-form-caption { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 70ch; }
+
+/* artist cards */
+.gs-artists { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin: 18px 0; }
+.gs-artist { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.gs-artist h3 { margin: 0 0 2px; font-size: 17px; }
+.gs-artist .tag { font-size: 12px; color: var(--gold); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.gs-artist p { font-size: 14.5px; color: var(--muted); margin: 8px 0 0; }
+.gs-artist .rec { font-size: 13.5px; margin-top: 8px; color: var(--ink); }
+.gs-artist .rec b { font-weight: 600; }
+
+/* hub cards */
+.gs-hub { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin: 22px 0; }
+.gs-hub-card { display: block; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; text-decoration: none; color: var(--ink); transition: border-color 0.15s, transform 0.15s; }
+.gs-hub-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.gs-hub-card h3 { margin: 0 0 6px; font-family: 'Playfair Display', Georgia, serif; font-size: 19px; }
+.gs-hub-card p { font-size: 14.5px; color: var(--muted); margin: 0; }
+.gs-hub-card .n { font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 0.1em; }
+
+/* listening list */
+.gs-listen { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+.gs-listen li { font-size: 15px; }
+.gs-listen .why { color: var(--muted); font-size: 14px; }
+
+/* prev/next + related */
+.gs-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; border-top: 1px solid var(--border); padding-top: 18px; font-size: 15px; }
+.gs-nav a { text-decoration: none; font-weight: 600; }
+.gs-footer-note { margin-top: 40px; font-size: 14px; color: var(--faint); }
+.gs-footer-note a { color: var(--muted); }
+
+table.gs-table { border-collapse: collapse; margin: 14px 0 20px; width: 100%; max-width: 680px; background: var(--card); border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+.gs-table th { text-align: left; font-size: 12px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.gs-table td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 15px; vertical-align: top; }
+.gs-table tr:last-child td { border-bottom: none; }
+.gs-table .mono { font-family: 'JetBrains Mono', monospace; font-size: 14px; }
+
+@media (max-width: 560px) {
+  .gs-bars { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .gs-bar { padding: 6px 2px 5px; }
+  .gs-bar .c { font-size: 12.5px; }
+  .gs-bar .r { font-size: 9.5px; }
+  .gs-wrap { padding-top: 76px; }
+}
