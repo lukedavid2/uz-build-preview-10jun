@@ -3253,8 +3253,9 @@ function exportToPdf() {
 }
 
 function loadProgressionData(data) {
-    // Set song name if present
-    if (data.songName) state.songName = data.songName;
+    // Song name: set unconditionally — a truthy guard here leaked the
+    // previous song's name into untitled songs when switching (My Songs hub).
+    state.songName = data.songName || '';
 
     // Set key if present
     if (data.key && Data.KEY_ORDER.includes(data.key)) {
@@ -3322,7 +3323,8 @@ function loadProgressionData(data) {
         }
     }
 
-    if (data.lyrics) state.lyrics = data.lyrics;
+    // Lyrics: same leak-prevention — reset to empty when the file has none.
+    state.lyrics = data.lyrics || { freeText: '', sections: [], currentView: 'freewrite', currentTab: 'lyrics' };
 
     state.currentLineIndex = 0;
     render();
