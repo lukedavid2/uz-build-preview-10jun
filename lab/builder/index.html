@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Builder Lab — chord builder v2 prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c8a04a;--ink:#2a2622;--blue:#2e6e8b;--red:#b5543e;--cream:#faf8f3;--border:#e4ddd0;--mut:#7a7064;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Outfit',sans-serif;background:linear-gradient(160deg,#faf8f4,#f0ece4 60%,#e8e2d8);color:var(--ink);min-height:100vh;}
+.wrap{max-width:980px;margin:0 auto;padding:28px 20px 80px;}
+h1{font-family:'Playfair Display',Georgia,serif;font-size:1.7rem;margin:.2rem 0 .3rem;}
+h1 em{color:var(--gold);font-style:normal;}
+.sub{color:var(--mut);font-size:.92rem;margin-bottom:1.2rem;}
+.lab-badge{display:inline-block;background:var(--red);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:.08em;padding:.2rem .55rem;border-radius:999px;vertical-align:middle;margin-left:.5rem;}
+.panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:14px 0;box-shadow:0 1px 4px rgba(42,38,34,.05);}
+.panel h2{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:.1rem 0 .6rem;}
+/* transport */
+.transport{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.play{background:var(--gold);border:0;color:#fff;font-family:inherit;font-weight:700;font-size:1rem;border-radius:999px;padding:.55rem 1.5rem;cursor:pointer;}
+.play.on{background:var(--red);}
+.tbtn{background:#f4efe4;border:1px solid var(--border);border-radius:8px;font-family:inherit;padding:.35rem .7rem;cursor:pointer;font-size:.85rem;}
+.tbtn.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.bpm{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--mut);}
+.bpm input{accent-color:var(--gold);}
+/* grid */
+.gridwrap{overflow-x:auto;}
+.row{position:relative;height:74px;margin:0 0 10px;min-width:560px;}
+.row .barbg{position:absolute;top:18px;bottom:0;border:1px solid var(--border);border-radius:8px;background:#fdfcf9;}
+.row .beatline{position:absolute;top:18px;bottom:0;width:1px;background:#f0e9dc;}
+.row .barline{position:absolute;top:18px;bottom:0;width:1px;background:#ddd3c0;}
+.row .barnum{position:absolute;top:0;font-size:.68rem;font-weight:700;color:var(--mut);letter-spacing:.05em;}
+.chip{position:absolute;top:24px;bottom:6px;border-radius:8px;background:#fff;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;user-select:none;overflow:hidden;transition:box-shadow .12s;}
+.chip .nm{font-weight:700;font-size:1.02rem;line-height:1.05;}
+.chip .meta{font-size:.62rem;color:var(--mut);display:flex;gap:5px;align-items:center;}
+.chip.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,160,74,.35);}
+.chip.playing{background:#fdf6e7;border-color:var(--gold);}
+.chip.stop .nm::after{content:" ✋";font-size:.7em;}
+.chip.push .nm::after{content:" →";color:var(--blue);font-size:.8em;}
+.chip .rz{position:absolute;right:0;top:0;bottom:0;width:10px;cursor:ew-resize;border-radius:0 8px 8px 0;}
+.chip .rz::after{content:"";position:absolute;right:3px;top:35%;bottom:35%;width:3px;border-radius:2px;background:var(--border);}
+.chip:hover .rz::after{background:var(--gold);}
+.playhead{position:absolute;top:16px;bottom:0;width:2px;background:var(--red);border-radius:2px;display:none;z-index:5;}
+/* selected chord tools */
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:34px;font-size:.85rem;}
+.tools .lab{color:var(--mut);}
+.tools button{font-family:inherit;background:#f4efe4;border:1px solid var(--border);border-radius:8px;padding:.3rem .6rem;cursor:pointer;font-size:.82rem;}
+.tools button.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.tools button.danger{color:var(--red);}
+/* palette */
+.pal{display:flex;flex-wrap:wrap;gap:7px;}
+.pal button{font-family:inherit;font-weight:600;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:.45rem .75rem;cursor:pointer;font-size:.95rem;}
+.pal button:hover{border-color:var(--gold);}
+.pal .free{display:flex;gap:6px;}
+.pal input{font-family:inherit;border:1.5px solid var(--border);border-radius:8px;padding:.4rem .6rem;width:90px;font-size:.95rem;}
+/* presets + share */
+.presets{display:flex;flex-wrap:wrap;gap:8px;}
+.presets button{font-family:inherit;background:var(--ink);color:var(--cream);border:0;border-radius:999px;padding:.4rem .9rem;cursor:pointer;font-size:.83rem;font-weight:600;}
+.presets button:hover{background:var(--gold);color:var(--ink);}
+.share{display:flex;gap:8px;align-items:center;}
+.share input{flex:1;font-family:ui-monospace,monospace;font-size:.78rem;border:1px solid var(--border);border-radius:8px;padding:.45rem .6rem;background:#fdfcf9;color:var(--mut);}
+.hint{font-size:.8rem;color:var(--mut);margin-top:.5rem;line-height:1.5;}
+.hint b{color:var(--ink);}
+.barcount{font-size:.8rem;color:var(--mut);margin:.2rem 0 .6rem;}
+a{color:var(--blue);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Builder <em>Lab</em><span class="lab-badge">SANDBOX</span></h1>
+  <div class="sub">Chord builder v2 prototype — per-chord duration, bar grid &amp; playhead, stop-time/push accents, two-clock scheduler. Nothing here touches the real site. <a href="../../">Back to the app</a></div>
+
+  <div class="panel">
+    <h2>Transport</h2>
+    <div class="transport">
+      <button class="play" id="play">▶ Loop</button>
+      <span>
+        <button class="tbtn styleb on" data-style="shuffle">Shuffle</button>
+        <button class="tbtn styleb" data-style="pop">Pop</button>
+      </span>
+      <span class="bpm">BPM <input type="range" id="bpm" min="50" max="180" value="96"><b id="bpmv">96</b></span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Progression <span id="barcount" style="text-transform:none;letter-spacing:0"></span></h2>
+    <div class="gridwrap" id="grid"></div>
+    <div class="tools" id="tools"><span class="lab">Select a chord to edit it — or drag a chip&rsquo;s right edge to resize. Duration snaps to ½, 1 or 2 bars.</span></div>
+  </div>
+
+  <div class="panel">
+    <h2>Add chords</h2>
+    <div class="pal" id="pal"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Presets — the forms the old builder couldn&rsquo;t play</h2>
+    <div class="presets" id="presets"></div>
+    <div class="hint" id="presetHint"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Share URL v2 (live)</h2>
+    <div class="share"><input id="share" readonly><button class="tbtn" id="copy">Copy</button></div>
+    <div class="hint"><b>Format:</b> token = chord, <b>.2</b> = half bar, <b>.8</b> = two bars, plain = one bar; <b>!</b> = stop-time, <b>&gt;</b> = push. Old v1 links contain none of these characters, so they parse unchanged.</div>
+  </div>
+</div>
+
+<script type="module">
+import * as Audio from '../../audio.js?v=101';
+
+// ---------- state ----------
+const state = {
+  chords: [],            // {id, chord, beats: 2|4|8, accent: 'norm'|'stop'|'push'}
+  sel: null,
+  style: 'shuffle',
+  bpm: 96,
+  playing: false,
+};
+let nextId = 1;
+const $ = s => document.querySelector(s);
+
+const PRESETS = {
+  '12-bar blues in A': { hint:'The baseline — every chord one bar. v1 could do this.',
+    p:[['A7',4],['A7',4],['A7',4],['A7',4],['D7',4],['D7',4],['A7',4],['A7',4],['E7',4],['D7',4],['A7',4],['E7',4]] },
+  '8-bar blues (real half-bars)': { hint:'Bars 7–8 are two chords each — the form that broke the old looper. Now native.',
+    p:[['A7',4],['E7',4],['D7',4],['D7',4],['A7',4],['E7',4],['A7',2],['D7',2],['A7',2],['E7',2]] },
+  '16-bar with 2-bar holds': { hint:'Long I chords as single 2-bar chips — the pattern no longer restarts mid-hold.',
+    p:[['A7',8],['A7',8],['D7',4],['D7',4],['A7',8],['E7',4],['D7',4],['A7',4],['E7',4]] },
+  'Jazz turnaround (all half-bars)': { hint:'I–VI–ii–V in two bars + two to breathe — uptown at last.',
+    p:[['Amaj7',2],['F#7',2],['Bm7',2],['E7',2],['Amaj7',4],['E7',4]] },
+  'Stop-time riff (Hoochie style)': { hint:'Stop-time chords stab beat one and leave silence — the move the blues course teaches.',
+    p:[['A7',4,'stop'],['A7',4,'stop'],['A7',4,'stop'],['A7',4],['D7',4,'stop'],['D7',4,'stop'],['A7',4,'stop'],['A7',4],['E7',4],['D7',4],['A7',2],['E7',2]] },
+  'Pushed pop (anticipations)': { hint:'Pushed chords land an eighth early while the drums hold the grid.',
+    p:[['C',4],['G',4,'push'],['Am',4],['F',4,'push'],['C',4],['G',4,'push'],['F',2],['G',2],['C',4]] },
+};
+
+const PALETTE = ['A7','D7','E7','Am7','Dm7','F7','C','G','Am','F','Dm','Em','Cmaj7','Bm7','E7','Amaj7','F#7'];
+
+// ---------- layout ----------
+const BEATS_PER_ROW = 16, PX_PER_BEAT_MIN = 34;
+
+function totalBeats(){ return state.chords.reduce((a,c)=>a+c.beats,0); }
+
+function render(){
+  const grid = $('#grid');
+  const w = Math.max(grid.clientWidth - 4, 560);
+  const pxb = Math.max(PX_PER_BEAT_MIN, Math.floor(w / BEATS_PER_ROW));
+  const rowW = pxb * BEATS_PER_ROW;
+  const tb = totalBeats();
+  const rows = Math.max(1, Math.ceil(tb / BEATS_PER_ROW));
+  let html = '';
+  for(let r=0;r<rows;r++){
+    html += `<div class="row" data-row="${r}" style="width:${rowW}px">`;
+    html += `<div class="barbg" style="left:0;width:${rowW}px"></div>`;
+    for(let b=0;b<BEATS_PER_ROW;b++){
+      const x = b*pxb;
+      if(b>0) html += `<div class="${b%4===0?'barline':'beatline'}" style="left:${x}px"></div>`;
+      if(b%4===0) html += `<div class="barnum" style="left:${x+4}px">BAR ${r*4 + b/4 + 1}</div>`;
+    }
+    html += `<div class="playhead" data-ph="${r}"></div></div>`;
+  }
+  grid.innerHTML = html;
+  // place chips
+  let beat = 0;
+  state.chords.forEach((c)=>{
+    const r = Math.floor(beat / BEATS_PER_ROW);
+    const off = beat % BEATS_PER_ROW;
+    const row = grid.querySelector(`[data-row="${r}"]`);
+    if(!row){ beat += c.beats; return; }
+    const span = Math.min(c.beats, BEATS_PER_ROW - off); // (prototype: chips don't wrap rows; resize snaps prevent most overflow)
+    const el = document.createElement('div');
+    el.className = 'chip' + (state.sel===c.id?' sel':'') + (c.accent==='stop'?' stop':'') + (c.accent==='push'?' push':'');
+    el.style.left = (off*pxb+2)+'px';
+    el.style.width = (span*pxb-6)+'px';
+    el.dataset.id = c.id;
+    el.innerHTML = `<span class="nm">${c.chord}</span><span class="meta">${c.beats===2?'½ bar':c.beats===4?'1 bar':'2 bars'}</span><span class="rz" data-rz="${c.id}"></span>`;
+    row.appendChild(el);
+    beat += c.beats;
+  });
+  $('#barcount').textContent = tb ? `· ${Math.ceil(tb/4)} bars (${tb} beats)` : '· empty';
+  renderTools(); renderShare();
+}
+
+function renderTools(){
+  const t = $('#tools');
+  const c = state.chords.find(x=>x.id===state.sel);
+  if(!c){ t.innerHTML = '<span class="lab">Select a chord to edit it — or drag a chip&rsquo;s right edge to resize. Duration snaps to ½, 1 or 2 bars.</span>'; return; }
+  t.innerHTML = `
+    <span class="lab"><b>${c.chord}</b></span>
+    <span class="lab">Length:</span>
+    <button data-beats="2" class="${c.beats===2?'on':''}">½ bar</button>
+    <button data-beats="4" class="${c.beats===4?'on':''}">1 bar</button>
+    <button data-beats="8" class="${c.beats===8?'on':''}">2 bars</button>
+    <span class="lab">Feel:</span>
+    <button data-acc="norm" class="${c.accent==='norm'?'on':''}">Normal</button>
+    <button data-acc="stop" class="${c.accent==='stop'?'on':''}">✋ Stop-time</button>
+    <button data-acc="push" class="${c.accent==='push'?'on':''}">→ Push</button>
+    <button data-dup="1">⧉ Duplicate</button>
+    <button data-del="1" class="danger">× Remove</button>`;
+}
+
+function shareToken(c){
+  let t = c.chord;
+  if(c.beats!==4) t += '.'+c.beats;
+  if(c.accent==='stop') t += '!';
+  if(c.accent==='push') t += '>';
+  return t;
+}
+function renderShare(){
+  $('#share').value = state.chords.length ? '/?key=A&p=' + state.chords.map(shareToken).join('-') : '';
+}
+
+// ---------- interactions ----------
+$('#grid').addEventListener('pointerdown', e=>{
+  const rz = e.target.closest('[data-rz]');
+  if(rz){ startResize(e, +rz.dataset.rz); return; }
+  const chip = e.target.closest('.chip');
+  if(chip){ state.sel = +chip.dataset.id; render(); }
+});
+let rzState = null;
+function startResize(e, id){
+  const c = state.chords.find(x=>x.id===id);
+  rzState = { id, startX: e.clientX, startBeats: c.beats };
+  e.preventDefault();
+  window.addEventListener('pointermove', onResize);
+  window.addEventListener('pointerup', endResize, {once:true});
+}
+function onResize(e){
+  if(!rzState) return;
+  const grid = $('#grid');
+  const pxb = Math.max(PX_PER_BEAT_MIN, Math.floor(Math.max(grid.clientWidth-4,560)/BEATS_PER_ROW));
+  const c = state.chords.find(x=>x.id===rzState.id);
+  const delta = Math.round((e.clientX - rzState.startX)/pxb);
+  let nb = rzState.startBeats + delta;
+  nb = nb<=2 ? 2 : nb<=5 ? 4 : 8; // snap ½ / 1 / 2 bars
+  if(nb!==c.beats){ c.beats = nb; state.sel = c.id; render(); }
+}
+function endResize(){ rzState=null; window.removeEventListener('pointermove', onResize); }
+
+$('#tools').addEventListener('click', e=>{
+  const c = state.chords.find(x=>x.id===state.sel); if(!c) return;
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.beats){ c.beats = +b.dataset.beats; }
+  else if(b.dataset.acc){ c.accent = b.dataset.acc; }
+  else if(b.dataset.dup){ const i = state.chords.indexOf(c); const n = {...c, id:nextId++}; state.chords.splice(i+1,0,n); state.sel=n.id; }
+  else if(b.dataset.del){ state.chords = state.chords.filter(x=>x!==c); state.sel=null; }
+  render(); if(state.playing) rebuildSchedule();
+});
+
+const pal = $('#pal');
+pal.innerHTML = PALETTE.map(c=>`<button data-add="${c}">${c}</button>`).join('') +
+  `<span class="free"><input id="freeChord" placeholder="B♭9…"><button data-addfree="1">Add</button></span>`;
+pal.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  let name = b.dataset.add || ($('#freeChord').value.trim());
+  if(b.dataset.addfree && !name) return;
+  if(!name) return;
+  name = name.replace('♭','b').replace('♯','#');
+  const c = {id:nextId++, chord:name, beats:4, accent:'norm'};
+  state.chords.push(c); state.sel = c.id; render(); if(state.playing) rebuildSchedule();
+});
+
+const pr = $('#presets');
+pr.innerHTML = Object.keys(PRESETS).map(k=>`<button data-pre="${k}">${k}</button>`).join('');
+pr.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  const p = PRESETS[b.dataset.pre];
+  state.chords = p.p.map(([ch,beats,acc])=>({id:nextId++, chord:ch, beats, accent:acc||'norm'}));
+  state.sel = null;
+  $('#presetHint').innerHTML = '<b>'+b.dataset.pre+':</b> '+p.hint;
+  render(); if(state.playing) rebuildSchedule();
+});
+
+document.querySelectorAll('.styleb').forEach(b=>b.addEventListener('click', ()=>{
+  document.querySelectorAll('.styleb').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.style = b.dataset.style; if(state.playing) rebuildSchedule();
+}));
+$('#bpm').addEventListener('input', e=>{ $('#bpmv').textContent = e.target.value; });
+$('#bpm').addEventListener('change', e=>{ state.bpm = +e.target.value; if(state.playing) rebuildSchedule(); });
+$('#copy').addEventListener('click', ()=>{ navigator.clipboard.writeText($('#share').value).catch(()=>{}); });
+
+// ---------- two-clock scheduler ----------
+// Bar clock: drums run on a continuous bar grid regardless of chord boundaries.
+// Chord clock: keys/bass are emitted per chord for its exact span, with the
+// chord's offset inside the bar respected. Stop-time silences everything but
+// the beat-one stab for that chord's span; push pulls harmony an 8th early.
+let schedTimer = null, loopStart = 0, loopBeats = 0, scheduledUntil = 0, phRaf = null, lastChipId = null;
+
+function events(){
+  // returns {beats, harm:[{t,beats,chord,accent}], stops:[{from,to}]} in beat units
+  let t = 0; const harm = [], stops = [];
+  state.chords.forEach(c=>{
+    harm.push({t, beats:c.beats, chord:c.chord, accent:c.accent, id:c.id});
+    if(c.accent==='stop') stops.push({from:t, to:t+c.beats});
+    t += c.beats;
+  });
+  return {beats:t, harm, stops};
+}
+
+function inStop(stops, beat){ return stops.some(s=>beat>=s.from && beat<s.to); }
+
+function scheduleWindow(ev, fromBeat, toBeat, bd, t0){
+  // drums (bar clock)
+  const swung = state.style==='shuffle';
+  for(let b=Math.ceil(fromBeat); b<toBeat; b++){
+    const beatInBar = ((b % 4)+4)%4;
+    const lb = ((b % ev.beats)+ev.beats)%ev.beats;
+    if(inStop(ev.stops, lb)) { if(beatInBar===0) Audio.playDrum('kick', t0+b*bd, .7); continue; }
+    if(beatInBar===0||beatInBar===2) Audio.playDrum('kick', t0+b*bd, .65);
+    if(beatInBar===1||beatInBar===3) Audio.playDrum('snare', t0+b*bd, .5);
+    Audio.playDrum('hihat', t0+b*bd, .5);
+    Audio.playDrum('hihat', t0+(b+(swung?2/3:0.5))*bd, .3);
+  }
+  // harmony (chord clock)
+  ev.harm.forEach(h=>{
+    for(let rep=Math.floor(fromBeat/ev.beats)-1; rep<=Math.ceil(toBeat/ev.beats); rep++){
+      let start = rep*ev.beats + h.t;
+      if(h.accent==='push') start -= 0.5;
+      if(start < fromBeat-0.01 || start >= toBeat-0.01) continue;
+      const at = t0 + start*bd;
+      const root = h.chord.match(/^[A-G][#b]?/)[0];
+      if(h.accent==='stop'){
+        Audio.playChord(h.chord, bd*1.1, at, 'epiano');
+        Audio.playBass(root, 2, bd*1.1, at);
+        continue;
+      }
+      if(state.style==='shuffle'){
+        // comp hits on each beat of the span, boogie-ish bass 1-and-5
+        for(let k=0;k<h.beats;k++){
+          Audio.playChord(h.chord, bd*0.55, at+k*bd, 'epiano');
+          Audio.playBass(root, 2, bd*0.9, at+k*bd);
+        }
+      } else {
+        Audio.playChord(h.chord, bd*h.beats*0.92, at, 'epiano');
+        Audio.playBass(root, 2, bd*0.9, at);
+        if(h.beats>=4) Audio.playBass(root, 2, bd*0.9, at+2*bd);
+        if(h.beats===8){ Audio.playChord(h.chord, bd*3.6, at+4*bd, 'epiano'); Audio.playBass(root,2,bd*.9,at+4*bd); Audio.playBass(root,2,bd*.9,at+6*bd); }
+      }
+    }
+  });
+}
+
+function rebuildSchedule(){ scheduledUntil = Math.max(scheduledUntil, beatNow()); }
+
+function beatNow(){ const bd = 60/state.bpm; return (Audio.getAudioTime()-loopStart)/bd; }
+
+function tickScheduler(){
+  if(!state.playing) return;
+  const ev = events(); loopBeats = ev.beats;
+  if(ev.beats>0){
+    const bd = 60/state.bpm;
+    const ahead = beatNow() + (0.18/bd);
+    if(scheduledUntil < ahead){
+      scheduleWindow(ev, scheduledUntil, scheduledUntil+ Math.max(1, ahead-scheduledUntil) + 1, bd, loopStart);
+      scheduledUntil = scheduledUntil + Math.max(1, ahead-scheduledUntil) + 1;
+    }
+  }
+  schedTimer = setTimeout(tickScheduler, 60);
+}
+
+function playheadLoop(){
+  if(!state.playing) return;
+  const grid = $('#grid');
+  const pxb = Math.max(PX_PER_BEAT_MIN, Math.floor(Math.max(grid.clientWidth-4,560)/BEATS_PER_ROW));
+  const ev = events();
+  if(ev.beats>0){
+    const lb = ((beatNow() % ev.beats)+ev.beats)%ev.beats;
+    const r = Math.floor(lb / BEATS_PER_ROW), off = (lb % BEATS_PER_ROW)*pxb;
+    document.querySelectorAll('.playhead').forEach(p=>{
+      p.style.display = (+p.dataset.ph===r)?'block':'none';
+      if(+p.dataset.ph===r) p.style.left = off+'px';
+    });
+    // active chip
+    const h = ev.harm.find(x=> lb>=x.t && lb < x.t+x.beats);
+    if(h && h.id!==lastChipId){
+      lastChipId = h.id;
+      document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('playing', +c.dataset.id===h.id));
+    }
+  }
+  phRaf = requestAnimationFrame(playheadLoop);
+}
+
+$('#play').addEventListener('click', async ()=>{
+  if(state.playing){
+    state.playing = false;
+    clearTimeout(schedTimer); cancelAnimationFrame(phRaf);
+    document.querySelectorAll('.playhead').forEach(p=>p.style.display='none');
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('playing'));
+    $('#play').textContent='▶ Loop'; $('#play').classList.remove('on');
+    return;
+  }
+  if(!state.chords.length) return;
+  try { await Promise.race([Audio.initAudio(), new Promise(r=>setTimeout(r,1500))]); } catch(e){}
+  state.bpm = +$('#bpm').value;
+  loopStart = Audio.getAudioTime() + 0.1; scheduledUntil = 0; lastChipId = null;
+  state.playing = true;
+  $('#play').textContent='■ Stop'; $('#play').classList.add('on');
+  tickScheduler(); playheadLoop();
+});
+
+window.addEventListener('resize', render);
+// boot with the 8-bar preset — the one that started all this
+const boot = PRESETS['8-bar blues (real half-bars)'];
+state.chords = boot.p.map(([ch,beats,acc])=>({id:nextId++, chord:ch, beats, accent:acc||'norm'}));
+$('#presetHint').innerHTML = '<b>8-bar blues (real half-bars):</b> '+boot.hint;
+render();
+</script>
+</body>
+</html>
