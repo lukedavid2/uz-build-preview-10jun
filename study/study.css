@@ -115,3 +115,17 @@ td .gs-listen-btns { display: flex; margin: 4px 0 0; }
   padding: 9px 18px; border-radius: 8px; text-decoration: none; margin: 6px 8px 10px 0;
 }
 .gs-pdf:hover { filter: brightness(1.25); }
+
+/* v4 — curated deep links + embeds */
+.gs-song{color:#2e6e8b;text-decoration:none;border-bottom:1px dotted #2e6e8b;font-weight:600;}
+.gs-song:hover{color:#c8a04a;border-bottom-color:#c8a04a;}
+.gs-album{color:#2e6e8b;text-decoration:none;border-bottom:1px dotted #2e6e8b;}
+.gs-album:hover{color:#c8a04a;border-bottom-color:#c8a04a;}
+.gs-ytico{display:inline-block;font-size:.62em;color:#b5543e;text-decoration:none;margin-left:.28em;vertical-align:super;line-height:1;}
+.gs-ytico:hover{color:#8f3f2e;}
+.gs-embed{margin:1.1rem 0 1.4rem;}
+.gs-embed iframe{border-radius:12px;display:block;border:0;}
+.gs-embed-cap{font-size:.82rem;color:#7a7064;margin-top:.35rem;}
+.gs-embed-cap a{color:#b5543e;}
+td .gs-song{font-weight:600;}
+.gs-selfcheck{background:#f4efe4;border-left:3px solid #c8a04a;padding:.55rem .8rem;border-radius:0 8px 8px 0;font-size:.92rem;}
