@@ -5547,3 +5547,20 @@ body.dark-mode .mel-legend { border-color: #3a3e48; color: #999; }
 .mel-tint-scale { background: rgba(232,184,74,0.08); transition: background 0.10s ease, box-shadow 0.10s ease; }
 .mel-tint-scale.bar-active { background: rgba(232,184,74,0.16); box-shadow: inset 0 0 8px rgba(232,184,74,0.18); }
 .mel-btn-dim { opacity: 0.4; }
+
+/* ===== v107: chord builder v2 engine — bar ticks, duration & accent badges ===== */
+.bar-tick{display:flex;align-items:center;justify-content:center;align-self:stretch;min-width:18px;font-size:.62rem;font-weight:700;color:#b0a48e;border-left:2px solid #e0d8c8;margin:4px 2px;padding-left:3px;user-select:none;}
+.bar-tick.half{border-left:1px dotted #e0d8c8;color:#cfc5ae;font-size:.7rem;min-width:8px;}
+body.dark-mode .bar-tick{border-left-color:#3a3f4b;color:#6b7180;}
+.progression-chord{position:relative;}
+.progression-chord.len-2{padding-left:6px;padding-right:6px;transform:scale(.94);opacity:.96;}
+.progression-chord.len-2 .chord-name{font-size:.92em;}
+.progression-chord.len-8{box-shadow:2px 0 0 0 #e8e0d0, 4px 0 0 0 #f2ecdf;}
+.progression-chord.acc-stop .chord-name::after{content:" ✋";font-size:.65em;}
+.progression-chord.acc-push .chord-name::after{content:" →";font-size:.75em;color:#2e6e8b;}
+.chord-time-btns{display:flex;gap:2px;justify-content:center;margin-top:2px;}
+.chord-len-btn,.chord-acc-btn{font-family:inherit;font-size:.6rem;line-height:1;border:1px solid #e4ddd0;background:#faf8f3;color:#7a7064;border-radius:6px;padding:2px 5px;cursor:pointer;}
+.chord-len-btn:hover,.chord-acc-btn:hover{border-color:#c8a04a;color:#2a2622;}
+.chord-acc-btn.on{background:#2a2622;color:#faf8f3;border-color:#2a2622;}
+body.dark-mode .chord-len-btn,body.dark-mode .chord-acc-btn{background:#2a2e38;border-color:#3a3f4b;color:#9aa0ac;}
+@media (max-width:480px){.bar-tick{min-width:14px;font-size:.56rem;}}

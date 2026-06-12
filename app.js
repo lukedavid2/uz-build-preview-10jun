@@ -1,6 +1,6 @@
 import * as Data from './data.js?v=99';
-import * as Audio from './audio.js?v=101';
-import * as Melody from './melody.js?v=4';
+import * as Audio from './audio.js?v=102';
+import * as Melody from './melody.js?v=5';
 
 const state = {
   selectedKey: 'C',
@@ -1699,6 +1699,10 @@ function renderTabAnalysis(analysis, lineIdx) {
     return html;
 }
 
+// ===== v112: per-chord duration & accent helpers =====
+function chordBeats(item) { return (item && (item.beats === 2 || item.beats === 8)) ? item.beats : 4; }
+function chordAccent(item) { return (item && (item.accent === 'stop' || item.accent === 'push')) ? item.accent : 'norm'; }
+
 function renderProgression() {
     if (typeof Melody !== 'undefined' && Melody.refresh) { try { Melody.refresh(); } catch (e) {} }
     const area = document.getElementById('progressionArea');
@@ -1798,8 +1802,16 @@ function renderProgression() {
         if (line.chords.length === 0) {
             html += `<span class="line-empty" data-action="selectLine" data-line="${lineIdx}">${isCurrentLine ? 'Click chords to add...' : 'Empty'}</span>`;
         } else {
+            let cumBeats = 0;
             line.chords.forEach((item, chordIdx) => {
-                if (chordIdx > 0) html += `<div class="prog-arrow">→</div>`;
+                if (chordIdx > 0) {
+                    html += (cumBeats % 4 === 0)
+                        ? `<div class="bar-tick" title="Bar ${cumBeats / 4 + 1}">${cumBeats / 4 + 1}</div>`
+                        : `<div class="bar-tick half" title="Mid-bar">·</div>`;
+                }
+                const itemBeats = chordBeats(item);
+                const itemAccent = chordAccent(item);
+                cumBeats += itemBeats;
                 const isPlaying = isPlayingLine && chordIdx === state.currentPlayingChord;
                 // Transpose chord if key changed
                 const rawDisplayChord = item.roman ?
@@ -1819,7 +1831,7 @@ function renderProgression() {
                 };
                 const chordCategoryClass = categoryClassMap[chordCategory] || '';
                 html += `
-                <div class="progression-chord ${isPlaying ? 'playing' : ''} ${chordCategoryClass}"
+                <div class="progression-chord ${isPlaying ? 'playing' : ''} ${chordCategoryClass} len-${itemBeats} acc-${itemAccent}"
                      data-chord="${displayChord}" data-roman="${romanDisplay}" data-line="${lineIdx}" data-idx="${chordIdx}"
                      draggable="true">
                     ${item.shape ? renderMiniChordDiagram(item.shape) : ''}
@@ -1827,6 +1839,10 @@ function renderProgression() {
                     ${romanDisplay ? `<span class="chord-roman">${romanDisplay}</span>` : ''}
                     <button class="chord-shape-btn" data-action="editChordShape" data-line="${lineIdx}" data-idx="${chordIdx}" title="Edit chord shape">♦</button>
                     <button class="remove-btn" data-action="removeChord" data-line="${lineIdx}" data-idx="${chordIdx}">×</button>
+                    <span class="chord-time-btns">
+                        <button class="chord-len-btn" data-action="cycleChordBeats" data-line="${lineIdx}" data-idx="${chordIdx}" title="Length: ½ / 1 / 2 bars (click to cycle)">${itemBeats === 2 ? '½' : itemBeats === 8 ? '2' : '1'}</button>
+                        <button class="chord-acc-btn ${itemAccent !== 'norm' ? 'on' : ''}" data-action="cycleChordAccent" data-line="${lineIdx}" data-idx="${chordIdx}" title="Feel: normal / ✋ stop-time / → push (click to cycle)">${itemAccent === 'stop' ? '✋' : itemAccent === 'push' ? '→' : '·'}</button>
+                    </span>
                 </div>`;
             });
         }
@@ -1999,9 +2015,11 @@ function midiBuildChordTrack(events, ppq, beatsPerChord) {
     midiPushStr(body, name);
     // Program change to acoustic grand piano (program 0) on channel 0
     body.push(...midiVarLen(0), 0xC0, 0x00);
-    const ticksPerBar = ppq * beatsPerChord;
     const velocity = 80;
-    events.forEach((chord) => {
+    events.forEach((ev) => {
+        const evBeats = (ev && typeof ev === 'object') ? (ev.beats || beatsPerChord) : beatsPerChord;
+        const ticksPerBar = ppq * evBeats;
+        const chord = (ev && typeof ev === 'object') ? ev.chord : ev;
         const parsed = midiParseChord(chord);
         if (!parsed) {
             // Unparseable chord — still consume the bar with silence
@@ -2104,21 +2122,24 @@ function midiBuildMelodyTrack(ppq, beatsPerChord) {
         const reps = (typeof line.repeats === 'number' && line.repeats > 0 && line.repeats < 999) ? line.repeats : 1;
         for (let r = 0; r < reps; r++) {
             line.chords.forEach((c, chordIdx) => {
-                if (c && c.chord && c.chord !== '?') flat.push({ lineIdx, chordIdx });
+                if (c && c.chord && c.chord !== '?') flat.push({ lineIdx, chordIdx, beats: chordBeats(c) });
             });
         }
     });
     if (!flat.length) return null;
-    const ticksPerBar = ppq * beatsPerChord;
     const res = (m.resolution === 16) ? 16 : 8;
-    const slotTicks = ticksPerBar / res;
     const events = []; // {tick, on, pitch}
+    let cumTicks = 0;
     flat.forEach((bar, i) => {
+        const barTicks = ppq * (bar.beats || beatsPerChord);
+        const slotTicks = barTicks / res;
+        const barStart = cumTicks;
+        cumTicks += barTicks;
         const notes = m.lines[bar.lineIdx] || [];
         notes.forEach(n => {
             if (n.bar !== bar.chordIdx) return;
             const pitch = Melody.midiPitch(n.d, n.o) & 0x7F;
-            const start = i * ticksPerBar + Math.round(n.slot * slotTicks);
+            const start = barStart + Math.round(n.slot * slotTicks);
             const end = start + Math.max(1, Math.round(n.len * slotTicks)) - 1;
             events.push({ tick: start, on: true, pitch });
             events.push({ tick: end, on: false, pitch });
@@ -2153,8 +2174,8 @@ function midiBuildSMF(chords, opts) {
     if (melodyTrack) tracks.push(melodyTrack);
     if (includeClick) {
         // Click runs the full progression length, 4 beats per bar
-        const numBars = chords.length;
-        const clickTrack = midiBuildClickTrack(numBars * (beatsPerChord / 4), 4, ppq);
+        const totalBeats = chords.reduce((s, c) => s + ((c && typeof c === 'object') ? (c.beats || beatsPerChord) : beatsPerChord), 0);
+        const clickTrack = midiBuildClickTrack(Math.ceil(totalBeats / 4), 4, ppq);
         tracks.push(clickTrack);
     }
     const header = [];
@@ -2179,7 +2200,7 @@ function midiFlattenProgression() {
         const reps = (typeof line.repeats === 'number' && line.repeats > 0 && line.repeats < 999) ? line.repeats : 1;
         for (let r = 0; r < reps; r++) {
             line.chords.forEach(c => {
-                if (c && c.chord && c.chord !== '?') flat.push(c.chord);
+                if (c && c.chord && c.chord !== '?') flat.push({ chord: c.chord, beats: chordBeats(c) });
             });
         }
     });
@@ -2593,7 +2614,9 @@ function buildFlatProgression() {
                     chord,
                     lineIdx,
                     chordIdx,
-                    id: item.id
+                    id: item.id,
+                    beats: chordBeats(item),
+                    accent: chordAccent(item)
                 });
             });
         }
@@ -4773,7 +4796,7 @@ function setupEventListeners() {
             }
             // Add to current line with roman numeral for transposition
             pushUndoState();
-            state.progressionLines[state.currentLineIndex].chords.push({chord, roman, id, active:false});
+            state.progressionLines[state.currentLineIndex].chords.push({chord, roman, id, active:false, beats:4, accent:'norm'});
             // Set progression key on first chord added
             if (state.progressionLines.every(line => line.chords.length <= 1)) {
                 state.progressionKey = state.selectedKey;
@@ -4828,6 +4851,34 @@ function setupEventListeners() {
             const lineIdx = parseInt(shapeBtn.dataset.line);
             const chordIdx = parseInt(shapeBtn.dataset.idx);
             showChordShapeEditor(lineIdx, chordIdx);
+        }
+        // v112: cycle chord length ½ → 1 → 2 bars
+        const lenBtn = e.target.closest('[data-action="cycleChordBeats"]');
+        if (lenBtn) {
+            e.stopPropagation();
+            pushUndoState();
+            const it = state.progressionLines[parseInt(lenBtn.dataset.line)].chords[parseInt(lenBtn.dataset.idx)];
+            if (it) {
+                const b = chordBeats(it);
+                it.beats = b === 2 ? 4 : b === 4 ? 8 : 2;
+                renderProgression();
+                saveStateToLocalStorage();
+            }
+            return;
+        }
+        // v112: cycle accent normal → stop-time → push
+        const accBtn = e.target.closest('[data-action="cycleChordAccent"]');
+        if (accBtn) {
+            e.stopPropagation();
+            pushUndoState();
+            const it = state.progressionLines[parseInt(accBtn.dataset.line)].chords[parseInt(accBtn.dataset.idx)];
+            if (it) {
+                const acc = chordAccent(it);
+                it.accent = acc === 'norm' ? 'stop' : acc === 'stop' ? 'push' : 'norm';
+                renderProgression();
+                saveStateToLocalStorage();
+            }
+            return;
         }
         // Remove chord from line
         const removeBtn = e.target.closest('[data-action="removeChord"]');
@@ -7694,7 +7745,7 @@ function renderLyricsPanel() {
             const params = ['embed=1'];
             if (rhymeQuery) params.push('q=' + encodeURIComponent(rhymeQuery));
             const qs = '?' + params.join('&');
-            rhymesPane.innerHTML = `<iframe class="lp-rhymes-frame" src="./rhymeforge/${qs}" title="RhymeForge"></iframe>`;
+            rhymesPane.innerHTML = `<iframe class="lp-rhymes-frame" src="rhymeforge/${qs}" title="RhymeForge"></iframe>`;
             iframe = rhymesPane.querySelector('.lp-rhymes-frame');
             // Belt-and-braces: also fire postMessage once the iframe loads.
             iframe.addEventListener('load', sendQuery);
@@ -8372,7 +8423,15 @@ const SHARE_CHORD_RE = /^[A-G][#b]?[A-Za-z0-9#°+()/-]{0,12}$/;
 
 function buildShareUrl() {
     const lines = state.progressionLines
-        .map(l => l.chords.filter(c => c.chord && c.chord !== '?').map(c => c.chord).join('-'))
+        .map(l => l.chords.filter(c => c.chord && c.chord !== '?').map(c => {
+            let t = c.chord;
+            const b = chordBeats(c);
+            if (b !== 4) t += '.' + b;
+            const acc = chordAccent(c);
+            if (acc === 'stop') t += '!';
+            if (acc === 'push') t += '>';
+            return t;
+        }).join('-'))
         .filter(Boolean);
     if (!lines.length) return null;
     const params = new URLSearchParams();
@@ -8389,7 +8448,16 @@ function buildShareUrl() {
     const p = params.get('p');
     if (!p) return;
     const lines = p.split('|').map(seg =>
-        seg.split('-').map(t => t.trim()).filter(t => SHARE_CHORD_RE.test(t))
+        seg.split('-').map(t => t.trim()).map(t => {
+            // v2 tokens: chord[.2|.8][!|>]   (v1 tokens have no . ! >)
+            const m = t.match(/^(.*?)(?:\.(2|8))?(!|>)?$/);
+            if (!m || !SHARE_CHORD_RE.test(m[1])) return null;
+            return {
+                chord: m[1],
+                beats: m[2] ? parseInt(m[2]) : 4,
+                accent: m[3] === '!' ? 'stop' : m[3] === '>' ? 'push' : 'norm'
+            };
+        }).filter(Boolean)
     ).filter(l => l.length);
     if (!lines.length) return;
     const key = params.get('key');
@@ -8398,7 +8466,7 @@ function buildShareUrl() {
         state.progressionKey = key;
     }
     state.progressionLines = lines.map(chords => ({
-        chords: chords.map((chord, i) => ({ chord, id: 'shared-' + i, active: false })),
+        chords: chords.map((c, i) => ({ chord: c.chord, beats: c.beats, accent: c.accent, id: 'shared-' + i, active: false })),
         repeats: 1, tab: [], showTab: false
     }));
     state.currentLineIndex = 0;

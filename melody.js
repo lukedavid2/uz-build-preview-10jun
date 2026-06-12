@@ -5,7 +5,7 @@
 // Jun 2026). Vanilla port of the React prototype: template-literal
 // renderer repainting from state, pointer interactions, chord-tone
 // tints + pills, rule-based Suggest, loop-synced playback + playhead.
-import * as Audio from './audio.js?v=101';
+import * as Audio from './audio.js?v=102';
 
 let D = null; // injected deps: { state, getScaleNotes, transposeChord, displayChordForKey, saveState, onPreviewBlocked }
 

@@ -1192,77 +1192,135 @@ export function playBackingMeasure(chord, style, bpm, startTime, options = {}) {
 }
 
 // Start looping the backing track with improved timing using lookahead scheduling
+// v102: half-bar comp figure for 2-beat chords — keys/bass only, drums
+// stay on the bar clock (see startBackingLoop).
+export function playBackingHalfBar(chord, style, bpm, startTime, options = {}) {
+  const beatDur = 60 / bpm;
+  if (options.keys !== false) {
+    const inst = (style === 'folk') ? 'guitar' : 'epiano';
+    playChord(chord, beatDur * 1.7, startTime, inst);
+  }
+  if (options.bass !== false) {
+    const root = (chord.length >= 2 && (chord[1] === '#' || chord[1] === 'b')) ? chord.substring(0, 2) : chord[0];
+    playBass(root, 2, beatDur * 0.9, startTime);
+    playBass(root, 2, beatDur * 0.85, startTime + beatDur);
+  }
+}
+
+// v102 two-clock scheduler.
+// Items may carry {beats: 2|4|8, accent: 'norm'|'stop'|'push'} — defaults 4/'norm'.
+// Drums run on a continuous BAR clock (immune to chord boundaries); keys/bass
+// run on a CHORD clock for each chord's exact span. For all-4-beat 'norm'
+// progressions the emitted events are identical to v1.
 export function startBackingLoop(progression, style, bpm, options = {}, onMeasure = null, onSchedule = null) {
   const ctx = getAudioContext();
   setupAudioChain();
 
   isLooping = true;
-  let measureIndex = 0;
-  const measureDur = (60 / bpm) * 4;
-  const lookaheadTime = 0.1; // Schedule 100ms in advance
-  const scheduleCheckInterval = 0.025; // Check every 25ms
+  const beatDur = 60 / bpm;
+  const barDur = beatDur * 4;
+  const lookaheadTime = 0.1;
+  const scheduleCheckInterval = 0.025;
 
-  // Visual sync: schedule callbacks to fire at the right audio time
+  const items = progression.map(p => ({
+    chord: p.chord,
+    beats: (p.beats === 2 || p.beats === 8) ? p.beats : 4,
+    accent: (p.accent === 'stop' || p.accent === 'push') ? p.accent : 'norm'
+  }));
+  let cum = 0;
+  const starts = items.map((it, idx) => { const s = { idx, item: it, beat: cum }; cum += it.beats; return s; });
+  const totalBeats = Math.max(4, Math.ceil(cum / 4) * 4);
+
+  function chordAt(beat) {
+    for (let i = starts.length - 1; i >= 0; i--) if (starts[i].beat <= beat) return starts[i];
+    return starts[0];
+  }
+
+  // Visual sync (unchanged from v1)
   let pendingVisualCallbacks = [];
-
   function visualSyncLoop() {
     if (!isLooping) return;
     const now = ctx.currentTime;
-    // Fire any callbacks whose scheduled time has arrived
     while (pendingVisualCallbacks.length > 0 && pendingVisualCallbacks[0].time <= now) {
       const cb = pendingVisualCallbacks.shift();
       cb.fn(cb.idx);
     }
     visualRafId = requestAnimationFrame(visualSyncLoop);
   }
-
   if (onMeasure) {
     visualRafId = requestAnimationFrame(visualSyncLoop);
   }
 
-  // Initialize next schedule time
   nextScheduleTime = ctx.currentTime + lookaheadTime;
+  const t0 = nextScheduleTime;          // audio time of loop-beat 0
+  let barIndex = 0;                     // absolute bar counter (drum clock)
+  let chordCursor = 0;                  // absolute chord-event counter (harmony clock)
 
-  function scheduleNextMeasure() {
+  function scheduleNextWindow() {
     if (!isLooping) return;
-
-    // Check if context got suspended and try to resume (Safari power saving)
     if (ctx.state === 'suspended') {
       ctx.resume().catch(() => {});
     }
+    const horizon = ctx.currentTime + lookaheadTime;
 
-    // Schedule all measures that should start within the lookahead window
-    while (nextScheduleTime < ctx.currentTime + lookaheadTime) {
-      const chord = progression[measureIndex % progression.length].chord;
-
-      playBackingMeasure(chord, style, bpm, nextScheduleTime, options);
-
-      // v100: ahead-of-time hook — lets callers schedule extra parts
-      // (melody sketcher) at the measure's precise audio start time.
-      if (onSchedule) {
-        try { onSchedule(measureIndex % progression.length, nextScheduleTime, measureDur); } catch (e) {}
+    // ---- bar clock: drums ----
+    while (t0 + barIndex * barDur < horizon) {
+      const barT = t0 + barIndex * barDur;
+      const loopBeat = (barIndex * 4) % totalBeats;
+      const cov = chordAt(loopBeat);
+      const covEnd = cov.beat + cov.item.beats;
+      const stopBar = cov.item.accent === 'stop' && loopBeat >= cov.beat && loopBeat < covEnd;
+      if (options.drums === true) {
+        if (stopBar) {
+          playDrum('kick', barT, 0.7);
+        } else {
+          playBackingMeasure(cov.item.chord, style, bpm, barT, { ...options, keys: false, bass: false, drums: true });
+        }
       }
-
-      // Queue visual callback to fire at the precise audio time
-      if (onMeasure) {
-        pendingVisualCallbacks.push({
-          time: nextScheduleTime,
-          fn: onMeasure,
-          idx: measureIndex % progression.length
-        });
-      }
-
-      measureIndex++;
-      nextScheduleTime += measureDur;
+      barIndex++;
     }
 
-    // Schedule next check using a small setTimeout for tight timing
+    // ---- chord clock: keys/bass + callbacks ----
+    while (true) {
+      const rep = Math.floor(chordCursor / starts.length);
+      const s = starts[chordCursor % starts.length];
+      let t = t0 + (rep * totalBeats + s.beat) * beatDur;
+      if (t >= horizon) break;
+      let playT = t;
+      if (s.item.accent === 'push') playT = Math.max(ctx.currentTime + 0.02, t - beatDur * 0.5);
+
+      if (s.item.accent === 'stop') {
+        // whole band stabs beat one, then space
+        if (options.keys !== false) playChord(s.item.chord, beatDur * 1.2, playT, 'epiano');
+        if (options.bass !== false) {
+          const root = (s.item.chord.length >= 2 && (s.item.chord[1] === '#' || s.item.chord[1] === 'b')) ? s.item.chord.substring(0, 2) : s.item.chord[0];
+          playBass(root, 2, beatDur * 1.1, playT);
+        }
+      } else if (s.item.beats === 2) {
+        playBackingHalfBar(s.item.chord, style, bpm, playT, options);
+      } else {
+        playBackingMeasure(s.item.chord, style, bpm, playT, { ...options, drums: false });
+        if (s.item.beats === 8) {
+          playBackingMeasure(s.item.chord, style, bpm, playT + barDur, { ...options, drums: false });
+        }
+      }
+
+      if (onSchedule) {
+        try { onSchedule(s.idx, t, s.item.beats * beatDur); } catch (e) {}
+      }
+      if (onMeasure) {
+        pendingVisualCallbacks.push({ time: t, fn: onMeasure, idx: s.idx });
+      }
+      chordCursor++;
+    }
+
+    nextScheduleTime = horizon;
     if (isLooping) {
-      loopTimeoutId = setTimeout(scheduleNextMeasure, scheduleCheckInterval * 1000);
+      loopTimeoutId = setTimeout(scheduleNextWindow, scheduleCheckInterval * 1000);
     }
   }
 
-  scheduleNextMeasure();
+  scheduleNextWindow();
 }
 
 export function playSequence(progression, callback) {

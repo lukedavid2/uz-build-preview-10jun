@@ -19,7 +19,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍋</text></svg>">
   <title>Guitar Chord Progression Builder — Undercover Zest</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=106">
+  <link rel="stylesheet" href="styles.css?v=107">
   <style>
     .welcome-modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -103,15 +103,15 @@
   "alternateName": "Undercover Zest Chord Tool"
 }
   </script>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon-192.png">
 </head>
 <body>
   <noscript>
     <div style="max-width:640px;margin:60px auto;padding:0 24px;text-align:center;font-family:Outfit,sans-serif;color:#e0e0e0;">
       <h1 style="font-size:1.8rem;font-weight:700;color:#d4a745;margin-bottom:12px;">Undercover Zest — Guitar Chord Progression Builder</h1>
       <p style="font-size:1.05rem;line-height:1.7;color:#bbb;margin-bottom:16px;">Build chord progressions in any key, visualise scales on the fretboard, use the built-in tuner and arpeggiator.</p>
-      <p style="font-size:0.9rem;color:#888;">Part of the <a href="./homepage/" style="color:#d4a745;text-decoration:underline;">Undercover Zest</a> songwriting suite.</p>
+      <p style="font-size:0.9rem;color:#888;">Part of the <a href="homepage/" style="color:#d4a745;text-decoration:underline;">Undercover Zest</a> songwriting suite.</p>
     </div>
   </noscript>
   <details id="uz-about-collapse" style="max-width:640px;margin:16px auto 0;text-align:center;font-family:Outfit,-apple-system,sans-serif;">
@@ -119,7 +119,7 @@
 <div id="uz-static-intro" style="max-width:640px;margin:16px auto 24px;padding:0 24px;text-align:center;font-family:'Outfit',-apple-system,sans-serif;color:#e0e0e0;">
   <h1 style="font-size:1.8rem;font-weight:700;color:#d4a745;margin-bottom:12px;">Guitar Chord Progression Builder</h1>
   <p style="font-size:1.05rem;line-height:1.7;color:#bbb;margin-bottom:16px;">Build chord progressions in any key. Every diatonic chord in every major and minor key, laid out as a grid you can play and arrange — with a fretboard scale visualiser, sampled guitar playback, arpeggiator, chromatic tuner, key finder and chord picker. Free, browser-based, no sign-up.</p>
-  <p style="font-size:0.9rem;color:#888;">Part of the <a href="./homepage/" style="color:#d4a745;text-decoration:underline;">Undercover Zest</a> songwriting suite — find lyrics with <a href="./rhymeforge/" style="color:#d4a745;text-decoration:underline;">RhymeForge</a>, build metaphors with <a href="./collisionlab/" style="color:#d4a745;text-decoration:underline;">CollisionLab</a>.</p>
+  <p style="font-size:0.9rem;color:#888;">Part of the <a href="homepage/" style="color:#d4a745;text-decoration:underline;">Undercover Zest</a> songwriting suite — find lyrics with <a href="rhymeforge/" style="color:#d4a745;text-decoration:underline;">RhymeForge</a>, build metaphors with <a href="collisionlab/" style="color:#d4a745;text-decoration:underline;">CollisionLab</a>.</p>
 </div>
 </details>
 
@@ -316,7 +316,7 @@
       </div>
     </div>
 
-    <a href="./rhymeforge/" class="rf-banner">
+    <a href="rhymeforge/" class="rf-banner">
       <div class="rf-banner-top">
         <img src="lemon-logo.png" alt="" class="rf-banner-lemon" onerror="this.style.display='none'">
         <div class="rf-banner-from">Also from Undercover Zest</div>
@@ -396,7 +396,7 @@
       if (tutorialBtn) { tutorialBtn.addEventListener('click', function(e) { e.preventDefault(); showModal(); }); }
       window.uzShowTutorial = showModal;
       if (gotItBtn) { gotItBtn.addEventListener('click', function() { markAsVisited(); hideModal(); }); }
-      if (learnMoreBtn) { learnMoreBtn.addEventListener('click', function() { window.location.href = './homepage/'; }); }
+      if (learnMoreBtn) { learnMoreBtn.addEventListener('click', function() { window.location.href = '/homepage/'; }); }
       if (modal) { modal.addEventListener('click', function(e) { if (e.target === modal) hideModal(); }); }
     })();
   </script>
@@ -420,7 +420,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script type="module" src="app.js?v=111"></script>
+  <script type="module" src="app.js?v=112"></script>
   <script src="uz-nav.js"></script>
   <script src="uz-footer.js?v=15"></script>
   <script src="uz-deferred-patches.js?v=5"></script>
