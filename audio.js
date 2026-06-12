@@ -1258,6 +1258,7 @@ export function startBackingLoop(progression, style, bpm, options = {}, onMeasur
 
   function scheduleNextWindow() {
     if (!isLooping) return;
+    if (barIndex < 2) console.log('uzv2 window: bar', barIndex, 'chord', chordCursor, 'now', ctx.currentTime.toFixed(2), 't0', t0.toFixed(2));
     if (ctx.state === 'suspended') {
       ctx.resume().catch(() => {});
     }
@@ -1310,6 +1311,7 @@ export function startBackingLoop(progression, style, bpm, options = {}, onMeasur
       }
       if (onMeasure) {
         pendingVisualCallbacks.push({ time: t, fn: onMeasure, idx: s.idx });
+        if (chordCursor < 3) console.log('uzv2 visual queued', s.idx, t.toFixed(2));
       }
       chordCursor++;
     }
