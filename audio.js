@@ -1243,6 +1243,7 @@ export function startBackingLoop(progression, style, bpm, options = {}, onMeasur
     const now = ctx.currentTime;
     while (pendingVisualCallbacks.length > 0 && pendingVisualCallbacks[0].time <= now) {
       const cb = pendingVisualCallbacks.shift();
+      try { window.__uzv2.vis++; } catch (e) {}
       cb.fn(cb.idx);
     }
     visualRafId = requestAnimationFrame(visualSyncLoop);
@@ -1251,6 +1252,7 @@ export function startBackingLoop(progression, style, bpm, options = {}, onMeasur
     visualRafId = requestAnimationFrame(visualSyncLoop);
   }
 
+  try { window.__uzv2 = { called: (window.__uzv2 ? window.__uzv2.called : 0) + 1, bars: 0, chords: 0, vis: 0, items: items.length }; } catch (e) {}
   nextScheduleTime = ctx.currentTime + lookaheadTime;
   const t0 = nextScheduleTime;          // audio time of loop-beat 0
   let barIndex = 0;                     // absolute bar counter (drum clock)
@@ -1279,6 +1281,7 @@ export function startBackingLoop(progression, style, bpm, options = {}, onMeasur
         }
       }
       barIndex++;
+      try { window.__uzv2.bars++; } catch (e) {}
     }
 
     // ---- chord clock: keys/bass + callbacks ----
@@ -1314,6 +1317,7 @@ export function startBackingLoop(progression, style, bpm, options = {}, onMeasur
         if (chordCursor < 3) console.log('uzv2 visual queued', s.idx, t.toFixed(2));
       }
       chordCursor++;
+      try { window.__uzv2.chords++; } catch (e) {}
     }
 
     nextScheduleTime = horizon;
