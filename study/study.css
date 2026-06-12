@@ -78,3 +78,7 @@ table.gs-table { border-collapse: collapse; margin: 14px 0 20px; width: 100%; ma
   .gs-bar .r { font-size: 9.5px; }
   .gs-wrap { padding-top: 76px; }
 }
+
+/* v2 — figures */
+.gs-fig { margin: 20px 0 26px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 10px 10px; }
+.gs-fig svg text { user-select: none; }
